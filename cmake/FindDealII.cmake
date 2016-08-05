@@ -1,0 +1,67 @@
+# Locate Deal.II
+# This module defines
+#  DEAL_II_FOUND, if false, do not try to link to OSL
+#  DEAL_II_LIBRARIES
+#  DEAL_II_INCLUDE_DIR
+#
+# Calling convection: <deal.II/version.h>
+
+SET(DEAL_II_FOUND FALSE)
+SET(DEAL_II_INCLUDE_DIRS)
+SET(DEAL_II_LIBRARIES)
+
+SET(extra_paths 
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /sw
+  /opt/local
+  /opt/csw
+  /opt
+  /usr
+  ${CMAKE_LIBRARY_PATH}
+  ${DEAL_II_DIR})
+function(DEAL_II_FIND_LIB setname names)
+find_library(${setname}
+  NAMES ${names}
+  HINTS
+    ENV DEAL_II_HOME
+  PATH_SUFFIXES lib
+  PATHS ${extra_paths}
+)
+endfunction()
+
+find_path(DEAL_II_INCLUDE_DIR deal.II/base/config.h
+  HINTS
+    ENV DEAL_II_HOME
+  PATH_SUFFIXES include local/include 
+  PATHS ${extra_paths}
+)
+IF(DEAL_II_INCLUDE_DIR)
+	SET(DEAL_II_INCLUDE_DIRS ${DEAL_II_INCLUDE_DIR})
+ENDIF()
+
+DEAL_II_FIND_LIB(DEAL_II_LIBRARY_RELEASE deal_II)
+DEAL_II_FIND_LIB(DEAL_II_LIBRARY_DEBUG deal_II.g)
+
+IF(DEAL_II_LIBRARY_RELEASE AND DEAL_II_LIBRARY_DEBUG)
+	SET(DEAL_II_LIBRARIES 
+		optimized "${DEAL_II_LIBRARY_RELEASE}" 
+		debug "${DEAL_II_LIBRARY_DEBUG}")
+ENDIF()
+
+IF (DEAL_II_INCLUDE_DIR AND DEAL_II_LIBRARIES)
+	SET(DEAL_II_FOUND TRUE)
+ENDIF()
+
+IF (DEAL_II_FOUND)
+	IF (NOT DEAL_II_FIND_QUIETLY)
+		MESSAGE(STATUS "Found deal.II: ${DEAL_II_INCLUDE_DIR} LIBS: ${DEAL_II_LIBRARIES}")
+	ENDIF (NOT DEAL_II_FIND_QUIETLY)
+ELSE ()
+	IF (DEAL_II_FIND_QUIETLY)
+		MESSAGE(FATAL_ERROR "Could not find deal.II")
+	ENDIF (DEAL_II_FIND_QUIETLY)
+ENDIF ()
+
+mark_as_advanced(DEAL_II_INCLUDE_DIR DEAL_II_LIBRARY_RELEASE DEAL_II_LIBRARY_DEBUG)
+

@@ -1,0 +1,1 @@
+NS_ADD_TARGET(poisson main.cpp)
