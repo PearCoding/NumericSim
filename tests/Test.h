@@ -170,6 +170,12 @@ namespace NST
 
 #define NS_FUNCTION_NAME __func__
 
+#define NS_GOT_EXCEPTION(e) \
+	{ \
+		std::stringstream _stream; \
+		_stream << "EXCEPTION: " << (e).what(); \
+		_test->assert(false, _stream.str(), NS_FUNCTION_NAME, __LINE__); \
+	}
 
 #define NS_CHECK_EQ(value, expected) \
 	{ \

@@ -89,6 +89,7 @@ bool operator ==(const T& v1, const ComplexNumber<T>& v2);
 template<typename T>
 bool operator !=(const T& v1, const ComplexNumber<T>& v2);
 
+// Should be in Types.h, but we need it in other types implementation.
 template<class T>
 struct is_number : std::integral_constant<bool,
 	std::is_floating_point<T>::value ||

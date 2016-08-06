@@ -1,30 +1,7 @@
 #include "Test.h"
 
 #include "SparseMatrix.h"
-#include "ComplexNumber.h"
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
-{
-	out << "[ " << f.real() << " " << f.imag() << "i ]";
-	return out;
-}
-
-template<typename T, NS::Dimension D1, NS::Dimension D2>
-std::ostream& operator<<(std::ostream& out, const NS::SparseMatrix<T, D1, D2>& f)
-{
-	out << "[ ";
-	for (Index i = 0; i < D2; ++i)
-	{
-		for (Index j = 0; j < D1; ++j)
-			out << f.at(j, i) << " ";
-
-		if (i != D2 - 1)
-			out << "| ";
-	}
-	out << "]";
-	return out;
-}
+#include "OutputStream.h"
 
 NS_USE_NAMESPACE;
 

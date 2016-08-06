@@ -1,12 +1,6 @@
 #include "Test.h"
 #include "ComplexNumber.h"
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
-{
-	out << "[ " << f.real() << " " << f.imag() <<  "i ]";
-	return out;
-}
+#include "OutputStream.h"
 
 NS_USE_NAMESPACE;
 

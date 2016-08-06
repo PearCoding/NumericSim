@@ -1,28 +1,6 @@
 #include "Test.h"
 #include "Matrix.h"
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
-{
-	out << "[ " << f.real() << " " << f.imag() << "i ]";
-	return out;
-}
-
-template<typename T, NS::Dimension D1, NS::Dimension D2>
-std::ostream& operator<<(std::ostream& out, const NS::Matrix<T, D1, D2>& f)
-{
-	out << "[ ";
-	for (Index i = 0; i < D1; ++i)
-	{
-		for (Index j = 0; j < D2; ++j)
-			out << f.at(i, j) << " ";
-
-		if (i != D1 - 1)
-			out << "| ";
-	}
-	out << "]";
-	return out;
-}
+#include "OutputStream.h"
 
 NS_USE_NAMESPACE;
 

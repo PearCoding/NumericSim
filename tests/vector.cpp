@@ -1,23 +1,6 @@
 #include "Test.h"
 #include "Vector.h"
-#include "ComplexNumber.h"
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
-{
-	out << "[ " << f.real() << " " << f.imag() << "i ]";
-	return out;
-}
-
-template<typename T, NS::Dimension D>
-std::ostream& operator<<(std::ostream& out, const NS::Vector<T, D>& f)
-{
-	out << "[ ";
-	for (Index i = 0; i < D; ++i)
-		out << f.at(i) << " ";
-	out << "]";
-	return out;
-}
+#include "OutputStream.h"
 
 NS_USE_NAMESPACE;
 
