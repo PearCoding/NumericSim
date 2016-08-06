@@ -20,16 +20,16 @@ template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>::Matrix(std::initializer_list<std::initializer_list<T> > l) :
 	Matrix()
 {
-	NS_ASSERT(l.size() <= D2);// Would be great if we could use size() with constexpr [C++14]
+	NS_ASSERT(l.size() <= D1);// Would be great if we could use size() with constexpr [C++14]
 	Index i = 0;
 	for (const auto& v : l)
 	{
 		Index j = 0;
-		NS_ASSERT(v.size() <= D1);
+		NS_ASSERT(v.size() <= D2);
 
 		for (const auto& w : v)
 		{
-			mData->ptr[i*D1 + j] = w;
+			mData->ptr[i*D2 + j] = w;
 			++j;
 		}
 		++i;
@@ -42,21 +42,19 @@ Matrix<T, D1, D2>::~Matrix()
 }
 
 template<typename T, Dimension D1, Dimension D2>
-const T& Matrix<T, D1, D2>::operator()(Index i1, Index i2) const
+const T& Matrix<T, D1, D2>::at(Index i1, Index i2) const
 {
 	NS_ASSERT(i1 < D1);
 	NS_ASSERT(i2 < D2);
-	return mData->ptr[i2*D1 + i1];
+	return linear_at(i1*D2 + i2);
 }
 
 template<typename T, Dimension D1, Dimension D2>
-T& Matrix<T, D1, D2>::operator()(Index i1, Index i2)
+void Matrix<T, D1, D2>::set(Index i1, Index i2, const T& v)
 {
-	make_unique();
-
 	NS_ASSERT(i1 < D1);
 	NS_ASSERT(i2 < D2);
-	return mData->ptr[i2*D1 + i1];
+	linear_set(i1*D2 + i2, v);
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -123,7 +121,7 @@ Matrix<T, D2, D1> Matrix<T, D1, D2>::transpose()
 	{
 		for (Index j = 0; j < D1; ++j)
 		{
-			tmp(i, j) = (*this)(j, i);
+			tmp.set(i, j, at(j, i));
 		}
 	}
 	return tmp;
@@ -133,6 +131,26 @@ template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2> Matrix<T, D1, D2>::invert()
 {
 	//TODO
+}
+
+template<typename T, Dimension D1, Dimension D2>
+template<Dimension D3>
+Matrix<T, D1, D3> Matrix<T, D1, D2>::mul(const Matrix<T, D2, D3>& m) const
+{
+	Matrix<T, D1, D3> tmp;
+	for (Index i = 0; i < D1; ++i)
+	{
+		for (Index k = 0; k < D3; ++k)
+		{
+			T v = 0;
+			for (Index j = 0; j < D2; ++j)
+			{
+				v += at(i, j) * m.at(j, k);
+			}
+			tmp.set(i, k, v);
+		}
+	}
+	return tmp;
 }
 
 template<typename T, Dimension D1, Dimension D2>

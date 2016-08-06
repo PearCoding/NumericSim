@@ -30,6 +30,9 @@ public:
 
 	SparseMatrix<T, D2, D1> transpose();
 	SparseMatrix invert();
+
+	template<Dimension D3>
+	SparseMatrix<T, D1, D3> mul(const SparseMatrix<T, D2, D3>& m) const;// Matrix multiplication
 };
 
 // Element wise operations

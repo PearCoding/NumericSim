@@ -5,6 +5,9 @@
 
 NS_BEGIN_NAMESPACE
 
+/** High dimensional matrix class.
+ * Math order: First row, Second column!
+ */
 template<typename T, Dimension D1, Dimension D2>
 class Matrix : public CountableSet<T, D1*D2>
 {
@@ -16,8 +19,8 @@ public:
 	virtual ~Matrix();
 
 	// Index
-	const T& operator()(Index i1, Index i2) const;
-	T& operator()(Index i1, Index i2);
+	const T& at(Index i1, Index i2) const;
+	void set(Index i1, Index i2, const T& v);
 
 	// Element wise operations
 	Matrix& operator +=(const Matrix& v2);
@@ -31,6 +34,9 @@ public:
 
 	Matrix<T, D2, D1> transpose();
 	Matrix invert();
+
+	template<Dimension D3>
+	Matrix<T, D1, D3> mul(const Matrix<T, D2, D3>& m) const;
 };
 
 // Element wise operations

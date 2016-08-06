@@ -78,14 +78,14 @@ SparseMatrix<T, D1, D2>& SparseMatrix<T, D1, D2>::operator *=(const SparseMatrix
 	{
 		if (mData.count(p.first))
 			mData[p.first] *= p.second;
-		else
-			mData.erase(p.first);
 	}
 
-	for (auto it mData.begin(); it != mData.end(); ++it)
+	for (auto it = mData.begin(); it != mData.end();)
 	{
-		if (!v.mData.count(it->first))
+		if (!v2.mData.count(it->first))
 			it = mData.erase(it);
+		else
+			it++;
 	}
 
 	return *this;
