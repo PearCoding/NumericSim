@@ -1,5 +1,13 @@
 #include "Test.h"
 #include "Vector.h"
+#include "ComplexNumber.h"
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
+{
+	out << "[ " << f.real() << " " << f.imag() << "i ]";
+	return out;
+}
 
 template<typename T, NS::Dimension D>
 std::ostream& operator<<(std::ostream& out, const NS::Vector<T, D>& f)
@@ -19,13 +27,13 @@ NS_TEST("default")
 {
 	Vector<T, D> t;
 	for(Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 0);
+		NS_CHECK_EQ(t.at(i), (T)0);
 }
 NS_TEST("fill")
 {
 	Vector<T, D> t(8);
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 8);
+		NS_CHECK_EQ(t.at(i), (T)8);
 }
 NS_TEST("+")
 {
@@ -33,15 +41,15 @@ NS_TEST("+")
 	Vector<T, D> v2(8);
 	Vector<T, D> t = v1 + v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 16);
+		NS_CHECK_EQ(t.at(i), (T)16);
 
 	t = v1 + (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 10);
+		NS_CHECK_EQ(t.at(i), (T)10);
 
 	t = (T)2 + v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 10);
+		NS_CHECK_EQ(t.at(i), (T)10);
 }
 NS_TEST("-")
 {
@@ -49,15 +57,15 @@ NS_TEST("-")
 	Vector<T, D> v2(8);
 	Vector<T, D> t = v1 - v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 0);
+		NS_CHECK_EQ(t.at(i), (T)0);
 
 	t = v1 - (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 6);
+		NS_CHECK_EQ(t.at(i), (T)6);
 
 	t = (T)2 - v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), -6);
+		NS_CHECK_EQ(t.at(i), (T)-6);
 }
 NS_TEST("*")
 {
@@ -65,15 +73,15 @@ NS_TEST("*")
 	Vector<T, D> v2(8);
 	Vector<T, D> t = v1 * v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 64);
+		NS_CHECK_EQ(t.at(i), (T)64);
 
 	t = v1 * (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 16);
+		NS_CHECK_EQ(t.at(i), (T)16);
 
 	t = (T)2 * v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 16);
+		NS_CHECK_EQ(t.at(i), (T)16);
 }
 NS_TEST("/")
 {
@@ -81,15 +89,15 @@ NS_TEST("/")
 	Vector<T, D> v2(2);
 	Vector<T, D> t = v1 / v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 4);
+		NS_CHECK_EQ(t.at(i), (T)4);
 
 	t = v1 / (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 4);
+		NS_CHECK_EQ(t.at(i), (T)4);
 
 	t = ((T)4) / v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t.at(i), 0.5);
+		NS_CHECK_EQ(t.at(i), (T)0.5);
 }
 NS_TEST("==")
 {
@@ -107,13 +115,13 @@ NS_TEST("dot")
 	Vector<T, D> v1(8);
 	Vector<T, D> v2(2);
 	T t = v1.dot(v2);
-	NS_CHECK_EQ(t, 16*D);
+	NS_CHECK_EQ(t, (T)(16*D));
 }
 NS_TEST("sum")
 {
 	Vector<T, D> v1(8);
 	T t = v1.sum();
-	NS_CHECK_EQ(t, 8 * D);
+	NS_CHECK_EQ(t, (T)(8 * D));
 }
 NS_TEST("mag")
 {
@@ -125,7 +133,7 @@ NS_TEST("magSqr")
 {
 	Vector<T, D> v1(8);
 	T t = v1.magSqr();
-	NS_CHECK_NEARLY_EQ(t, 64 * D);
+	NS_CHECK_NEARLY_EQ(t, (T)(64 * D));
 }
 NS_TEST("swap")
 {
@@ -134,9 +142,9 @@ NS_TEST("swap")
 	v1.swap(v2);
 
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(v1.at(i), 4);
+		NS_CHECK_EQ(v1.at(i), (T)4);
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(v2.at(i), 8);
+		NS_CHECK_EQ(v2.at(i), (T)8);
 }
 NS_END_TESTCASE()
 
@@ -240,5 +248,6 @@ NST_TESTCASE_T2(Vector, float, 1);
 NST_TESTCASE_T2(Vector, double, 1);
 NST_TESTCASE_T2(Vector, float, 8);
 NST_TESTCASE_T2(Vector, double, 8);
+NST_TESTCASE_T2(Vector, NS::ComplexNumber<double>, 8);
 NST_TESTCASE(VectorFixed);
 NST_END_MAIN

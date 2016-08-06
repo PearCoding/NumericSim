@@ -97,7 +97,7 @@ namespace NST
 		inline void end(Test* test)
 		{
 			mCount++;
-			std::cout << "######################" << std::endl;
+			std::cout << "**********************" << std::endl;
 			std::cout << mCount << ". ";
 			if (!test->end())
 				mErrors++;
@@ -108,7 +108,7 @@ namespace NST
 
 		inline bool end()
 		{
-			std::cout << "######################" << std::endl;
+			std::cout << "**********************" << std::endl;
 			std::cout << "Result: " << (mCount - mErrors) << "/" << mCount << " successful." << std::endl;
 
 			return mErrors == 0;
@@ -288,5 +288,10 @@ namespace NST
 
 #define NST_END_MAIN \
 		NS_DEBUG_ASSERT(_errors == 0); \
+		std::cout << "######################" << std::endl; \
+		if(_errors == 0) \
+			std::cout << "Status: Successful" << std::endl; \
+		else \
+			std::cout << "Status: " << _errors << " errors" << std::endl; \
 		return -_errors; \
 	}

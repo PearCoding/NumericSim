@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.h"
+#include "ComplexNumber.h"
 
 #include <initializer_list>
 #include <type_traits>

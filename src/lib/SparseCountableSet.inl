@@ -9,7 +9,7 @@ SparseCountableSet<T, D>::SparseCountableSet() :
 	mData()
 {
 	static_assert(D > 0, "Dimension has to be greater then 0.");
-	static_assert(std::is_scalar<T>::value, "Type T has to be a scalar type.\nSee C++ reference of std::is_scalar for more information.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
 }
 
 template<typename T, Dimension D>

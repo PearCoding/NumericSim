@@ -9,7 +9,7 @@ CountableSet<T, D>::CountableSet() :
 	mData(nullptr)
 {
 	static_assert(D > 0, "Dimension has to be greater then 0.");
-	static_assert(std::is_scalar<T>::value, "Type T has to be a scalar type.\nSee C++ reference of std::is_scalar for more information.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
 
 	mData = std::make_shared<_Data>();
 	memset(mData->ptr, 0, sizeof(T)*D);
@@ -134,7 +134,7 @@ void CountableSet<T, D>::inverse()
 
 	make_unique();
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] = 1 / mData->ptr[i];
+		mData->ptr[i] = (T)1 / mData->ptr[i];
 }
 
 template<typename T, Dimension D>

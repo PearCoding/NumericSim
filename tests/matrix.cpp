@@ -1,6 +1,13 @@
 #include "Test.h"
 #include "Matrix.h"
 
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
+{
+	out << "[ " << f.real() << " " << f.imag() << "i ]";
+	return out;
+}
+
 template<typename T, NS::Dimension D1, NS::Dimension D2>
 std::ostream& operator<<(std::ostream& out, const NS::Matrix<T, D1, D2>& f)
 {
@@ -25,13 +32,13 @@ NS_TEST("default")
 {
 	Matrix<T, D1, D2> t;
 	for(Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 0);
+		NS_CHECK_EQ(t.linear_at(i), (T)0);
 }
 NS_TEST("fill")
 {
 	Matrix<T, D1, D2> t(8);
 	for (Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 8);
+		NS_CHECK_EQ(t.linear_at(i), (T)8);
 }
 NS_TEST("+")
 {
@@ -39,7 +46,7 @@ NS_TEST("+")
 	Matrix<T, D1, D2> v2(8);
 	Matrix<T, D1, D2> t = v1 + v2;
 	for (Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 16);
+		NS_CHECK_EQ(t.linear_at(i), (T)16);
 }
 NS_TEST("-")
 {
@@ -47,7 +54,7 @@ NS_TEST("-")
 	Matrix<T, D1, D2> v2(8);
 	Matrix<T, D1, D2> t = v1 - v2;
 	for (Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 0);
+		NS_CHECK_EQ(t.linear_at(i), (T)0);
 }
 NS_TEST("*")
 {
@@ -55,15 +62,15 @@ NS_TEST("*")
 	Matrix<T, D1, D2> v2(8);
 	Matrix<T, D1, D2> t = v1 * v2;
 	for (Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 64);
+		NS_CHECK_EQ(t.linear_at(i), (T)64);
 
 	t = v1 * (T)2;
 	for (Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 16);
+		NS_CHECK_EQ(t.linear_at(i), (T)16);
 
 	t = (T)2 * v1;
 	for (Index i = 0; i < D1*D2; ++i)
-		NS_CHECK_EQ(t.linear_at(i), 16);
+		NS_CHECK_EQ(t.linear_at(i), (T)16);
 }
 NS_TEST("==")
 {
@@ -116,5 +123,6 @@ NST_TESTCASE_T3(Matrix, float, 1, 1);
 NST_TESTCASE_T3(Matrix, double, 1, 1);
 NST_TESTCASE_T3(Matrix, float, 4, 4);
 NST_TESTCASE_T3(Matrix, double, 4, 4);
+NST_TESTCASE_T3(Matrix, ComplexNumber<double>, 4, 4);
 NST_TESTCASE(MatrixFixed);
 NST_END_MAIN

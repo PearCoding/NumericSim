@@ -233,7 +233,7 @@ Vector<T, D>& Vector<T, D>::operator /=(const T& f)
 {
 	make_unique();
 
-	T invF = 1 / f;// TODO: NAN?
+	T invF = (T)1 / f;// TODO: NAN?
 	for (Index i = 0; i < D; ++i)
 		mData->ptr[i] *= invF;
 

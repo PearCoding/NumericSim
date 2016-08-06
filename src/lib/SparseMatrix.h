@@ -3,8 +3,10 @@
 #include "SparseCountableSet.h"
 
 NS_BEGIN_NAMESPACE
-
-// Does not derive from CountableSet -> Is sparse
+/** High dimensional sparse matrix class.
+* Math order: First row, Second column!
+* Does not derive from CountableSet -> Is sparse
+*/
 template<typename T, Dimension D1, Dimension D2>
 class SparseMatrix : public SparseCountableSet<T, D1*D2>
 {
