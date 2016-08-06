@@ -1,23 +1,12 @@
 #pragma once
 
 #include "Config.h"
-#include "Vector.h"
 
 #include <iostream>
 #include <list>
 #include <limits>
 #include <string>
 #include <sstream>
-
-template<typename T, NS::Dimension D>
-std::ostream& operator<<(std::ostream& out, const NS::Vector<T, D>& f)
-{
-	out << "[ ";
-	for (Index i = 0; i < D; ++i)
-		out << f(i) << " ";
-	out << "]";
-	return out;
-}
 
 namespace NST
 {
@@ -161,16 +150,16 @@ namespace NST
 	return _testcase.end(); \
 	}
 
-#define NS_TESTCASE(name) \
+#define NST_TESTCASE_F(name) \
 	_testcase_ ##name()
 
-#define NS_TESTCASE_T1(name, t) \
+#define NST_TESTCASE_F_T1(name, t) \
 	_testcase_ ##name<t>(NS_STRINGIFY(t))
 
-#define NS_TESTCASE_T2(name, t1, t2) \
+#define NST_TESTCASE_F_T2(name, t1, t2) \
 	_testcase_ ##name<t1, t2>(NS_STRINGIFY(t1), NS_STRINGIFY(t2))
 
-#define NS_TESTCASE_T3(name, t1, t2, t3) \
+#define NST_TESTCASE_F_T3(name, t1, t2, t3) \
 	_testcase_ ##name<t1, t2, t3>(NS_STRINGIFY(t1), NS_STRINGIFY(t2), NS_STRINGIFY(t3))
 
 #define NS_TEST(name) \
@@ -286,7 +275,16 @@ namespace NST
 		int _errors = 0;
 
 #define NST_TESTCASE(name) \
-		_errors += NS_TESTCASE(name) ? 0 : 1
+		_errors += NST_TESTCASE_F(name) ? 0 : 1
+
+#define NST_TESTCASE_T1(name, t1) \
+		_errors += NST_TESTCASE_F_T1(name, t1) ? 0 : 1
+
+#define NST_TESTCASE_T2(name, t1, t2) \
+		_errors += NST_TESTCASE_F_T2(name, t1, t2) ? 0 : 1
+
+#define NST_TESTCASE_T3(name, t1, t2, t3) \
+		_errors += NST_TESTCASE_F_T3(name, t1, t2, t3) ? 0 : 1
 
 #define NST_END_MAIN \
 		NS_DEBUG_ASSERT(_errors == 0); \

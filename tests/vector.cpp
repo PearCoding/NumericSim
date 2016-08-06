@@ -1,4 +1,15 @@
 #include "Test.h"
+#include "Vector.h"
+
+template<typename T, NS::Dimension D>
+std::ostream& operator<<(std::ostream& out, const NS::Vector<T, D>& f)
+{
+	out << "[ ";
+	for (Index i = 0; i < D; ++i)
+		out << f.at(i) << " ";
+	out << "]";
+	return out;
+}
 
 NS_USE_NAMESPACE;
 
@@ -8,13 +19,13 @@ NS_TEST("default")
 {
 	Vector<T, D> t;
 	for(Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 0);
+		NS_CHECK_EQ(t.at(i), 0);
 }
 NS_TEST("fill")
 {
 	Vector<T, D> t(8);
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 8);
+		NS_CHECK_EQ(t.at(i), 8);
 }
 NS_TEST("+")
 {
@@ -22,15 +33,15 @@ NS_TEST("+")
 	Vector<T, D> v2(8);
 	Vector<T, D> t = v1 + v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 16);
+		NS_CHECK_EQ(t.at(i), 16);
 
 	t = v1 + (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 10);
+		NS_CHECK_EQ(t.at(i), 10);
 
 	t = (T)2 + v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 10);
+		NS_CHECK_EQ(t.at(i), 10);
 }
 NS_TEST("-")
 {
@@ -38,15 +49,15 @@ NS_TEST("-")
 	Vector<T, D> v2(8);
 	Vector<T, D> t = v1 - v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 0);
+		NS_CHECK_EQ(t.at(i), 0);
 
 	t = v1 - (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 6);
+		NS_CHECK_EQ(t.at(i), 6);
 
 	t = (T)2 - v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), -6);
+		NS_CHECK_EQ(t.at(i), -6);
 }
 NS_TEST("*")
 {
@@ -54,15 +65,15 @@ NS_TEST("*")
 	Vector<T, D> v2(8);
 	Vector<T, D> t = v1 * v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 64);
+		NS_CHECK_EQ(t.at(i), 64);
 
 	t = v1 * (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 16);
+		NS_CHECK_EQ(t.at(i), 16);
 
 	t = (T)2 * v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 16);
+		NS_CHECK_EQ(t.at(i), 16);
 }
 NS_TEST("/")
 {
@@ -70,15 +81,15 @@ NS_TEST("/")
 	Vector<T, D> v2(2);
 	Vector<T, D> t = v1 / v2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 4);
+		NS_CHECK_EQ(t.at(i), 4);
 
 	t = v1 / (T)2;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 4);
+		NS_CHECK_EQ(t.at(i), 4);
 
 	t = ((T)4) / v1;
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(t(i), 0.5);
+		NS_CHECK_EQ(t.at(i), 0.5);
 }
 NS_TEST("==")
 {
@@ -123,9 +134,9 @@ NS_TEST("swap")
 	v1.swap(v2);
 
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(v1(i), 4);
+		NS_CHECK_EQ(v1.at(i), 4);
 	for (Index i = 0; i < D; ++i)
-		NS_CHECK_EQ(v2(i), 8);
+		NS_CHECK_EQ(v2.at(i), 8);
 }
 NS_END_TESTCASE()
 
@@ -133,7 +144,7 @@ NS_BEGIN_TESTCASE(VectorFixed)
 NS_TEST("Initializer List")
 {
 	Vector<float, 6> t = { 1, 2, 3, 4, 5, 6 };
-	NS_CHECK_EQ(t(2), 3);
+	NS_CHECK_EQ(t.at(2), 3);
 }
 NS_TEST("Sum")
 {
@@ -225,9 +236,9 @@ NS_TEST("Zero")
 NS_END_TESTCASE()
 
 NST_BEGIN_MAIN
-NS_TESTCASE_T2(Vector, float, 1);
-NS_TESTCASE_T2(Vector, double, 1);
-NS_TESTCASE_T2(Vector, float, 8);
-NS_TESTCASE_T2(Vector, double, 8);
-NS_TESTCASE(VectorFixed);
+NST_TESTCASE_T2(Vector, float, 1);
+NST_TESTCASE_T2(Vector, double, 1);
+NST_TESTCASE_T2(Vector, float, 8);
+NST_TESTCASE_T2(Vector, double, 8);
+NST_TESTCASE(VectorFixed);
 NST_END_MAIN

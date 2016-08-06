@@ -15,3 +15,5 @@ endfunction()
 
 # TESTS
 NS_ADD_TEST(vector vector.cpp)
+NS_ADD_TEST(matrix matrix.cpp)
+NS_ADD_TEST(sparsematrix sparsematrix.cpp)
