@@ -91,11 +91,28 @@ bool operator !=(const T& v1, const ComplexNumber<T>& v2);
 
 // Should be in Types.h, but we need it in other types implementation.
 template<class T>
-struct is_number : std::integral_constant<bool,
-	std::is_floating_point<T>::value ||
+struct is_complex : std::integral_constant<bool,
 	std::is_same<ComplexNumber<float>, typename std::remove_cv<T>::type>::value ||
 	std::is_same<ComplexNumber<double>, typename std::remove_cv<T>::type>::value ||
 	std::is_same<ComplexNumber<long double>, typename std::remove_cv<T>::type>::value> {};
+
+template<class T>
+struct is_number : std::integral_constant<bool,
+	std::is_floating_point<T>::value ||
+	is_complex<T>::value> {};
+
+// Variable Template functions
+template<typename T>
+T conjugate_vt(const T& t)
+{
+	return t;
+}
+
+template<typename T>
+ComplexNumber<T> conjugate_vt(const ComplexNumber<T>& t)
+{
+	return t.conjugate();
+}
 
 NS_END_NAMESPACE
 

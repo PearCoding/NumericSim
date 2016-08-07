@@ -14,6 +14,30 @@ NS_TEST("default")
 		NS_CHECK_EQ(t.linear_at(i), (T)0);
 	NS_CHECK_TRUE(t.isEmpty());
 }
+NS_TEST("set/at")
+{
+	SparseMatrix<T, 4, 4> t;
+	t.set(2, 2, (T)1);
+	t.set(1, 2, (T)2);
+	NS_CHECK_EQ(t.at(2, 2), (T)1);
+	NS_CHECK_EQ(t.at(1, 2), (T)2);
+	NS_CHECK_EQ(t.filledCount(), 2);
+
+	t.set(2, 2, (T)0);
+	t.set(2, 3, (T)0);
+	NS_CHECK_EQ(t.filledCount(), 1);
+	NS_CHECK_EQ(t.at(2, 3), (T)0);
+
+	t.set(3, 3, (T)3);
+	NS_CHECK_EQ(t.at(3, 3), (T)3);
+	NS_CHECK_EQ(t.filledCount(), 2);
+
+	t.set(3, 3, (T)4);
+	NS_CHECK_EQ(t.at(3, 3), (T)4);
+	NS_CHECK_EQ(t.filledCount(), 2);
+
+	NS_CHECK_FALSE(t.isEmpty());
+}
 NS_TEST("+")
 {
 	SparseMatrix<T, 3, 3> v1 = { { 1, 0, 3 },{ 4, 0, 6 },{ 7, 0, 9 } };
