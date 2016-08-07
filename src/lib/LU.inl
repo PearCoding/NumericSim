@@ -51,14 +51,17 @@ namespace LU {
 			{
 				ComplexNumber<T> s;
 				for (Index k = 0; k < j; ++k)
-					s += L.at(j, k).magSqr();
+				{
+					ComplexNumber<T> v = L.at(j, k);
+					s += v * v.conjugate();
+				}
 				
 				L.set(j, j, std::sqrt(m.at(j, j) - s));
 				for (Index i = j; i < D1; ++i)
 				{
-					s = (T)0;
+					s = (ComplexNumber<T>)0;
 					for (Index k = 0; k < i; ++k)
-						s += L.at(i, k)*L.at(j, k);
+						s += L.at(i, k)*L.at(j, k).conjugate();
 					L.set(i, j, (m.at(i, j) - s) / L.at(j, j));
 				}
 			}
@@ -113,14 +116,17 @@ namespace LU {
 			{
 				ComplexNumber<T> s;
 				for (Index k = 0; k < j; ++k)
-					s += L.at(j, k).magSqr();
+				{
+					ComplexNumber<T> v = L.at(j, k);
+					s += v*v.conjugate();
+				}
 
 				L.set(j, j, std::sqrt(m.at(j, j) - s));
 				for (Index i = j; i < D1; ++i)
 				{
-					s = (T)0;
+					s = (ComplexNumber<T>)0;
 					for (Index k = 0; k < i; ++k)
-						s += L.at(i, k)*L.at(j, k);
+						s += L.at(i, k)*L.at(j, k).conjugate();
 					L.set(i, j, (m.at(i, j) - s) / L.at(j, j));
 				}
 			}
