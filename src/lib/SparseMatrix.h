@@ -71,7 +71,7 @@ private:
 	T mEmpty;//Used for references; Could also be static, but that would break the header only approach
 
 protected:
-	const T& internal_at(Index i1, Index i2, Index& columnPtrIndex, bool& found) const;
+	const T& internal_at(Index i1, Index i2, Index& columnPtrIndex, bool& found, bool needNear = false) const;
 	void remove_at(Index i1, Index i2);
 	void set_at(Index i1, Index i2, const T& v);
 

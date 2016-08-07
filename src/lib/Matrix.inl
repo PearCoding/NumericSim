@@ -29,7 +29,7 @@ Matrix<T, D1, D2>::Matrix(std::initializer_list<std::initializer_list<T> > l) :
 
 		for (const auto& w : v)
 		{
-			mData->ptr[i*D2 + j] = w;
+			mData[i*D2 + j] = w;
 			++j;
 		}
 		++i;
@@ -60,10 +60,8 @@ void Matrix<T, D1, D2>::set(Index i1, Index i2, const T& v)
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator +=(const Matrix<T, D1,D2>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D1*D2; ++i)
-		mData->ptr[i] += v2.mData->ptr[i];
+		mData[i] += v2.mData[i];
 
 	return *this;
 }
@@ -71,10 +69,8 @@ Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator +=(const Matrix<T, D1,D2>& v2)
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator -=(const Matrix<T, D1, D2>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D1*D2; ++i)
-		mData->ptr[i] -= v2.mData->ptr[i];
+		mData[i] -= v2.mData[i];
 
 	return *this;
 }
@@ -82,10 +78,8 @@ Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator -=(const Matrix<T, D1, D2>& v2)
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator *=(const Matrix<T, D1, D2>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D1*D2; ++i)
-		mData->ptr[i] *= v2.mData->ptr[i];
+		mData[i] *= v2.mData[i];
 
 	return *this;
 }
@@ -93,10 +87,8 @@ Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator *=(const Matrix<T, D1, D2>& v2)
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator *=(const T& f)
 {
-	make_unique();
-
 	for (Index i = 0; i < D1*D2; ++i)
-		mData->ptr[i] *= f;
+		mData[i] *= f;
 
 	return *this;
 }

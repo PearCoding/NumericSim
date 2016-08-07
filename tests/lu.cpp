@@ -22,6 +22,22 @@ NS_TEST("cholesky")
 		NS_GOT_EXCEPTION(exception);
 	}
 }
+NS_TEST("cholesky-sparse")
+{
+	SparseMatrix<T, 4, 4> m = { { 4,0,2,2 },{ 0,4,2,-2 },{ 2,2,6,0 },{ 2,-2,0,6 } };
+	SparseMatrix<T, 4, 4> r = { { 2,0,0,0 },{ 0,2,0,0 },{ 1,1,2,0 },{ 1,-1,0,2 } };
+
+	try
+	{
+		auto l = LU::serial::cholesky(m);
+
+		NS_CHECK_EQ(l, r);
+	}
+	catch (const NSException& exception)
+	{
+		NS_GOT_EXCEPTION(exception);
+	}
+}
 NS_END_TESTCASE()
 
 NST_BEGIN_MAIN

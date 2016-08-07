@@ -3,9 +3,8 @@
 #include "Config.h"
 #include "ComplexNumber.h"
 
-#include <initializer_list>
 #include <type_traits>
-#include <memory>
+#include <vector>
 
 NS_BEGIN_NAMESPACE
 
@@ -53,13 +52,7 @@ public:
 
 	CountableSet();
 	explicit CountableSet(const T& f);
-	CountableSet(const CountableSet& v);
-	CountableSet(CountableSet&& v);
 	virtual ~CountableSet();
-
-	// Assignment
-	CountableSet& operator=(const CountableSet& v);
-	CountableSet& operator=(CountableSet&& v);
 
 	// Index
 	const T& linear_at(Index i) const;
@@ -92,25 +85,7 @@ public:
 	bool hasZero() const;
 
 protected:
-	void make_unique();
-
-	struct _Data
-	{
-	public:
-		_Data() :
-			ptr(new T[D])
-		{
-		}
-
-		~_Data()
-		{
-			delete[] ptr;
-		}
-
-		T* ptr;
-	};
-
-	std::shared_ptr<_Data> mData;
+	std::vector<T> mData;
 };
 
 NS_END_NAMESPACE

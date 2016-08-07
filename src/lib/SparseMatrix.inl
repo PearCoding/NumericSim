@@ -111,7 +111,7 @@ SparseMatrix<T, D1, D2>::~SparseMatrix()
  columnPtrIndex has the found index for columnPtr or the one next to the new entry position (not created!).
  */
 template<typename T, Dimension D1, Dimension D2>
-const T& SparseMatrix<T, D1, D2>::internal_at(Index i1, Index i2, Index& columnPtrIndex, bool& found) const
+const T& SparseMatrix<T, D1, D2>::internal_at(Index i1, Index i2, Index& columnPtrIndex, bool& found, bool needNear) const
 {
 	found = false;
 	columnPtrIndex = 0;
@@ -120,10 +120,11 @@ const T& SparseMatrix<T, D1, D2>::internal_at(Index i1, Index i2, Index& columnP
 	{
 		Index rowPtr = mRowPtr[i1];
 		size_t s = i1 != (D1 - 1) ? mRowPtr[i1 + 1] - rowPtr : mColumnPtr.size() - rowPtr;
-		if (s == 0 && i1 != (D1 - 1))// Nothing found, but we need next close one.
+		if (needNear && s == 0 && i1 != (D1 - 1))// Nothing found, but we need next close one.
 		{
+			// Recursion for very big data is not that good :/
 			bool found2;
-			return internal_at(i1 + 1, 0, columnPtrIndex, found2);// Recursion for very big data is not that good :/
+			internal_at(i1 + 1, 0, columnPtrIndex, found2, true);
 		}
 		else
 		{
@@ -144,6 +145,7 @@ const T& SparseMatrix<T, D1, D2>::internal_at(Index i1, Index i2, Index& columnP
 		}
 	}
 
+	NS_ASSERT(mEmpty == (T)0);
 	return mEmpty;
 }
 
@@ -171,7 +173,7 @@ void SparseMatrix<T, D1, D2>::set_at(Index i1, Index i2, const T& v)
 {
 	Index columnPtrIndex;
 	bool found;
-	internal_at(i1, i2, columnPtrIndex, found);
+	internal_at(i1, i2, columnPtrIndex, found, true);
 
 	if (found)// Replace
 	{

@@ -89,6 +89,7 @@ NS_TEST("Initializer List")
 	SparseMatrix<T, 3, 3> t = { {1, 2, 3}, {4, 5, 0}, {7, 8, 9} };
 	NS_CHECK_EQ(t.at(1, 1), (T)5);
 	NS_CHECK_EQ(t.at(2, 1), (T)8);
+	NS_CHECK_EQ(t.at(1, 2), (T)0);
 }
 NS_TEST("foreach")
 {
@@ -109,9 +110,9 @@ NS_TEST("Transpose")
 }
 NS_TEST("Mul")
 {
-	SparseMatrix<float, 2, 3> v1 = { { 3, 2, 1 },{ 1, 0, 2 } };
-	SparseMatrix<float, 3, 2> v2 = { { 1, 2 },{ 0, 1 },{ 4, 0 } };
-	SparseMatrix<float, 2, 2> res = { { 7, 8 },{ 9, 2 } };
+	SparseMatrix<T, 2, 3> v1 = { { 3, 2, 1 },{ 1, 0, 2 } };
+	SparseMatrix<T, 3, 2> v2 = { { 1, 2 },{ 0, 1 },{ 4, 0 } };
+	SparseMatrix<T, 2, 2> res = { { 7, 8 },{ 9, 2 } };
 	auto ret = v1.mul(v2);
 	NS_CHECK_EQ(ret, res);
 }

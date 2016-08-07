@@ -154,10 +154,8 @@ Vector<T, MaxD> Vector<T, D>::mid(Index start, Index end) const
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator +=(const Vector<T, D>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] += v2.at(i);
+		mData[i] += v2.at(i);
 
 	return *this;
 }
@@ -165,10 +163,8 @@ Vector<T, D>& Vector<T, D>::operator +=(const Vector<T, D>& v2)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator +=(const T& f)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] += f;
+		mData[i] += f;
 
 	return *this;
 }
@@ -176,10 +172,8 @@ Vector<T, D>& Vector<T, D>::operator +=(const T& f)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator -=(const Vector<T, D>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] -= v2.at(i);
+		mData[i] -= v2.at(i);
 
 	return *this;
 }
@@ -187,10 +181,8 @@ Vector<T, D>& Vector<T, D>::operator -=(const Vector<T, D>& v2)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator -=(const T& f)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] -= f;
+		mData[i] -= f;
 
 	return *this;
 }
@@ -198,10 +190,8 @@ Vector<T, D>& Vector<T, D>::operator -=(const T& f)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator *=(const Vector<T, D>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] *= v2.at(i);
+		mData[i] *= v2.at(i);
 
 	return *this;
 }
@@ -209,10 +199,8 @@ Vector<T, D>& Vector<T, D>::operator *=(const Vector<T, D>& v2)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator *=(const T& f)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] *= f;
+		mData[i] *= f;
 
 	return *this;
 }
@@ -220,10 +208,8 @@ Vector<T, D>& Vector<T, D>::operator *=(const T& f)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator /=(const Vector<T, D>& v2)
 {
-	make_unique();
-
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] /= v2.at(i);
+		mData[i] /= v2.at(i);
 
 	return *this;
 }
@@ -231,11 +217,9 @@ Vector<T, D>& Vector<T, D>::operator /=(const Vector<T, D>& v2)
 template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator /=(const T& f)
 {
-	make_unique();
-
 	T invF = (T)1 / f;// TODO: NAN?
 	for (Index i = 0; i < D; ++i)
-		mData->ptr[i] *= invF;
+		mData[i] *= invF;
 
 	return *this;
 }
