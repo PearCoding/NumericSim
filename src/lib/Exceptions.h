@@ -31,6 +31,7 @@ public:
 
 NS_DECLARE_EXCEPTION_GROUP(Math, NS);
 NS_DECLARE_EXCEPTION(DivisionByZero, Math, "Division by Zero is not defined.");
+NS_DECLARE_EXCEPTION(MatrixHasZeroInDiag, Math, "Matrix has a zero in his diagonal.");
 NS_DECLARE_EXCEPTION(NotPositiveDefinite, Math, "Matrix is not positive definite.");
 
 NS_END_NAMESPACE

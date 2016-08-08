@@ -14,7 +14,7 @@ endfunction()
 
 # TESTS
 NS_ADD_TEST(complex complex.cpp)
-NS_ADD_TEST(jacobi jacobi.cpp)
+NS_ADD_TEST(iterative iterative.cpp)
 NS_ADD_TEST(lu lu.cpp)
 NS_ADD_TEST(matrix matrix.cpp)
 NS_ADD_TEST(sparsematrix sparsematrix.cpp)
