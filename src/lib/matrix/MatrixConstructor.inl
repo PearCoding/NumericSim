@@ -6,7 +6,7 @@ NS_BEGIN_NAMESPACE
 
 namespace Construct
 {
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 	typename std::enable_if<is_matrix<M, T, D1, D2>::value, M<T,D1,D2> >::type eye()
 	{
 		M<T,D1,D2> m;
@@ -18,7 +18,7 @@ namespace Construct
 		return m;
 	}
 
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D>
 	typename std::enable_if<is_matrix<M, T, D, D>::value, M<T, D, D> >::type
 		diag(const Vector<T, D>& v)
 	{
@@ -32,7 +32,7 @@ namespace Construct
 		return m;
 	}
 
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 	Vector<T, t_min(D1,D2)>	diag(const M<T, D1, D2>& m)
 	{
 		Vector<T, t_min(D1, D2)> v;
@@ -45,7 +45,7 @@ namespace Construct
 		return v;
 	}
 
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 	typename std::enable_if<is_matrix<M, T, D1, D2>::value, M<T, D1, D2> >::type
 		tril(const M<T, D1, D2>& m, int32 k)
 	{
@@ -67,7 +67,7 @@ namespace Construct
 		return r;
 	}
 
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 	typename std::enable_if<is_matrix<M, T, D1, D2>::value, M<T, D1, D2> >::type
 		triu(const M<T, D1, D2>& m, int32 k)
 	{
@@ -89,7 +89,7 @@ namespace Construct
 		return r;
 	}
 
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 	typename std::enable_if<is_matrix<M, T, D1, D2>::value, M<T,D1,D2> >::type hilbert()
 	{
 		M<T,D1,D2> m;
@@ -105,7 +105,7 @@ namespace Construct
 		return m;
 	}
 
-	template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+	template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 	typename std::enable_if<is_matrix<M, T, D1, D2>::value, M<T, D1, D2> >::type inv_hilbert()
 	{
 		static_assert(D1 == D2, "Inverse hilbert matrix must be square.");
