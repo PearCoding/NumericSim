@@ -3,7 +3,6 @@ include_directories(AFTER ${CMAKE_CURRENT_SOURCE_DIR}/../src/lib ${CMAKE_CURRENT
 function(NS_ADD_TEST name src)
 add_executable(test_${name} ${src} Test.h)
 #target_link_libraries(test_${name} ns_lib)
-target_link_libraries(test_${name} ${Boost_LIBRARIES})
 set_target_properties(test_${name} PROPERTIES VERSION ${NS_Version})
 add_test(NAME ${name} COMMAND test_${name})
 set_tests_properties(${name} PROPERTIES DEPENDS test_${name})

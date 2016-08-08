@@ -42,14 +42,9 @@ IF(CYGWIN)
 ENDIF()
 
 #PACKAGE
-
-find_package(Boost 1.36 COMPONENTS filesystem system iostreams program_options REQUIRED)
-
 find_package(Doxygen)
 
 #DEFINITIONS AND FLAGS
-link_directories(${CMAKE_CURRENT_BINARY_DIR} ${Boost_LIBRARY_DIRS})
-
 IF(MSVC)
 	SET(DEFS "${DEFS};_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE")
 	#SET(DEFS_DEBUG "_DEBUG")
@@ -78,9 +73,6 @@ ELSE()
 ENDIF()
 
 #CONFIGURE
-include_directories(${CMAKE_CURRENT_BINARY_DIR} 
-			${DEAL_II_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-
 add_subdirectory(src)
 
 if(NS_BUILD_TEST)
