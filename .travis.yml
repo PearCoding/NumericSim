@@ -1,5 +1,7 @@
 language: cpp
-compiler: gcc clang
+compiler: 
+  - clang
+  - gcc
 sudo: true
 env:
   global:
@@ -12,8 +14,9 @@ before_install:
   - sudo -E apt-get update -qq
 install:
 # CMake and GCC
-  - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install cmake cmake-data gcc-4.8 g++-4.8 
-  - export CXX=g++-4.8 CC=gcc-4.8
+  - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install cmake cmake-data
+  - if [ "$CXX" = "g++" ]; then sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install gcc-4.8 g++-4.8; fi
+  - if [ "$CXX" = "g++" ]; then export CXX=g++-4.8 CC=gcc-4.8; fi
 before_script:
   - $CXX --version
   - cmake --version
