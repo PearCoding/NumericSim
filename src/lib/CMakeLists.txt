@@ -1,20 +1,30 @@
-SET(SRC 
- ${CMAKE_CURRENT_SOURCE_DIR}/Config.h
- ${CMAKE_CURRENT_SOURCE_DIR}/ComplexNumber.h
- ${CMAKE_CURRENT_SOURCE_DIR}/ComplexNumber.inl
- ${CMAKE_CURRENT_SOURCE_DIR}/CountableSet.h
- ${CMAKE_CURRENT_SOURCE_DIR}/CountableSet.inl
- ${CMAKE_CURRENT_SOURCE_DIR}/Exceptions.h
- ${CMAKE_CURRENT_SOURCE_DIR}/LU.h
- ${CMAKE_CURRENT_SOURCE_DIR}/LU.inl
- ${CMAKE_CURRENT_SOURCE_DIR}/Matrix.h
- ${CMAKE_CURRENT_SOURCE_DIR}/Matrix.inl
- ${CMAKE_CURRENT_SOURCE_DIR}/OutputStream.h
- ${CMAKE_CURRENT_SOURCE_DIR}/SparseMatrix.h
- ${CMAKE_CURRENT_SOURCE_DIR}/SparseMatrix.inl
- ${CMAKE_CURRENT_SOURCE_DIR}/Types.h
- ${CMAKE_CURRENT_SOURCE_DIR}/Vector.h
- ${CMAKE_CURRENT_SOURCE_DIR}/Vector.inl)
+SET(SRC_MAIN
+ Config.h
+ ComplexNumber.h
+ ComplexNumber.inl
+ CountableSet.h
+ CountableSet.inl
+ Exceptions.h
+ LU.h
+ LU.inl
+ OutputStream.h
+ Types.h
+ Utils.h
+ Vector.h
+ Vector.inl)
+
+SET(SRC_MATRIX
+ matrix/Matrix.h
+ matrix/Matrix.inl
+ matrix/MatrixConstructor.h
+ matrix/MatrixConstructor.inl
+ matrix/MatrixConverter.h
+ matrix/MatrixConverter.inl
+ matrix/SparseMatrix.h
+ matrix/SparseMatrix.inl)
+SOURCE_GROUP("Header Files\\Matrix" FILES ${SRC_MATRIX})
+
+SET(SRC ${SRC_MAIN} ${SRC_MATRIX})
  
 add_library(ns_lib STATIC ${SRC})
 set_target_properties(ns_lib PROPERTIES LINKER_LANGUAGE CXX)

@@ -69,6 +69,7 @@ namespace LU {
 			return L;
 		}
 
+		// TODO: Improve for sparse matrices!
 		template<typename T, Dimension D1, Dimension D2>
 		SparseMatrix<T, D1, D2> cholesky(const SparseMatrix<T, D1, D2>& m)
 		{

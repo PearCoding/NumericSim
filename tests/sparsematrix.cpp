@@ -1,6 +1,6 @@
 #include "Test.h"
 
-#include "SparseMatrix.h"
+#include "matrix/SparseMatrix.h"
 #include "OutputStream.h"
 
 NS_USE_NAMESPACE;

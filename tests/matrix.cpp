@@ -1,6 +1,8 @@
 #include "Test.h"
-#include "Matrix.h"
+#include "matrix/Matrix.h"
 #include "OutputStream.h"
+
+#include "matrix/MatrixConstructor.h"
 
 NS_USE_NAMESPACE;
 
@@ -61,6 +63,21 @@ NS_TEST("==")
 	NS_CHECK_TRUE(v1 != v3);
 	NS_CHECK_FALSE(v1 != v2);
 }
+NS_TEST("eye")
+{
+	Matrix<T, D1, D2> v1 = Construct::eye<Matrix, T, D1, D2>();
+
+	for (Index i = 0; i < std::min(D1, D2); ++i)
+		NS_CHECK_EQ(v1.at(i, i), (T)1);
+}
+NS_TEST("hilbert")
+{
+	Matrix<T, D1, D2> v1 = Construct::hilbert<Matrix, T, D1, D2>();
+
+	for (Index i = 0; i < D1; ++i)
+		for(Index j = 0; j < D2; ++j)
+			NS_CHECK_EQ(v1.at(i, j), (T)(1/(i + j + 1.0)));
+}
 NS_END_TESTCASE()
 
 NS_BEGIN_TESTCASE(MatrixFixed)
@@ -92,6 +109,12 @@ NS_TEST("Mul")
 	Matrix<float, 3, 2> v2 = { { 1, 2 },{ 0, 1 },{ 4, 0} };
 	Matrix<float, 2, 2> res = { { 7, 8 },{ 9, 2 } };
 	auto ret = v1.mul(v2);
+	NS_CHECK_EQ(ret, res);
+}
+NS_TEST("Inverse Hilbert")
+{
+	Matrix<float, 3, 3> ret = Construct::inv_hilbert<Matrix, float, 3, 3>();
+	Matrix<float, 3, 3> res = { {9,-36,30},{-36,192,-180},{30,-180,180} };
 	NS_CHECK_EQ(ret, res);
 }
 NS_END_TESTCASE()
