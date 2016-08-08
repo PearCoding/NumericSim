@@ -6,13 +6,13 @@ NS_BEGIN_NAMESPACE
 
 template<typename T, Dimension D>
 Vector<T, D>::Vector() :
-	CountableSet()
+	CountableSet<T,D>()
 {
 }
 
 template<typename T, Dimension D>
 Vector<T, D>::Vector(const T& f) :
-	CountableSet(f)
+	CountableSet<T, D>(f)
 {
 }
 
@@ -37,13 +37,13 @@ Vector<T, D>::~Vector()
 template<typename T, Dimension D>
 const T& Vector<T,D>::at(Index i) const 
 {
-	return linear_at(i); 
+	return CountableSet<T, D>::linear_at(i);
 }
 
 template<typename T, Dimension D>
 void Vector<T, D>::set(Index i, const T& v) 
 { 
-	linear_set(i, v);
+	CountableSet<T, D>::linear_set(i, v);
 }
 
 // Other
@@ -166,7 +166,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator +=(const Vector<T, D>& v2)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] += v2.at(i);
+		CountableSet<T, D>::mData[i] += v2.at(i);
 
 	return *this;
 }
@@ -175,7 +175,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator +=(const T& f)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] += f;
+		CountableSet<T, D>::mData[i] += f;
 
 	return *this;
 }
@@ -184,7 +184,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator -=(const Vector<T, D>& v2)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] -= v2.at(i);
+		CountableSet<T, D>::mData[i] -= v2.at(i);
 
 	return *this;
 }
@@ -193,7 +193,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator -=(const T& f)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] -= f;
+		CountableSet<T, D>::mData[i] -= f;
 
 	return *this;
 }
@@ -202,7 +202,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator *=(const Vector<T, D>& v2)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] *= v2.at(i);
+		CountableSet<T, D>::mData[i] *= v2.at(i);
 
 	return *this;
 }
@@ -211,7 +211,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator *=(const T& f)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] *= f;
+		CountableSet<T, D>::mData[i] *= f;
 
 	return *this;
 }
@@ -220,7 +220,7 @@ template<typename T, Dimension D>
 Vector<T, D>& Vector<T, D>::operator /=(const Vector<T, D>& v2)
 {
 	for (Index i = 0; i < D; ++i)
-		mData[i] /= v2.at(i);
+		CountableSet<T, D>::mData[i] /= v2.at(i);
 
 	return *this;
 }
@@ -230,7 +230,7 @@ Vector<T, D>& Vector<T, D>::operator /=(const T& f)
 {
 	T invF = (T)1 / f;// TODO: NAN?
 	for (Index i = 0; i < D; ++i)
-		mData[i] *= invF;
+		CountableSet<T, D>::mData[i] *= invF;
 
 	return *this;
 }

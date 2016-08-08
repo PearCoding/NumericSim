@@ -19,7 +19,7 @@ NS_BEGIN_NAMESPACE
  * @sa SparseMatrix
  * @ingroup TypeTraits
  */
-template<template<typename, Dimension, Dimension> typename M, typename T, Dimension D1, Dimension D2>
+template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
 struct is_matrix : std::integral_constant<bool,
 	is_number<T>::value &&
 		(std::is_same<Matrix<T, D1, D2>, typename std::remove_cv<typename M<T, D1, D2> >::type>::value ||

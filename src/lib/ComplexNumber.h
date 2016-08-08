@@ -114,7 +114,9 @@ struct is_number : std::integral_constant<bool,
 
 /**
 * @brief A type trait returning the internal type of ComplexNumber or himself.
-* `get_complex_internal<ComplexNumber<float> >::type == float` but `get_complex_internal<float>::type == float`
+*
+* `get_complex_internal<ComplexNumber<float> >::type == float` but also
+* `get_complex_internal<float>::type == float`
 * @ingroup TypeTraits
 */
 template<typename T>

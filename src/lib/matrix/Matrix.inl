@@ -6,13 +6,13 @@ NS_BEGIN_NAMESPACE
 
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>::Matrix() :
-	CountableSet()
+	CountableSet<T,D1*D2>()
 {
 }
 
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>::Matrix(const T& f) :
-	CountableSet(f)
+	CountableSet<T,D1*D2>(f)
 {
 }
 
@@ -29,7 +29,7 @@ Matrix<T, D1, D2>::Matrix(std::initializer_list<std::initializer_list<T> > l) :
 
 		for (const auto& w : v)
 		{
-			mData[i*D2 + j] = w;
+			CountableSet<T, D1*D2>::mData[i*D2 + j] = w;
 			++j;
 		}
 		++i;
@@ -46,7 +46,7 @@ const T& Matrix<T, D1, D2>::at(Index i1, Index i2) const
 {
 	NS_ASSERT(i1 < D1);
 	NS_ASSERT(i2 < D2);
-	return linear_at(i1*D2 + i2);
+	return CountableSet<T, D1*D2>::linear_at(i1*D2 + i2);
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -54,14 +54,14 @@ void Matrix<T, D1, D2>::set(Index i1, Index i2, const T& v)
 {
 	NS_ASSERT(i1 < D1);
 	NS_ASSERT(i2 < D2);
-	linear_set(i1*D2 + i2, v);
+	CountableSet<T, D1*D2>::linear_set(i1*D2 + i2, v);
 }
 
 template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator +=(const Matrix<T, D1,D2>& v2)
 {
 	for (Index i = 0; i < D1*D2; ++i)
-		mData[i] += v2.mData[i];
+		CountableSet<T, D1*D2>::mData[i] += v2.CountableSet<T, D1*D2>::mData[i];
 
 	return *this;
 }
@@ -70,7 +70,7 @@ template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator -=(const Matrix<T, D1, D2>& v2)
 {
 	for (Index i = 0; i < D1*D2; ++i)
-		mData[i] -= v2.mData[i];
+		CountableSet<T, D1*D2>::mData[i] -= v2.CountableSet<T, D1*D2>::mData[i];
 
 	return *this;
 }
@@ -79,7 +79,7 @@ template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator *=(const Matrix<T, D1, D2>& v2)
 {
 	for (Index i = 0; i < D1*D2; ++i)
-		mData[i] *= v2.mData[i];
+		CountableSet<T, D1*D2>::mData[i] *= v2.CountableSet<T, D1*D2>::mData[i];
 
 	return *this;
 }
@@ -88,7 +88,7 @@ template<typename T, Dimension D1, Dimension D2>
 Matrix<T, D1, D2>& Matrix<T, D1, D2>::operator *=(const T& f)
 {
 	for (Index i = 0; i < D1*D2; ++i)
-		mData[i] *= f;
+		CountableSet<T, D1*D2>::mData[i] *= f;
 
 	return *this;
 }
