@@ -45,7 +45,6 @@ ENDIF()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Boost 1.36 COMPONENTS filesystem system iostreams program_options REQUIRED)
-find_package(dealII REQUIRED)
 
 #DEFINITIONS AND FLAGS
 link_directories(${CMAKE_CURRENT_BINARY_DIR} ${Boost_LIBRARY_DIRS})
