@@ -220,7 +220,7 @@ ComplexNumber<T> operator -(T f, const ComplexNumber<T>& v1)
 template<typename T>
 ComplexNumber<T> operator -(const ComplexNumber<T>& v)
 {
-	return ComplexNumber<T>(-v1.real(), -v1.imag());
+	return ComplexNumber<T>(-v.real(), -v.imag());
 }
 
 template<typename T>

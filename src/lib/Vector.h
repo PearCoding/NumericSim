@@ -27,8 +27,8 @@ public:
 	Vector& operator /=(const Vector& v2);
 	Vector& operator /=(const T& f);
 
-	const T& at(Index i) const { return linear_at(i); }
-	void set(Index i, const T& v) { linear_set(i, v); }
+	const T& at(Index i) const;
+	void set(Index i, const T& v);
 
 	// Other
 	constexpr Dimension dim() const;

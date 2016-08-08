@@ -53,7 +53,7 @@ T CountableSet<T, D>::sum() const
 template<typename T, Dimension D>
 T CountableSet<T, D>::max() const
 {
-	T s = std::numeric_limits<T>::min();
+	T s = (T)std::numeric_limits<typename get_complex_internal<T>::type>::min();
 	for (Index i = 0; i < D; ++i)
 	{
 		if (mData[i] > s)
@@ -66,7 +66,7 @@ T CountableSet<T, D>::max() const
 template<typename T, Dimension D>
 T CountableSet<T, D>::min() const
 {
-	T s = std::numeric_limits<T>::max();
+	T s = (T)std::numeric_limits<typename get_complex_internal<T>::type>::max();
 	for (Index i = 0; i < D; ++i)
 	{
 		if (mData[i] < s)

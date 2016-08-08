@@ -14,7 +14,6 @@ template<typename T, Dimension D>
 Vector<T, D>::Vector(const T& f) :
 	CountableSet(f)
 {
-	fill(f);
 }
 
 template<typename T, Dimension D>
@@ -33,6 +32,18 @@ Vector<T, D>::Vector(std::initializer_list<T> l) :
 template<typename T, Dimension D>
 Vector<T, D>::~Vector()
 {
+}
+
+template<typename T, Dimension D>
+const T& Vector<T,D>::at(Index i) const 
+{
+	return linear_at(i); 
+}
+
+template<typename T, Dimension D>
+void Vector<T, D>::set(Index i, const T& v) 
+{ 
+	linear_set(i, v);
 }
 
 // Other
