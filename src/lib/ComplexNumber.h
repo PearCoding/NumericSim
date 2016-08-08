@@ -124,6 +124,18 @@ ComplexNumber<T> conjugate_vt(const ComplexNumber<T>& t)
 	return t.conjugate();
 }
 
+template<typename T>
+T magSqr_vt(const T& t)
+{
+	return t*t;
+}
+
+template<typename T>
+T magSqr_vt(const ComplexNumber<T>& t)
+{
+	return t.magSqr();
+}
+
 NS_END_NAMESPACE
 
 // Standard functions

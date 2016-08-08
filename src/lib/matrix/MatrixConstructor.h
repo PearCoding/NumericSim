@@ -1,7 +1,5 @@
 #pragma once
 
-#include "matrix/Matrix.h"
-#include "matrix/SparseMatrix.h"
 #include "Types.h"
 #include "Utils.h"
 

@@ -62,7 +62,7 @@ NS_TEST("/")
 {
 	ComplexNumber<T> v1(5, 6);
 	ComplexNumber<T> v2(1, 2);
-	ComplexNumber<T> res(17/(T)5, -4/(T)5);
+	ComplexNumber<T> res(3.4, -0.8);
 	ComplexNumber<T> res2(2.5, 3);
 	ComplexNumber<T> res3(2 / (T)5, -4 / (T)5);
 

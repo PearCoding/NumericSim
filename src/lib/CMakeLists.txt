@@ -5,6 +5,8 @@ SET(SRC_MAIN
  CountableSet.h
  CountableSet.inl
  Exceptions.h
+ Jacobi.h
+ Jacobi.inl
  LU.h
  LU.inl
  OutputStream.h

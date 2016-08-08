@@ -104,11 +104,12 @@ ComplexNumber<T>& ComplexNumber<T>::operator *=(const T& f)
 template<typename T>
 ComplexNumber<T>& ComplexNumber<T>::operator /=(const ComplexNumber& v2)
 {
-	T n = 1 / v2.magSqr();
+	auto n = v2.magSqr();
 
-	T r = mReal*v2.real() + mImag*v2.imag();
-	mImag = (mImag*v2.real() - mReal*v2.imag())*n;
-	mReal = r * n;
+	auto r = mReal*v2.real() + mImag*v2.imag();
+	mImag = (mImag*v2.real() - mReal*v2.imag())/n;
+	mReal = r/n;
+
 	return *this;
 }
 
@@ -267,8 +268,7 @@ ComplexNumber<T> operator /(T f, const ComplexNumber<T>& v1)
 template<typename T>
 bool operator ==(const ComplexNumber<T>& v1, const ComplexNumber<T>& v2)
 {
-	return std::abs(v1.real() - v2.real()) <= std::numeric_limits<T>::epsilon() &&
-		std::abs(v1.imag() - v2.imag()) <= std::numeric_limits<T>::epsilon();
+	return v1.real() == v2.real() && v1.imag() == v2.imag();
 }
 
 template<typename T>
@@ -280,7 +280,7 @@ bool operator !=(const ComplexNumber<T>& v1, const ComplexNumber<T>& v2)
 template<typename T>
 bool operator ==(const ComplexNumber<T>& v1, const T& v2)
 {
-	return !v1.isComplex() && std::abs(v1.real() - v2) <= std::numeric_limits<T>::epsilon();
+	return !v1.isComplex() && v1.real() == v2;
 }
 
 template<typename T>
@@ -292,13 +292,13 @@ bool operator !=(const ComplexNumber<T>& v1, T& v2)
 template<typename T>
 bool operator ==(const T& v1, const ComplexNumber<T>& v2)
 {
-	return !v2.isComplex() && std::abs(v2.real() - v1) <= std::numeric_limits<T>::epsilon();
+	return v2 == v1;
 }
 
 template<typename T>
 bool operator !=(const T& v1, const ComplexNumber<T>& v2)
 {
-	return !(v1 == v2);
+	return !(v2 == v1);
 }
 
 NS_END_NAMESPACE
