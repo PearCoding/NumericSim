@@ -11,6 +11,8 @@ cache:
 before_install:
   - sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
   - sudo -E apt-add-repository -y "ppa:george-edison55/precise-backports"
+  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+  - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main' -y
   - sudo -E apt-get update -qq
 install:
 # CMake and GCC

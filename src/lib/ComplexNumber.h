@@ -131,7 +131,7 @@ struct get_complex_internal
 template<typename T>
 struct get_complex_internal<ComplexNumber<T> > 
 {
-	typedef typename T type;
+	typedef T type;
 };
 
 // Variable Template functions
