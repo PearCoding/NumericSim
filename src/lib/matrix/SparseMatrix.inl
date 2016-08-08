@@ -523,7 +523,7 @@ bool SparseMatrix<T, D1, D2>::hasInf() const
 template<typename T, Dimension D1, Dimension D2>
 bool SparseMatrix<T, D1, D2>::hasZero() const
 {
-	return mData.size() != size();
+	return mValues.size() != size();
 }
 
 template<typename T, Dimension D1, Dimension D2>
