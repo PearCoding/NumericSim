@@ -1,0 +1,31 @@
+language: cpp
+compiler: gcc clang
+sudo: true
+env:
+  global:
+    - MAKEFLAGS="-j 2"
+cache:
+  - apt
+before_install:
+  - sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+  - sudo -E apt-add-repository -y "ppa:george-edison55/precise-backports"
+  - sudo -E apt-get update -qq
+install:
+# CMake and GCC
+  - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install cmake cmake-data gcc-4.8 g++-4.8 
+  - export CXX=g++-4.8 CC=gcc-4.8
+before_script:
+  - $CXX --version
+  - cmake --version
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Release -DNS_BUILD_TEST=ON ..
+script:
+  - make $MAKEFLAGS 
+  - make test
+
+branches:
+  only:
+  - master
+notifications:
+  email: false
