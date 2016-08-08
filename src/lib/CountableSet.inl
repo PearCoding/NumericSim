@@ -83,7 +83,7 @@ T CountableSet<T, D>::avg() const
 }
 
 template<typename T, Dimension D>
-void CountableSet<T, D>::inverse()
+void CountableSet<T, D>::do_reciprocal()
 {
 	NS_DEBUG_ASSERT(!hasZero());
 

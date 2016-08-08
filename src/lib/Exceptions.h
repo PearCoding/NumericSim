@@ -4,10 +4,19 @@
 
 NS_BEGIN_NAMESPACE
 
+/**
+ * @brief Top level exception class.
+ * All other exceptions derive from this class.
+ */
 class NSException
 {
 public:
 	NSException() {}
+
+	/**
+	 * @brief Returns an English description of the exception.
+	 * @return An English zero-terminated string.
+	 */
 	virtual const char* what() const = 0;
 };
 

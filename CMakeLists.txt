@@ -43,8 +43,9 @@ ENDIF()
 
 #PACKAGE
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Boost 1.36 COMPONENTS filesystem system iostreams program_options REQUIRED)
+
+find_package(Doxygen)
 
 #DEFINITIONS AND FLAGS
 link_directories(${CMAKE_CURRENT_BINARY_DIR} ${Boost_LIBRARY_DIRS})
@@ -86,3 +87,12 @@ if(NS_BUILD_TEST)
 enable_testing()
 add_subdirectory(tests)
 endif()
+
+if(DOXYGEN_FOUND)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+	add_custom_target(doc
+		${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+		COMMENT "Generating API documentation with Doxygen" VERBATIM
+	)
+endif(DOXYGEN_FOUND)

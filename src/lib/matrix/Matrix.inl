@@ -120,9 +120,21 @@ Matrix<T, D2, D1> Matrix<T, D1, D2>::transpose()
 }
 
 template<typename T, Dimension D1, Dimension D2>
-Matrix<T, D1, D2> Matrix<T, D1, D2>::invert()
+Matrix<T, D1, D2> Matrix<T, D1, D2>::inverse()
 {
 	//TODO
+}
+
+template<typename T, Dimension D1, Dimension D2>
+T Matrix<T, D1, D2>::trace() const
+{
+	T v = (T)0;
+	for (Index i = 0; i < std::min(D1, D2); ++i)
+	{
+		v += at(i, i);
+	}
+
+	return v;
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -143,6 +155,38 @@ Matrix<T, D1, D3> Matrix<T, D1, D2>::mul(const Matrix<T, D2, D3>& m) const
 		}
 	}
 	return tmp;
+}
+
+template<typename T, Dimension D1, Dimension D2>
+Vector<T, D1> Matrix<T, D1, D2>::mul(const Vector<T, D2>& m) const
+{
+	Vector<T, D1> r;
+	for (Index i = 0; i < D1; ++i)
+	{
+		T v = (T)0;
+		for (Index j = 0; j < D2; ++j)
+		{
+			v += at(i, j)*m.linear_at(j);
+		}
+		r.linear_set(i, v);
+	}
+	return r;
+}
+
+template<typename T, Dimension D1, Dimension D2>
+Vector<T, D2> Matrix<T, D1, D2>::mul_left(const Vector<T, D1>& m) const
+{
+	Vector<T, D2> r;
+	for (Index j = 0; j < D2; ++j)
+	{
+		T v = (T)0;
+		for (Index i = 0; i < D1; ++i)
+		{
+			v += at(i, j)*m.linear_at(i);
+		}
+		r.linear_set(j, v);
+	}
+	return r;
 }
 
 template<typename T, Dimension D1, Dimension D2>

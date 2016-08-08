@@ -69,6 +69,8 @@ NS_TEST("eye")
 
 	for (Index i = 0; i < std::min(D1, D2); ++i)
 		NS_CHECK_EQ(v1.at(i, i), (T)1);
+
+	NS_CHECK_EQ(v1.trace(), static_cast<T>(std::min(D1, D2)));
 }
 NS_TEST("hilbert")
 {
@@ -110,6 +112,65 @@ NS_TEST("Mul")
 	Matrix<float, 2, 2> res = { { 7, 8 },{ 9, 2 } };
 	auto ret = v1.mul(v2);
 	NS_CHECK_EQ(ret, res);
+}
+NS_TEST("Mul Vector")
+{
+	Matrix<float, 3, 2> m = { { 1,2 },{ 4,5 },{7,8} };
+	Vector<float, 2> r = { 1,2 };
+	Vector<float, 3> l = { 1,2,3 };
+
+	Vector<float, 3> res1 = { 5,14,23 };
+	Vector<float, 2> res2 = { 30,36 };
+	auto ret1 = m.mul(r);
+	auto ret2 = m.mul_left(l);
+
+	NS_CHECK_EQ(ret1, res1);
+	NS_CHECK_EQ(ret2, res2);
+}
+NS_TEST("diag")
+{
+	Vector<float, 3> v = { 1,2,3 };
+	Matrix<float, 3, 3> m = Construct::diag<Matrix>(v);
+	Matrix<float, 3, 3> res1 = { {1,0,0},{0,2,0},{0,0,3} };
+
+	NS_CHECK_EQ(m, res1);
+	NS_CHECK_EQ(Construct::diag(m), v);
+}
+NS_TEST("triu/tril")
+{
+	Matrix<float, 3, 3> m = { { 1, 2, 3 },{ 4, 5, 6 },{ 7, 8, 9 } };
+	Matrix<float, 3, 3> r1 = Construct::triu(m);
+	Matrix<float, 3, 3> r2 = Construct::tril(m);
+
+	Matrix<float, 3, 3> res1 = { { 1, 2, 3 },{ 0, 5, 6 },{ 0, 0, 9 } };
+	Matrix<float, 3, 3> res2 = { { 1, 0, 0 },{ 4, 5, 0 },{ 7, 8, 9 } };
+
+	NS_CHECK_EQ(r1, res1);
+	NS_CHECK_EQ(r2, res2);
+}
+NS_TEST("triu/tril k=-1")
+{
+	Matrix<float, 3, 3> m = { { 1, 2, 3 },{ 4, 5, 6 },{ 7, 8, 9 } };
+	Matrix<float, 3, 3> r1 = Construct::triu(m,-1);
+	Matrix<float, 3, 3> r2 = Construct::tril(m,-1);
+
+	Matrix<float, 3, 3> res1 = { { 1, 2, 3 },{ 4, 5, 6 },{ 0, 8, 9 } };
+	Matrix<float, 3, 3> res2 = { { 0, 0, 0 },{ 4, 0, 0 },{ 7, 8, 0 } };
+
+	NS_CHECK_EQ(r1, res1);
+	NS_CHECK_EQ(r2, res2);
+}
+NS_TEST("triu/tril k=1")
+{
+	Matrix<float, 3, 3> m = { { 1, 2, 3 },{ 4, 5, 6 },{ 7, 8, 9 } };
+	Matrix<float, 3, 3> r1 = Construct::triu(m,1);
+	Matrix<float, 3, 3> r2 = Construct::tril(m,1);
+
+	Matrix<float, 3, 3> res1 = { { 0, 2, 3 },{ 0, 0, 6 },{ 0, 0, 0 } };
+	Matrix<float, 3, 3> res2 = { { 1, 2, 0 },{ 4, 5, 6 },{ 7, 8, 9 } };
+
+	NS_CHECK_EQ(r1, res1);
+	NS_CHECK_EQ(r2, res2);
 }
 NS_TEST("Inverse Hilbert")
 {

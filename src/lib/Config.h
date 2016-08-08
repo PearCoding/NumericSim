@@ -115,6 +115,9 @@
 
 NS_BEGIN_NAMESPACE
 
+	/**
+	 * @brief Simple no operation function used for preprocessor definitions.
+	 */
 	inline void ns_Noop()
 	{
 	}

@@ -89,6 +89,11 @@ bool operator ==(const T& v1, const ComplexNumber<T>& v2);
 template<typename T>
 bool operator !=(const T& v1, const ComplexNumber<T>& v2);
 
+/**
+* @brief A std:: conform type-trait for the several complex number formats supported in NumericSim.
+* @sa ComplexNumber
+* @ingroup TypeTraits
+*/
 // Should be in Types.h, but we need it in other types implementation.
 template<class T>
 struct is_complex : std::integral_constant<bool,
@@ -96,6 +101,11 @@ struct is_complex : std::integral_constant<bool,
 	std::is_same<ComplexNumber<double>, typename std::remove_cv<T>::type>::value ||
 	std::is_same<ComplexNumber<long double>, typename std::remove_cv<T>::type>::value> {};
 
+/**
+* @brief A std:: conform type-trait for the numbers supported in NumericSim.
+* @sa is_complex
+* @ingroup TypeTraits
+*/
 template<class T>
 struct is_number : std::integral_constant<bool,
 	std::is_floating_point<T>::value ||

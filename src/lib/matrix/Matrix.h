@@ -33,10 +33,15 @@ public:
 	constexpr Dimension rows() const;
 
 	Matrix<T, D2, D1> transpose();
-	Matrix invert();
+	Matrix inverse();
+
+	T trace() const;
 
 	template<Dimension D3>
 	Matrix<T, D1, D3> mul(const Matrix<T, D2, D3>& m) const;
+
+	Vector<T, D1> mul(const Vector<T, D2>& m) const;
+	Vector<T, D2> mul_left(const Vector<T, D1>& m) const;
 };
 
 // Element wise operations

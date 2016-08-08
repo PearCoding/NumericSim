@@ -75,7 +75,7 @@ public:
 	T min() const;
 	T avg() const;
 
-	void inverse();
+	void do_reciprocal();
 
 	void fill(const T& f);
 	void swap(CountableSet& v);

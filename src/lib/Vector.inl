@@ -312,7 +312,7 @@ template<typename T, Dimension D>
 Vector<T, D> operator /(T f, const Vector<T, D>& v1)
 {
 	Vector<T, D>tmp = v1;
-	tmp.inverse();
+	tmp.do_reciprocal();
 	return (tmp *= f);
 }
 

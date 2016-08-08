@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Config.h"
 #include "ComplexNumber.h"
+#include "Vector.h"
 
 #include <initializer_list>
 #include <type_traits>
@@ -130,12 +130,17 @@ public:
 
 	SparseMatrix<T, D2, D1> transpose();
 
-	SparseMatrix<T, D1, D2> conjugate();
+	SparseMatrix conjugate();
 	SparseMatrix<T, D2, D1> conjugate_transpose();
-	SparseMatrix invert();
+	SparseMatrix inverse();
+
+	T trace() const;
 
 	template<Dimension D3>
-	SparseMatrix<T, D1, D3> mul(const SparseMatrix<T, D2, D3>& m) const;// Matrix multiplication
+	SparseMatrix<T, D1, D3> mul(const SparseMatrix<T, D2, D3>& m) const;
+
+	Vector<T, D1> mul(const Vector<T, D2>& m) const;
+	Vector<T, D2> mul_left(const Vector<T, D1>& m) const;
 };
 
 // Element wise operations
