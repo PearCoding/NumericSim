@@ -96,6 +96,8 @@ SparseMatrixRowIterator<T, D1, D2>::SparseMatrixRowIterator(const SparseMatrix<T
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrixRowIterator<T, D1, D2>& SparseMatrixRowIterator<T, D1, D2>::operator++ ()
 {
+	using SparseMatrixIterator<T, D1, D2>;
+
 	if (mIndex1 < D1 && mIndex2 < D2)
 	{
 		mColumnPtrIndex++;
@@ -137,6 +139,8 @@ SparseMatrixColumnIterator<T, D1, D2>::SparseMatrixColumnIterator(const SparseMa
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrixColumnIterator<T, D1, D2>& SparseMatrixColumnIterator<T, D1, D2>::operator++ ()
 {
+	using SparseMatrixIterator<T, D1, D2>;
+
 	if (mIndex1 < D1 && mIndex2 < D2)
 	{
 		bool found = false;
