@@ -431,4 +431,16 @@ namespace std
 		complex<T> c = atanh(complex<T>(v.real(), v.imag()));
 		return NS::ComplexNumber<T>(c.real(), c.imag());
 	}
+
+	template<typename T>
+	bool isnan(const NS::ComplexNumber<T>& arg)
+	{
+		return arg.hasNaN();
+	}
+
+	template<typename T>
+	bool isinf(const NS::ComplexNumber<T>& arg)
+	{
+		return arg.hasInf();
+	}
 }

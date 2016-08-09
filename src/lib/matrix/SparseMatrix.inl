@@ -53,7 +53,9 @@ SparseMatrixIterator<T,D1,D2>& SparseMatrixIterator<T,D1,D2>::operator++ ()
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrixIterator<T, D1, D2> SparseMatrixIterator<T, D1, D2>::operator++ (int)
 {
-	return SparseMatrixIterator<T, D1, D2>::operator++ ();
+	auto c = *this;
+	SparseMatrixIterator<T, D1, D2>::operator++ ();
+	return c;
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -66,6 +68,19 @@ T SparseMatrixIterator<T, D1, D2>::operator *() const
 	else
 	{
 		return (T)0;
+	}
+}
+
+template<typename T, Dimension D1, Dimension D2>
+T& SparseMatrixIterator<T, D1, D2>::operator *()// This is really dirty
+{
+	if (mIndex1 < D1 && mIndex2 < D2)
+	{
+		return const_cast<SparseMatrix<T,D1,D2>*>(mMatrix)->mValues[mColumnPtrIndex];
+	}
+	else
+	{
+		return const_cast<SparseMatrix<T, D1, D2>*>(mMatrix)->mEmpty;
 	}
 }
 
@@ -83,12 +98,15 @@ template<typename T, Dimension D1, Dimension D2>
 SparseMatrix<T, D1, D2>::SparseMatrix(std::initializer_list<std::initializer_list<T> > l) :
 	SparseMatrix()
 {
-	NS_ASSERT(l.size() <= D1);// Would be great if we could use size() with constexpr [C++14]
+	if (l.size() > D1)
+		throw MatrixInitializerListFailedException();
+
 	Index i = 0;
 	for (const auto& v : l)
 	{
 		Index j = 0;
-		NS_ASSERT(v.size() <= D2);
+		if (v.size() > D2)
+			throw MatrixInitializerListFailedException();
 
 		for (const auto& w : v)
 		{
@@ -118,24 +136,24 @@ const T& SparseMatrix<T, D1, D2>::internal_at(Index i1, Index i2, Index& columnP
 
 	if (!isEmpty())
 	{
-		Index rowPtr = mRowPtr[i1];
+		Index rowPtr = mRowPtr[i1];// O(1)
 		size_t s = i1 != (D1 - 1) ? mRowPtr[i1 + 1] - rowPtr : mColumnPtr.size() - rowPtr;
 		if (needNear && s == 0 && i1 != (D1 - 1))// Nothing found, but we need next close one.
 		{
 			// Recursion for very big data is not that good :/
 			bool found2;
-			internal_at(i1 + 1, 0, columnPtrIndex, found2, true);
+			internal_at(i1 + 1, 0, columnPtrIndex, found2, true);// O(D2)
 		}
 		else
 		{
-			for (columnPtrIndex = rowPtr; columnPtrIndex < rowPtr + s; ++columnPtrIndex)
+			for (columnPtrIndex = rowPtr; columnPtrIndex < rowPtr + s; ++columnPtrIndex)// O(D2)
 			{
-				auto ci = mColumnPtr[columnPtrIndex];
+				auto ci = mColumnPtr[columnPtrIndex];// O(1)
 
 				if (ci == i2)
 				{
 					found = true;
-					return mValues[columnPtrIndex];
+					return mValues[columnPtrIndex];// O(1)
 				}
 				else if (ci > i2)
 				{
@@ -154,14 +172,14 @@ void SparseMatrix<T, D1, D2>::remove_at(Index i1, Index i2)
 {
 	Index columnPtrIndex;
 	bool found;
-	internal_at(i1, i2, columnPtrIndex, found);
+	internal_at(i1, i2, columnPtrIndex, found);// O(D2)
 
 	if (found)
 	{
-		mValues.erase(mValues.begin() + columnPtrIndex);
-		mColumnPtr.erase(mColumnPtr.begin() + columnPtrIndex);
+		mValues.erase(mValues.begin() + columnPtrIndex);// O(D1*D2), due to the moving in std::vector<T>::erase
+		mColumnPtr.erase(mColumnPtr.begin() + columnPtrIndex);// O(D1*D2), see above
 
-		for (Index k = i1 + 1; k < D1; ++k)
+		for (Index k = i1 + 1; k < D1; ++k)// O(D1)
 		{
 			mRowPtr[k] -= 1;
 		}
@@ -173,18 +191,18 @@ void SparseMatrix<T, D1, D2>::set_at(Index i1, Index i2, const T& v)
 {
 	Index columnPtrIndex;
 	bool found;
-	internal_at(i1, i2, columnPtrIndex, found, true);
+	internal_at(i1, i2, columnPtrIndex, found, true);// O(D1*D2), due to the needNear == true
 
 	if (found)// Replace
 	{
-		mValues[columnPtrIndex] = v;
+		mValues[columnPtrIndex] = v; // O(1)
 	}
 	else// New
 	{
-		mValues.insert(mValues.begin() + columnPtrIndex, v);
-		mColumnPtr.insert(mColumnPtr.begin() + columnPtrIndex, i2);
+		mValues.insert(mValues.begin() + columnPtrIndex, v);// O(D1*D2)
+		mColumnPtr.insert(mColumnPtr.begin() + columnPtrIndex, i2);// O(D1*D2)
 
-		for (Index k = i1 + 1; k < D1; ++k)
+		for (Index k = i1 + 1; k < D1; ++k)// O(D1)
 		{
 			mRowPtr[k] += 1;
 		}
@@ -199,7 +217,7 @@ T SparseMatrix<T, D1, D2>::at(Index i1, Index i2) const
 
 	Index tmp;
 	bool found;
-	return internal_at(i1, i2, tmp, found);
+	return internal_at(i1, i2, tmp, found);// O(D2)
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -209,9 +227,9 @@ void SparseMatrix<T, D1, D2>::set(Index i1, Index i2, const T& t)
 	NS_ASSERT(i2 < D2);
 
 	if (t == (T)0)
-		remove_at(i1, i2);
+		remove_at(i1, i2);// O(D1*D2)
 	else
-		set_at(i1, i2, t);
+		set_at(i1, i2, t);// 
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -302,13 +320,20 @@ SparseMatrixIterator<T, D1, D2> SparseMatrix<T, D1, D2>::set(const SparseMatrixI
 {
 	NS_ASSERT(this == it.mMatrix);
 
-	if (val == (T)0)
-		return erase(it);
+	if (it.row() < D1 && it.column() < D2)
+	{
+		if (val == (T)0)
+			return erase(it);
+		else
+		{
+			SparseMatrixIterator<T, D1, D2> nit = it;
+			mValues[nit.mColumnPtrIndex] = val;
+			return nit;
+		}
+	}
 	else
 	{
-		SparseMatrixIterator<T, D1, D2> nit = it;
-		mValues[nit.mColumnPtrIndex] = val;
-		return nit;
+		return it;
 	}
 }
 
@@ -362,8 +387,8 @@ SparseMatrixIterator<T, D1, D2> SparseMatrix<T, D1, D2>::erase(const SparseMatri
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrix<T, D1, D2>& SparseMatrix<T, D1, D2>::operator +=(const SparseMatrix<T, D1, D2>& v2)
 {
-	for (auto it = v2.cbegin(); it != v2.cend(); ++it)
-		set(it.row(), it.column(), at(it.row(), it.column()) + *it);
+	for (auto it = v2.cbegin(); it != v2.cend(); ++it)// O(D1*D2)
+		set(it.row(), it.column(), at(it.row(), it.column()) + *it);// O(D1*D2)
 
 	return *this;
 }
@@ -380,19 +405,19 @@ SparseMatrix<T, D1, D2>& SparseMatrix<T, D1, D2>::operator -=(const SparseMatrix
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrix<T, D1, D2>& SparseMatrix<T, D1, D2>::operator *=(const SparseMatrix<T, D1, D2>& v2)
 {
-	for (auto it = v2.cbegin(); it != v2.cend(); ++it)// Only v2 non zero entries
+	for (auto it = v2.cbegin(); it != v2.cend(); ++it)// O(D1*D2)
 	{
 		bool found;
 		Index tmp;
-		T& val = const_cast<T&>(internal_at(it.row(), it.column(), tmp, found));
+		T& val = const_cast<T&>(internal_at(it.row(), it.column(), tmp, found));// O(D2)
 
 		val *= *it;
 	}
 
-	for (auto it = begin(); it != end();)
+	for (auto it = begin(); it != end();)// O(D1*D2)
 	{
-		if (!v2.has(it.row(), it.column()))
-			it = erase(it);
+		if (!v2.has(it.row(), it.column()))// O(D2)
+			it = erase(it);// O(D1*D2)
 		else
 			++it;
 	}
@@ -407,12 +432,12 @@ SparseMatrix<T, D1, D2>& SparseMatrix<T, D1, D2>::operator *=(const T& f)
 	{
 		mValues.clear();
 		mColumnPtr.clear();
-		std::transform(mRowPtr.begin(), mRowPtr.end(), mRowPtr.begin(), [](Index i) -> Index { return 0; });// Better way?
+		std::transform(mRowPtr.begin(), mRowPtr.end(), mRowPtr.begin(), [](Index i) -> Index { return 0; });// Better way? O(D1)
 	}
 	else
 	{
-		for (auto it = begin(); it != end(); ++it)
-			set(it, *it * f);
+		for (auto it = begin(); it != end(); ++it)// O(D1*D2)
+			*it *= f; // O(1)
 	}
 
 	return *this;
@@ -461,7 +486,7 @@ T SparseMatrix<T, D1, D2>::sum() const
 template<typename T, Dimension D1, Dimension D2>
 T SparseMatrix<T, D1, D2>::max() const
 {
-	T s = std::numeric_limits<T>::min();
+	T s = std::numeric_limits<typename get_complex_internal<T>::type>::min();
 	for (auto l : mValues)
 	{
 		if (l > s)
@@ -477,7 +502,7 @@ T SparseMatrix<T, D1, D2>::max() const
 template<typename T, Dimension D1, Dimension D2>
 T SparseMatrix<T, D1, D2>::min() const
 {
-	T s = std::numeric_limits<T>::max();
+	T s = std::numeric_limits<typename get_complex_internal<T>::type>::max();
 	for (auto l : mValues)
 	{
 		if (l < s)
@@ -539,8 +564,8 @@ SparseMatrix<T, D2, D1> SparseMatrix<T, D1, D2>::transpose()
 {
 	SparseMatrix<T, D2, D1> tmp;
 
-	for (auto it = begin(); it != end(); ++it)
-		tmp.set(it.column(), it.row(), *it);
+	for (auto it = begin(); it != end(); ++it)// O(D1*D2)
+		tmp.set(it.column(), it.row(), *it);// O(D1*D2)
 
 	return tmp;
 }
@@ -557,24 +582,18 @@ SparseMatrix<T, D1, D2> SparseMatrix<T, D1, D2>::conjugate()
 }
 
 template<typename T, Dimension D1, Dimension D2>
-SparseMatrix<T, D2, D1> SparseMatrix<T, D1, D2>::conjugate_transpose()
+SparseMatrix<T, D2, D1> SparseMatrix<T, D1, D2>::adjugate()
 {
 	return transpose().conjugate();
-}
-
-template<typename T, Dimension D1, Dimension D2>
-SparseMatrix<T, D1, D2> SparseMatrix<T, D1, D2>::inverse()
-{
-	//TODO
 }
 
 template<typename T, Dimension D1, Dimension D2>
 T SparseMatrix<T, D1, D2>::trace() const
 {
 	T v = (T)0;
-	for (Index i = 0; i < std::min(D1, D2); ++i)
+	for (Index i = 0; i < t_min(D1, D2); ++i)
 	{
-		v += at(i, i);
+		v += at(i, i);// O(D2)
 	}
 
 	return v;
@@ -586,53 +605,37 @@ template<Dimension D3>
 SparseMatrix<T, D1, D3> SparseMatrix<T, D1, D2>::mul(const SparseMatrix<T, D2, D3>& m) const
 {
 	SparseMatrix<T, D1, D3> tmp;
-	for (Index i = 0; i < D1; ++i)
+	for (Index i = 0; i < D1; ++i)// O(D1)
 	{
-		for (Index k = 0; k < D3; ++k)
+		for (Index k = 0; k < D3; ++k)// O(D3)
 		{
 			T v = 0;
-			for (Index j = 0; j < D2; ++j)
+			for (Index j = 0; j < D2; ++j)// O(D2)
 			{
-				v += at(i, j) * m.at(j, k);
+				v += at(i, j) * m.at(j, k);// O(D2) + O(D3)
 			}
-			tmp.set(i, k, v);
+			tmp.set(i, k, v);// O(D1*D3)
 		}
 	}
 
 	return tmp;
 }
 
-//TODO: Improve
 template<typename T, Dimension D1, Dimension D2>
 Vector<T, D1> SparseMatrix<T, D1, D2>::mul(const Vector<T, D2>& m) const
 {
 	Vector<T, D1> r;
-	for (Index i = 0; i < D1; ++i)
-	{
-		T v = (T)0;
-		for (Index j = 0; j < D2; ++j)
-		{
-			v += at(i, j)*m.linear_at(j);
-		}
-		r.linear_set(i, v);
-	}
+	for (auto it = begin(); it != end(); ++it)// O(D1*D2)
+		r.set(it.row(), r.at(it.row()) + *it * m.at(it.column()));// 2*O(D1)+O(D2)
 	return r;
 }
 
-//TODO: Improve
 template<typename T, Dimension D1, Dimension D2>
 Vector<T, D2> SparseMatrix<T, D1, D2>::mul_left(const Vector<T, D1>& m) const
 {
 	Vector<T, D2> r;
-	for (Index j = 0; j < D2; ++j)
-	{
-		T v = (T)0;
-		for (Index i = 0; i < D1; ++i)
-		{
-			v += at(i, j)*m.linear_at(i);
-		}
-		r.linear_set(j, v);
-	}
+	for (auto it = begin(); it != end(); ++it)// O(D1*D2)
+		r.set(it.column(), r.at(it.column()) + *it * m.at(it.row()));// 2*O(D1)+O(D2)
 	return r;
 }
 

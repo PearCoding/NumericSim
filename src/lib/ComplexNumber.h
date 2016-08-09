@@ -219,6 +219,12 @@ namespace std
 
 	template<typename T>
 	NS::ComplexNumber<T> atanh(const NS::ComplexNumber<T>& v);
+
+	template<typename T>
+	bool isnan(const NS::ComplexNumber<T>& arg);
+
+	template<typename T>
+	bool isinf(const NS::ComplexNumber<T>& arg);
 }
 
 #define _NS_COMPLEXNUMBER_INL
