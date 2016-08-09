@@ -96,11 +96,31 @@ NS_TEST("Initializer List")
 NS_TEST("foreach")
 {
 	SparseMatrix<T, 3, 3> t = { { 1, 2, 3 },{ 4, 5, 6 },{ 7, 8, 9 } };
-	Index i = 0;
+	Index i = 1;
 	for (T f : t)
 	{
-		NS_CHECK_EQ(f, (T)(i + 1));
+		NS_CHECK_EQ(f, static_cast<T>(i));
 		i++;
+	}
+}
+NS_TEST("row iterator")
+{
+	SparseMatrix<T, 3, 3> t = { { 1, 2, 3 },{ 4, 5, 6 },{ 7, 8, 9 } };
+	Index i = 4;
+	for (auto it = t.row_begin(1); it != t.row_end(1); ++it)
+	{
+		NS_CHECK_EQ(*it, static_cast<T>(i));
+		i++;
+	}
+}
+NS_TEST("column iterator")
+{
+	SparseMatrix<T, 3, 3> t = { { 1, 2, 3 },{ 4, 5, 6 },{ 7, 8, 9 } };
+	Index i = 2;
+	for (auto it = t.column_begin(1); it != t.column_end(1); ++it)
+	{
+		NS_CHECK_EQ(*it, static_cast<T>(i));
+		i += 3;
 	}
 }
 NS_TEST("Transpose")

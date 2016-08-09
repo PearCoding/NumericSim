@@ -22,11 +22,13 @@ class SparseMatrix;
  * @tparam D2 The column dimension of the sparse matrix.
  * @details This iterator can not be created outside of SparseMatrix.
  * @sa SparseMatrix
+ * @sa SparseMatrixRowIterator
+ * @sa SparseMatrixColumnIterator
  */
 template<typename T, Dimension D1, Dimension D2>
 class SparseMatrixIterator
 {
-private:
+protected:
 	friend SparseMatrix<T, D1, D2>;
 	SparseMatrixIterator(const SparseMatrix<T, D1, D2>& m, Index i1, Index i2);
 
@@ -99,7 +101,7 @@ public:
 	 * First all the columns from the current row are traversed and then the next row.
 	 * @return Reference to `this` iterator.
 	 */
-	SparseMatrixIterator& operator++ ();
+	virtual SparseMatrixIterator& operator++ ();
 
 	/**
 	* @brief Moves the iterator forward.
@@ -108,11 +110,83 @@ public:
 	* @return Copy of `this` iterator before moving forward.
 	*/
 	SparseMatrixIterator operator++ (int);
-private:
+
+protected:
 	const SparseMatrix<T, D1, D2>* mMatrix;
 	Index mIndex1;
 	Index mIndex2;
 	Index mColumnPtrIndex;
+};
+
+/**
+* @brief An Iterator to traverse through one row of a sparse matrix.
+* @tparam T Internal data type.
+* @tparam D1 The row dimension of the sparse matrix.
+* @tparam D2 The column dimension of the sparse matrix.
+* @details This iterator can not be created outside of SparseMatrix.
+* @sa SparseMatrix
+* @sa SparseMatrixIterator
+* @sa SparseMatrixColumnIterator
+*/
+template<typename T, Dimension D1, Dimension D2>
+class SparseMatrixRowIterator : public SparseMatrixIterator<T,D1,D2>
+{
+private:
+	friend SparseMatrix<T, D1, D2>;
+	SparseMatrixRowIterator(const SparseMatrix<T, D1, D2>& m, Index i1, Index i2);
+
+public:
+	/**
+	* @brief Moves the iterator forward.
+	* @details The moving direction is from left to right.\n
+	* Only the current row will be traversed.
+	* @return Reference to `this` iterator.
+	*/
+	SparseMatrixRowIterator& operator++ ();
+
+	/**
+	* @brief Moves the iterator forward.
+	* @details The moving direction is from left to right.\n
+	* Only the current row will be traversed.
+	* @return Copy of `this` iterator before moving forward.
+	*/
+	SparseMatrixRowIterator operator++ (int);
+};
+
+/**
+* @brief An Iterator to traverse through one column of a sparse matrix.
+* @attention This iterator type does not give you any performance benefits. Use Row or Standard if possible.
+* @tparam T Internal data type.
+* @tparam D1 The row dimension of the sparse matrix.
+* @tparam D2 The column dimension of the sparse matrix.
+* @details This iterator can not be created outside of SparseMatrix.
+* @sa SparseMatrix
+* @sa SparseMatrixIterator
+* @sa SparseMatrixRowIterator
+*/
+template<typename T, Dimension D1, Dimension D2>
+class SparseMatrixColumnIterator : public SparseMatrixIterator<T, D1, D2>
+{
+private:
+	friend SparseMatrix<T, D1, D2>;
+	SparseMatrixColumnIterator(const SparseMatrix<T, D1, D2>& m, Index i1, Index i2);
+
+public:
+	/**
+	* @brief Moves the iterator forward.
+	* @details The moving direction is from top to down.\n
+	* Only the current column will be traversed.
+	* @return Reference to `this` iterator.
+	*/
+	SparseMatrixColumnIterator& operator++ ();
+
+	/**
+	* @brief Moves the iterator forward.
+	* @details The moving direction is from top to down.\n
+	* Only the current column will be traversed.
+	* @return Copy of `this` iterator before moving forward.
+	*/
+	SparseMatrixColumnIterator operator++ (int);
 };
 
 /**
@@ -141,6 +215,8 @@ template<typename T, Dimension D1, Dimension D2>
 class SparseMatrix
 {
 	friend SparseMatrixIterator<T, D1, D2>;
+	friend SparseMatrixRowIterator<T, D1, D2>;
+	friend SparseMatrixColumnIterator<T, D1, D2>;
 private:
 	std::vector<T> mValues;
 	std::vector<Index> mColumnPtr;
@@ -152,6 +228,7 @@ private:
 	const T& internal_at(Index i1, Index i2, Index& columnPtrIndex, bool& found, bool needNear = false) const;
 	void remove_at(Index i1, Index i2);
 	void set_at(Index i1, Index i2, const T& v);
+	size_t row_entry_count(Index i, Index& rowPtr) const;
 
 public:
 	/**
@@ -165,6 +242,30 @@ public:
 	* @sa SparseMatrixIterator
 	*/
 	typedef const SparseMatrixIterator<T, D1, D2> const_iterator;
+
+	/**
+	* @brief The row iterator.
+	* @sa SparseMatrixRowIterator
+	*/
+	typedef SparseMatrixRowIterator<T, D1, D2> row_iterator;
+
+	/**
+	* @brief A const variant of the row iterator.
+	* @sa SparseMatrixRowIterator
+	*/
+	typedef const SparseMatrixRowIterator<T, D1, D2> const_row_iterator;
+
+	/**
+	* @brief The column iterator.
+	* @sa SparseMatrixIterator
+	*/
+	typedef SparseMatrixColumnIterator<T, D1, D2> column_iterator;
+
+	/**
+	* @brief A const variant of the column iterator.
+	* @sa SparseMatrixIterator
+	*/
+	typedef const SparseMatrixColumnIterator<T, D1, D2> const_column_iterator;
 
 	/**
 	 * @brief Constructs an empty sparse matrix
@@ -193,7 +294,7 @@ public:
 	/**
 	 * @brief Returns an iterator pointing at the first topological entry.
 	 * @par Complexity
-	 * Always: \f$ O(1) \f$
+	 * Worst case: \f$ O(D1) \f$
 	 * @return Const sparse matrix iterator.
 	 */
 	const SparseMatrixIterator<T, D1, D2> begin() const;
@@ -210,7 +311,7 @@ public:
 	/**
 	 * @brief Returns an iterator pointing at the first topological entry.
 	 * @par Complexity
-	 * Always: \f$ O(1) \f$
+	 * Worst case: \f$ O(D1) \f$
 	 * @return Sparse matrix iterator.
 	 */
 	SparseMatrixIterator<T, D1, D2> begin();
@@ -233,6 +334,102 @@ public:
 	* @copydoc end() const
 	*/
 	const SparseMatrixIterator<T, D1, D2> cend() const;
+
+	/**
+	* @brief Returns a row iterator pointing at the first topological entry at the given row.
+	* @par Complexity
+	* Always: \f$ O(1) \f$
+	* @param i Index of the row.
+	* @return Const sparse matrix row iterator.
+	*/
+	const SparseMatrixRowIterator<T, D1, D2> row_begin(Index i) const;
+
+	/**
+	* @brief Returns a row iterator representing the end of the row.
+	* @note This iterator can not be dereferenced.
+	* @par Complexity
+	* Always: \f$ O(1) \f$
+	* @param i Index of the row.
+	* @return Const sparse matrix row iterator.
+	*/
+	const SparseMatrixRowIterator<T, D1, D2> row_end(Index i) const;
+
+	/**
+	* @brief Returns a row iterator pointing at the first topological entry at the given row.
+	* @par Complexity
+	* Always: \f$ O(1) \f$
+	* @param i Index of the row.
+	* @return Sparse matrix row iterator.
+	*/
+	SparseMatrixRowIterator<T, D1, D2> row_begin(Index i);
+
+	/**
+	* @brief Returns a row iterator representing the end.
+	* @note This iterator can not be dereferenced.
+	* @par Complexity
+	* Always: \f$ O(1) \f$
+	* @param i Index of the row.
+	* @return Sparse matrix row iterator.
+	*/
+	SparseMatrixRowIterator<T, D1, D2> row_end(Index i);
+
+	/**
+	* @copydoc row_begin(Index) const
+	*/
+	const SparseMatrixRowIterator<T, D1, D2> row_cbegin(Index i) const;
+
+	/**
+	* @copydoc row_end(Index) const
+	*/
+	const SparseMatrixRowIterator<T, D1, D2> row_cend(Index i) const;
+
+	/**
+	* @brief Returns a column iterator pointing at the first topological entry at the given column.
+	* @par Complexity
+	* Worst case: \f$ O(D1+D2) \f$
+	* @param j Index of the column.
+	* @return Const sparse matrix column iterator.
+	*/
+	const SparseMatrixColumnIterator<T, D1, D2> column_begin(Index j) const;
+
+	/**
+	* @brief Returns a column iterator representing the end of the column.
+	* @note This iterator can not be dereferenced.
+	* @par Complexity
+	* Always: \f$ O(1) \f$
+	* @param j Index of the column.
+	* @return Const sparse matrix column iterator.
+	*/
+	const SparseMatrixColumnIterator<T, D1, D2> column_end(Index j) const;
+
+	/**
+	* @brief Returns a column iterator pointing at the first topological entry at the given column.
+	* @par Complexity
+	* Worst case: \f$ O(D1+D2) \f$
+	* @param j Index of the column.
+	* @return Sparse matrix column iterator.
+	*/
+	SparseMatrixColumnIterator<T, D1, D2> column_begin(Index j);
+
+	/**
+	* @brief Returns a column iterator representing the end.
+	* @note This iterator can not be dereferenced.
+	* @par Complexity
+	* Always: \f$ O(1) \f$
+	* @param j Index of the column.
+	* @return Sparse matrix column iterator.
+	*/
+	SparseMatrixColumnIterator<T, D1, D2> column_end(Index j);
+
+	/**
+	* @copydoc column_begin(Index) const
+	*/
+	const SparseMatrixColumnIterator<T, D1, D2> column_cbegin(Index j) const;
+
+	/**
+	* @copydoc column_end(Index) const
+	*/
+	const SparseMatrixColumnIterator<T, D1, D2> column_cend(Index j) const;
 
 	/**
 	 * @brief Returns a copy of the value at the respective location.

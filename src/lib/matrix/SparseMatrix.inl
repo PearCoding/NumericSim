@@ -13,6 +13,7 @@ SparseMatrixIterator<T, D1, D2>::SparseMatrixIterator(const SparseMatrix<T, D1, 
 	{
 		bool found;
 		mMatrix->internal_at(mIndex1, mIndex2, mColumnPtrIndex, found);
+		NS_ASSERT(found);
 	}
 }
 
@@ -80,8 +81,105 @@ T& SparseMatrixIterator<T, D1, D2>::operator *()// This is really dirty
 	}
 	else
 	{
+		NS_ASSERT(mMatrix->mEmpty == (T)0);
 		return const_cast<SparseMatrix<T, D1, D2>*>(mMatrix)->mEmpty;
 	}
+}
+
+// Row
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixRowIterator<T, D1, D2>::SparseMatrixRowIterator(const SparseMatrix<T, D1, D2>& m, Index i1, Index i2) :
+	SparseMatrixIterator<T,D1,D2>(m,i1,i2)
+{
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixRowIterator<T, D1, D2>& SparseMatrixRowIterator<T, D1, D2>::operator++ ()
+{
+	if (mIndex1 < D1 && mIndex2 < D2)
+	{
+		mColumnPtrIndex++;
+
+		if (mMatrix->mColumnPtr.size() <= mColumnPtrIndex)
+		{
+			mIndex1 = D1;
+			mIndex2 = D2;
+		}
+		else
+		{
+			mIndex2 = mMatrix->mColumnPtr[mColumnPtrIndex];
+
+			if (mIndex1 != D1 - 1 && mMatrix->mRowPtr[mIndex1 + 1] <= mColumnPtrIndex)
+			{
+				mIndex1 = D1;
+				mIndex2 = D2;
+			}
+		}
+	}
+	return *this;
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixRowIterator<T, D1, D2> SparseMatrixRowIterator<T, D1, D2>::operator++ (int)
+{
+	auto c = *this;
+	SparseMatrixRowIterator<T, D1, D2>::operator++ ();
+	return c;
+}
+
+// Column
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixColumnIterator<T, D1, D2>::SparseMatrixColumnIterator(const SparseMatrix<T, D1, D2>& m, Index i1, Index i2) :
+	SparseMatrixIterator<T,D1,D2>(m,i1,i2)
+{
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixColumnIterator<T, D1, D2>& SparseMatrixColumnIterator<T, D1, D2>::operator++ ()
+{
+	if (mIndex1 < D1 && mIndex2 < D2)
+	{
+		bool found = false;
+		do
+		{
+			mIndex1++;
+
+			if (mIndex1 >= D1)
+			{
+				mIndex1 = D1;
+				mIndex2 = D2;
+				break;
+			}
+
+			Index rowPtr;
+			size_t s = mMatrix->row_entry_count(mIndex1, rowPtr);
+			
+			for (mColumnPtrIndex = rowPtr; mColumnPtrIndex < rowPtr + s; ++mColumnPtrIndex)// O(D2)
+			{
+				auto ci = mMatrix->mColumnPtr[mColumnPtrIndex];// O(1)
+				
+				if (ci == mIndex2)
+				{
+					found = true;
+					break;
+				}
+				else if (ci > mIndex2)
+				{
+					break;
+				}
+			}
+		} while (!found);//O(D1)
+	}
+
+	return *this;
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixColumnIterator<T, D1, D2> SparseMatrixColumnIterator<T, D1, D2>::operator++ (int)
+{
+	auto c = *this;
+	SparseMatrixColumnIterator<T, D1, D2>::operator++ ();
+	return c;
 }
 
 // Main
@@ -126,39 +224,37 @@ SparseMatrix<T, D1, D2>::~SparseMatrix()
 
 /*
  Only for internal use.
- columnPtrIndex has the found index for columnPtr or the one next to the new entry position (not created!).
  */
 template<typename T, Dimension D1, Dimension D2>
 const T& SparseMatrix<T, D1, D2>::internal_at(Index i1, Index i2, Index& columnPtrIndex, bool& found, bool needNear) const
 {
+	Index tmp_i1 = i1;
+
 	found = false;
 	columnPtrIndex = 0;
 
 	if (!isEmpty())
 	{
-		Index rowPtr = mRowPtr[i1];// O(1)
-		size_t s = i1 != (D1 - 1) ? mRowPtr[i1 + 1] - rowPtr : mColumnPtr.size() - rowPtr;
-		if (needNear && s == 0 && i1 != (D1 - 1))// Nothing found, but we need next close one.
+		Index rowPtr;
+		size_t s = row_entry_count(tmp_i1, rowPtr);// O(1)
+		while (needNear && s == 0 && tmp_i1 < (D1 - 1))// Nothing found, but we need the next close one.
 		{
-			// Recursion for very big data is not that good :/
-			bool found2;
-			internal_at(i1 + 1, 0, columnPtrIndex, found2, true);// O(D2)
+			tmp_i1 += 1;
+			s = row_entry_count(tmp_i1, rowPtr);
 		}
-		else
-		{
-			for (columnPtrIndex = rowPtr; columnPtrIndex < rowPtr + s; ++columnPtrIndex)// O(D2)
-			{
-				auto ci = mColumnPtr[columnPtrIndex];// O(1)
 
-				if (ci == i2)
-				{
-					found = true;
-					return mValues[columnPtrIndex];// O(1)
-				}
-				else if (ci > i2)
-				{
-					break;
-				}
+		for (columnPtrIndex = rowPtr; columnPtrIndex < rowPtr + s; ++columnPtrIndex)// O(D2)
+		{
+			auto ci = mColumnPtr[columnPtrIndex];// O(1)
+			
+			if (ci == i2)
+			{
+				found = (tmp_i1 == i1) ? true : false;
+				return mValues[columnPtrIndex];// O(1)
+			}
+			else if (ci > i2)
+			{
+				break;
 			}
 		}
 	}
@@ -180,9 +276,7 @@ void SparseMatrix<T, D1, D2>::remove_at(Index i1, Index i2)
 		mColumnPtr.erase(mColumnPtr.begin() + columnPtrIndex);// O(D1*D2), see above
 
 		for (Index k = i1 + 1; k < D1; ++k)// O(D1)
-		{
 			mRowPtr[k] -= 1;
-		}
 	}
 }
 
@@ -203,9 +297,22 @@ void SparseMatrix<T, D1, D2>::set_at(Index i1, Index i2, const T& v)
 		mColumnPtr.insert(mColumnPtr.begin() + columnPtrIndex, i2);// O(D1*D2)
 
 		for (Index k = i1 + 1; k < D1; ++k)// O(D1)
-		{
 			mRowPtr[k] += 1;
-		}
+	}
+}
+
+template<typename T, Dimension D1, Dimension D2>
+size_t SparseMatrix<T, D1, D2>::row_entry_count(Index i, Index& rowPtr) const
+{
+	if (i < D1)
+	{
+		rowPtr = mRowPtr[i];// O(1)
+		return i != (D1 - 1) ? mRowPtr[i + 1] - rowPtr : mColumnPtr.size() - rowPtr;
+	}
+	else
+	{
+		rowPtr = 0;
+		return 0;
 	}
 }
 
@@ -279,7 +386,17 @@ const SparseMatrixIterator<T, D1, D2> SparseMatrix<T, D1, D2>::begin() const
 	if (isEmpty())
 		return end();
 	else
-		return iterator(*this, mRowPtr.front(), mColumnPtr.front());
+	{
+		Index row = 0;
+		Index rowPtr;
+		while (row_entry_count(row, rowPtr) == 0 && row != D1)
+			++row;
+
+		if (row == D1)
+			return end();
+		else
+			return iterator(*this, row, mColumnPtr.front());
+	}
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -294,7 +411,17 @@ SparseMatrixIterator<T, D1, D2> SparseMatrix<T, D1, D2>::begin()
 	if (isEmpty())
 		return end();
 	else
-		return iterator(*this, mRowPtr.front(), mColumnPtr.front());
+	{
+		Index row = 0;
+		Index rowPtr;
+		while (row_entry_count(row, rowPtr) == 0 && row != D1)
+			++row;
+
+		if (row == D1)
+			return end();
+		else
+			return iterator(*this, row, mColumnPtr[rowPtr]);
+	}
 }
 
 template<typename T, Dimension D1, Dimension D2>
@@ -315,6 +442,112 @@ const SparseMatrixIterator<T, D1, D2> SparseMatrix<T, D1, D2>::cend() const
 	return end();
 }
 
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixRowIterator<T, D1, D2> SparseMatrix<T, D1, D2>::row_begin(Index i) const
+{
+	Index tmp;
+	if (isEmpty() || row_entry_count(i, tmp) == 0)
+		return row_end(i);
+	else
+		return row_iterator(*this, i, mColumnPtr[tmp]);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixRowIterator<T, D1, D2> SparseMatrix<T, D1, D2>::row_end(Index) const
+{
+	return row_iterator(*this, D1, D2);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixRowIterator<T, D1, D2> SparseMatrix<T, D1, D2>::row_begin(Index i)
+{
+	Index tmp;
+	if (isEmpty() || row_entry_count(i, tmp) == 0)
+		return row_end(i);
+	else
+		return row_iterator(*this, i, mColumnPtr[tmp]);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixRowIterator<T, D1, D2> SparseMatrix<T, D1, D2>::row_end(Index)
+{
+	return row_iterator(*this, D1, D2);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixRowIterator<T, D1, D2> SparseMatrix<T, D1, D2>::row_cbegin(Index i) const
+{
+	return row_begin(i);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixRowIterator<T, D1, D2> SparseMatrix<T, D1, D2>::row_cend(Index i) const
+{
+	return row_end(i);
+}
+
+//Column
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixColumnIterator<T, D1, D2> SparseMatrix<T, D1, D2>::column_begin(Index i) const
+{
+	if (isEmpty())
+		return column_end(i);
+	else
+	{
+		Index row = 0;
+		while (!has(row, i) && row != D1)
+			++row;
+
+		if (row == D1)
+			return column_end(i);
+		else
+			return column_iterator(*this, row, i);
+	}
+}
+
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixColumnIterator<T, D1, D2> SparseMatrix<T, D1, D2>::column_end(Index) const
+{
+	return column_iterator(*this, D1, D2);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixColumnIterator<T, D1, D2> SparseMatrix<T, D1, D2>::column_begin(Index i)
+{
+	if (isEmpty())
+		return column_end(i);
+	else
+	{
+		Index row = 0;
+		while (!has(row, i) && row != D1)
+			++row;
+
+		if (row == D1)
+			return column_end(i);
+		else
+			return column_iterator(*this, row, i);
+	}
+}
+
+template<typename T, Dimension D1, Dimension D2>
+SparseMatrixColumnIterator<T, D1, D2> SparseMatrix<T, D1, D2>::column_end(Index)
+{
+	return column_iterator(*this, D1, D2);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixColumnIterator<T, D1, D2> SparseMatrix<T, D1, D2>::column_cbegin(Index i) const
+{
+	return column_begin(i);
+}
+
+template<typename T, Dimension D1, Dimension D2>
+const SparseMatrixColumnIterator<T, D1, D2> SparseMatrix<T, D1, D2>::column_cend(Index i) const
+{
+	return column_end(i);
+}
+
+// Set/Erase
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrixIterator<T, D1, D2> SparseMatrix<T, D1, D2>::set(const SparseMatrixIterator<T, D1, D2>& it, const T& val)
 {

@@ -1,0 +1,1 @@
+NS_ADD_EXAMPLE(poisson main.cpp)

@@ -21,7 +21,8 @@ SET(CMAKE_DEBUG_POSTFIX  "_d")
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 
 option(VERBOSE "Show debug information." OFF)
-option(NS_BUILD_TEST "Build tests." ON)
+option(NS_BUILD_TESTS "Build tests." ON)
+option(NS_BUILD_EXAMPLES "Build examples." ON)
 
 #CHECKS
 if(VERBOSE)
@@ -78,13 +79,17 @@ ENDIF()
 #CONFIGURE
 add_subdirectory(src)
 
-if(NS_BUILD_TEST)
+if(NS_BUILD_EXAMPLES)
+add_subdirectory(examples)
+endif()
+
+if(NS_BUILD_TESTS)
 enable_testing()
 add_subdirectory(tests)
 endif()
 
 if(DOXYGEN_FOUND)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 	add_custom_target(doc
 		${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
