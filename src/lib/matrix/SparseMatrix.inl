@@ -195,7 +195,9 @@ SparseMatrix<T>::SparseMatrix(Dimension d1, Dimension d2) :
 
 template<typename T>
 SparseMatrix<T>::SparseMatrix(std::initializer_list<std::initializer_list<T> > l) :
-	SparseMatrix(l.size(), std::max_element(l.begin(), l.end(), [](auto a, auto b) { return a.size() < b.size(); })->size())
+	SparseMatrix(l.size(), 
+		std::max_element(l.begin(), l.end(), [](const std::initializer_list<T>& a, const std::initializer_list<T>& b)
+		{ return a.size() < b.size(); })->size())
 {
 	Index i = 0;
 	for (const auto& v : l)
@@ -498,10 +500,10 @@ const SparseMatrixColumnIterator<T> SparseMatrix<T>::column_begin(Index i) const
 	else
 	{
 		Index row = 0;
-		while (!has(row, i) && row != D1)
+		while (!has(row, i) && row != rows())
 			++row;
 
-		if (row == D1)
+		if (row == rows())
 			return column_end(i);
 		else
 			return column_iterator(*this, row, i);

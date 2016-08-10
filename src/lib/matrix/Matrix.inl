@@ -81,10 +81,10 @@ MatrixRowIterator<T>& MatrixRowIterator<T>::operator++ ()
 	{
 		this->mIndex2++;
 
-		if (this->mIndex2 >= mMatrix->columns())
+		if (this->mIndex2 >= this->mMatrix->columns())
 		{
-			mIndex1 = mMatrix->rows();
-			mIndex2 = mMatrix->columns();
+			this->mIndex1 = this->mMatrix->rows();
+			this->mIndex2 = this->mMatrix->columns();
 		}
 	}
 	return *this;
@@ -112,10 +112,10 @@ MatrixColumnIterator<T>& MatrixColumnIterator<T>::operator++ ()
 	{
 		this->mIndex1++;
 
-		if (this->mIndex1 >= mMatrix->rows())
+		if (this->mIndex1 >= this->mMatrix->rows())
 		{
-			mIndex1 = mMatrix->rows();
-			mIndex2 = mMatrix->columns();
+			this->mIndex1 = this->mMatrix->rows();
+			this->mIndex2 = this->mMatrix->columns();
 		}
 	}
 
@@ -143,7 +143,9 @@ Matrix<T>::Matrix(Dimension d1, Dimension d2) :
 
 template<typename T>
 Matrix<T>::Matrix(std::initializer_list<std::initializer_list<T> > l) :
-	Matrix(l.size(), std::max_element(l.begin(), l.end(), [](auto a, auto b) { return a.size() < b.size(); })->size())
+	Matrix(l.size(),
+		std::max_element(l.begin(), l.end(), [](const std::initializer_list<T>& a, const std::initializer_list<T>& b) 
+		{ return a.size() < b.size(); })->size())
 {
 	Index i = 0;
 	for (const auto& v : l)
@@ -255,7 +257,7 @@ const MatrixIterator<T> Matrix<T>::cend() const
 template<typename T>
 const MatrixRowIterator<T> Matrix<T>::row_begin(Index i) const
 {
-	NS_ASSERT(i < D1);
+	NS_ASSERT(i < rows());
 	return row_iterator(*this, i, 0);
 }
 

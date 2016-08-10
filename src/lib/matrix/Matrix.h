@@ -69,8 +69,8 @@ public:
 	*/
 	bool operator ==(const MatrixIterator& other) const
 	{
-		return (!isValid() && !other.isValid()) ||
-			mMatrix == other.mMatrix && mIndex1 == other.mIndex1 && mIndex2 == other.mIndex2;
+		return (!isValid() && !other.isValid()) || 
+			(mMatrix == other.mMatrix && mIndex1 == other.mIndex1 && mIndex2 == other.mIndex2);
 	}
 
 	/**
@@ -256,7 +256,7 @@ public:
 	typedef const MatrixColumnIterator<T> const_column_iterator;
 	
 	/**
-	* @brief Constructs an empty sparse matrix of size(d1,d2)
+	* @brief Constructs an empty (dense) matrix of size(d1,d2)
 	* @param d1 Row dimension
 	* @param d2 Column dimension
 	*/

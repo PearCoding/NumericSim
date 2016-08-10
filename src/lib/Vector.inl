@@ -107,7 +107,7 @@ Vector<T> Vector<T>::mid(Index start, Index end) const
 	NS_ASSERT(start < end);
 
 	Vector<T> tmp(end-start);
-	for (Index i = start; i < end && i < size(); ++i)
+	for (Index i = start; i < end && i < this->size(); ++i)
 		tmp.set(i - start, at(i));
 
 	return tmp;

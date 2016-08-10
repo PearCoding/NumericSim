@@ -70,7 +70,7 @@ public:
 	bool operator ==(const SparseMatrixIterator& other) const
 	{
 		return  (!isValid() && !other.isValid()) ||
-			mMatrix == other.mMatrix && mIndex1 == other.mIndex1 && mIndex2 == other.mIndex2;
+			(mMatrix == other.mMatrix && mIndex1 == other.mIndex1 && mIndex2 == other.mIndex2);
 	}
 
 	/**
