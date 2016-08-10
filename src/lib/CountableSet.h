@@ -51,9 +51,9 @@ public:
 
 	const CountableSetIterator operator++ (int)
 	{
-		auto nit = *it;
+		auto it = *this;
 		this->operator++();
-		return nit;
+		return it;
 	}
 private:
 	Index mPos;

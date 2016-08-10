@@ -558,7 +558,7 @@ SparseMatrixIterator<T> SparseMatrix<T>::set(const SparseMatrixIterator<T>& it, 
 {
 	NS_ASSERT(this == it.mMatrix);
 
-	if (it.row() < D1 && it.column() < D2)
+	if (it.isValid())
 	{
 		if (val == (T)0)
 			return erase(it);
