@@ -11,7 +11,7 @@ NS_USE_NAMESPACE;
  * Poisson equation solver for boundary problems.
  */
 
-//#define SPARSE_PATTER_OUTPUT // Enable this to create a huge file with the patterns of the sparse matrix
+//#define SPARSE_PATTER_OUTPUT // Enable this to create a huge file showing the patterns of the sparse matrix
 
 /* Boundary modes:
  * 0 - Dirichlet boundaries
@@ -26,11 +26,11 @@ int main(int argc, char** argv)
 	constexpr double pi = 3.141592;
 
 	// Some parameters to change... Feel free to play around :)
-	constexpr double RELAX_PAR = 1.2;// SOR weight parameter
+	constexpr double RELAX_PAR = 1.2;// SOR weight parameter (0,2]
 	constexpr double grid_width = 1;
 	constexpr double grid_height = 1;
-	constexpr double H = 0.02;
-	constexpr double K = 0.02;
+	constexpr double H = 0.05;
+	constexpr double K = 0.05;
 
 	auto f = [=](double x, double y) { return std::exp(-100*(y+x));};
 	auto b = [=](double x, double y) { return std::sin(2 * pi * x / grid_width) + std::cos(2 * pi * y / grid_height);};
@@ -50,8 +50,8 @@ int main(int argc, char** argv)
 
 	std::cout << "XC " << XC << " YC " << YC << " D " << D << std::endl;
 
-	SparseMatrix<double, D, D> A;
-	Vector<double, D> B;
+	SparseMatrix<double> A(D, D);
+	Vector<double> B(D);
 
 	auto p1_start = std::chrono::high_resolution_clock::now();
 	for (Index x = 0; x < XC; ++x)
@@ -132,10 +132,10 @@ int main(int argc, char** argv)
 
 	// Iterations
 	uint32 iterations = 0;
-	Vector<double, D> X;
+	Vector<double> X(D);
 
 	auto p2_start = std::chrono::high_resolution_clock::now();
-	X = Iterative::serial::sor<SparseMatrix,double,D,D>(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
+	X = Iterative::serial::sor<SparseMatrix,double>(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
 	auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
 	std::cout << iterations << " Iterations [" 

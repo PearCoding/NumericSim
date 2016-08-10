@@ -8,8 +8,8 @@ template<typename T>
 NS_BEGIN_TESTCASE_T1(LU)
 NS_TEST("cholesky")
 {
-	Matrix<T, 3, 3> m = { {4,12,-16},{12,37,-43},{-16,-43,98} };
-	Matrix<T, 3, 3> r = { {2, 0, 0},{6,1,0},{-8,5,3} };
+	Matrix<T> m = { {4,12,-16},{12,37,-43},{-16,-43,98} };
+	Matrix<T> r = { {2, 0, 0},{6,1,0},{-8,5,3} };
 
 	try
 	{
@@ -24,8 +24,8 @@ NS_TEST("cholesky")
 }
 NS_TEST("cholesky-sparse")
 {
-	SparseMatrix<T, 4, 4> m = { { 4,0,2,2 },{ 0,4,2,-2 },{ 2,2,6,0 },{ 2,-2,0,6 } };
-	SparseMatrix<T, 4, 4> r = { { 2,0,0,0 },{ 0,2,0,0 },{ 1,1,2,0 },{ 1,-1,0,2 } };
+	SparseMatrix<T> m = { { 4,0,2,2 },{ 0,4,2,-2 },{ 2,2,6,0 },{ 2,-2,0,6 } };
+	SparseMatrix<T> r = { { 2,0,0,0 },{ 0,2,0,0 },{ 1,1,2,0 },{ 1,-1,0,2 } };
 
 	try
 	{

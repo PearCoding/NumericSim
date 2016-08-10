@@ -8,24 +8,27 @@ namespace Iterative
 {
 	namespace serial
 	{
-		template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
-		typename std::enable_if<is_matrix<M, T, D1, D2>::value, Vector<T, D1> >::type
-			jacobi(const M<T, D1, D2>& a, const Vector<T, D1>& b, const Vector<T, D1>& x0,
+		template<template<typename> class M, typename T>
+		typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
+			jacobi(const M<T>& a, const Vector<T>& b, const Vector<T>& x0,
 				uint32 maxIter, double eps, uint32* it_stat)
 		{
-			static_assert(D1 == D2, "To use the Jacobi method a square matrix is needed.");
+			if (a.rows() != a.columns())
+				throw NotSquareException();
+			if (a.rows() != b.size() || a.rows() != x0.size())
+				throw IterativeMatrixVectorMismatchException();
 
 			const double eps2 = eps*eps;
 
-			Vector<T, D1> x = x0;
-			Vector<T, D1> xm;
+			Vector<T> x = x0;
+			Vector<T> xm(a.rows());
 
 			for (uint32 it = 0; it < maxIter; ++it)
 			{
-				for (Index i = 0; i < D1; ++i)
+				for (Index i = 0; i < a.rows(); ++i)
 				{
 					T t = (T)0;
-					for (Index j = 0; j < D1; ++j)
+					for (Index j = 0; j < a.rows(); ++j)
 					{
 						if (j != i)
 							t += a.at(i, j)*x.at(j);
@@ -58,28 +61,31 @@ namespace Iterative
 			return x;
 		}
 
-		template<template<typename, Dimension, Dimension> class M, typename T, Dimension D1, Dimension D2>
-		typename std::enable_if<is_matrix<M, T, D1, D2>::value, Vector<T, D1> >::type
-			sor(const M<T, D1, D2>& a, const Vector<T, D1>& b, const Vector<T, D1>& x0,
+		template<template<typename> class M, typename T>
+		typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
+			sor(const M<T>& a, const Vector<T>& b, const Vector<T>& x0,
 				const T& weight, uint32 maxIter, double eps, uint32* it_stat)
 		{
-			static_assert(D1 == D2, "To use the SOR method a square matrix is needed.");
+			if (a.rows() != a.columns())
+				throw NotSquareException();
+			if (a.rows() != b.size() || a.rows() != x0.size())
+				throw IterativeMatrixVectorMismatchException();
 
 			const double eps2 = eps*eps;
 			const T rweight = (T)1 - weight;
 
-			Vector<T, D1> x = x0;
-			Vector<T, D1> xm;
+			Vector<T> x = x0;
+			Vector<T> xm(a.rows());
 
 			for (uint32 it = 0; it < maxIter; ++it)
 			{
-				for (Index i = 0; i < D1; ++i)
+				for (Index i = 0; i < a.rows(); ++i)
 				{
 					T t = (T)0;
 					for (Index j = 0; j < i; ++j)
 						t += a.at(i, j)*xm.at(j);
 
-					for (Index j = i + 1; j < D1; ++j)
+					for (Index j = i + 1; j < a.rows(); ++j)
 						t += a.at(i, j)*x.at(j);
 
 					t = (b.at(i) - t) / a.at(i, i);

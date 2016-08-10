@@ -42,19 +42,13 @@ NS_DECLARE_EXCEPTION(MatrixInitializerListFailed, Init, "Tried to initialize mat
 NS_DECLARE_EXCEPTION_GROUP(Math, NS);
 NS_DECLARE_EXCEPTION(DivisionByZero, Math, "Division by Zero is not defined.");
 NS_DECLARE_EXCEPTION(MatrixHasZeroInDiag, Math, "Matrix has a zero in his diagonal.");
+NS_DECLARE_EXCEPTION(NotSquare, Math, "Matrix is not square.");
 NS_DECLARE_EXCEPTION(NotPositiveDefinite, Math, "Matrix is not positive definite.");
+NS_DECLARE_EXCEPTION(IterativeMatrixVectorMismatch, Math, "Matrix and vectors for iterative methods do not match in dimensions.");
 
-/**
-* @class InitException
-* @brief Exception group for construction related exceptions.
-* @exception InitException 
-* @ingroup Exceptions
-*/
+NS_DECLARE_EXCEPTION_GROUP(Dimension, NS);
+NS_DECLARE_EXCEPTION(VectorSizeMismatch, Dimension, "Size of vectors do not match.");
+NS_DECLARE_EXCEPTION(MatrixSizeMismatch, Dimension, "Size of matrix do not match.");
+NS_DECLARE_EXCEPTION(MatrixMulMismatch, Dimension, "Dimensional requirement for multiplication not fulfilled.");
 
-/**
-* @class MathException
-* @brief Exception group for math related exceptions.
-* @exception MathException
-* @ingroup Exceptions
-*/
 NS_END_NAMESPACE

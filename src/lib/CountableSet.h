@@ -9,51 +9,71 @@
 
 NS_BEGIN_NAMESPACE
 
+template<typename T>
+class CountableSet;
+
+template<typename T>
+class CountableSetIterator
+{
+	friend CountableSet<T>;
+
+private:
+	CountableSetIterator(const CountableSet<T>& vec, Index pos) :
+		mPos(pos), mVec(vec)
+	{}
+public:
+	bool isValid() const
+	{
+		return mPos < mVec.size();
+	}
+
+	bool operator ==(const CountableSetIterator& other) const
+	{
+		return (!isValid() && !other.isValid()) || mPos == other.mPos;
+	}
+
+	bool operator !=(const CountableSetIterator& other) const
+	{
+		return !(*this == other);
+	}
+
+	T operator *() const
+	{
+		NS_ASSERT(mPos < mVec.size());
+		return mVec.linear_at(mPos);
+	}
+
+	const CountableSetIterator& operator++ ()
+	{
+		++mPos;
+		return *this;
+	}
+
+	const CountableSetIterator operator++ (int)
+	{
+		auto it = *it;
+		this->operator++();
+		return it;
+	}
+private:
+	Index mPos;
+	const CountableSet<T>& mVec;
+};
+
 /** A utility class useful for big dimensions
  */
-template<typename T, Dimension D>
+template<typename T>
 class CountableSet
 {
 public:
-	class CountableSetIterator
-	{
-	public:
-		CountableSetIterator(const CountableSet<T, D>& vec, Index pos) :
-			mPos(pos), mVec(vec)
-		{}
-
-		bool operator ==(const CountableSetIterator& other) const
-		{
-			return mPos == other.mPos;
-		}
-
-		bool operator !=(const CountableSetIterator& other) const
-		{
-			return !(*this == other);
-		}
-
-		T operator *() const
-		{
-			NS_ASSERT(mPos < D);
-			return mVec.linear_at(mPos);
-		}
-
-		const CountableSetIterator& operator++ ()
-		{
-			++mPos;
-			return *this;
-		}
-
-	private:
-		Index mPos;
-		const CountableSet<T, D>& mVec;
-	};
-
-	typedef CountableSetIterator iterator;
+	typedef CountableSetIterator<T> iterator;
 
 	CountableSet();
-	explicit CountableSet(const T& f);
+	explicit CountableSet(Dimension size);
+	CountableSet(Dimension size, const T& f);
 	virtual ~CountableSet();
+
+	void resize(Dimension size);
 
 	// Index
 	const T& linear_at(Index i) const;
@@ -61,16 +81,16 @@ public:
 
 	iterator begin() const
 	{
-		return CountableSetIterator(*this, 0);
+		return iterator(*this, 0);
 	}
 
 	iterator end() const
 	{
-		return CountableSetIterator(*this, D);
+		return iterator(*this, size());
 	}
 
 	// Other
-	constexpr Dimension size() const { return D; }
+	Dimension size() const { return mData.size(); }
 	T sum() const;
 	T max() const;
 	T min() const;

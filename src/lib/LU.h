@@ -10,14 +10,14 @@ namespace LU
 	namespace serial
 	{
 		// Cholesky
-		template<typename T, Dimension D1, Dimension D2>
-		Matrix<T, D1, D2> cholesky(const Matrix<T, D1, D2>& m);
-		template<typename T, Dimension D1, Dimension D2>//Specialization for ComplexNumber
-		Matrix<ComplexNumber<T>, D1, D2> cholesky(const Matrix<ComplexNumber<T>, D1, D2>& m);
-		template<typename T, Dimension D1, Dimension D2>
-		SparseMatrix<T, D1, D2> cholesky(const SparseMatrix<T, D1, D2>& m);
-		template<typename T, Dimension D1, Dimension D2>//Specialization for ComplexNumber
-		SparseMatrix<ComplexNumber<T>, D1, D2> cholesky(const SparseMatrix<ComplexNumber<T>, D1, D2>& m);
+		template<typename T>
+		Matrix<T> cholesky(const Matrix<T>& m);
+		template<typename T>//Specialization for ComplexNumber
+		Matrix<ComplexNumber<T> > cholesky(const Matrix<ComplexNumber<T> >& m);
+		template<typename T>
+		SparseMatrix<T> cholesky(const SparseMatrix<T>& m);
+		template<typename T>//Specialization for ComplexNumber
+		SparseMatrix<ComplexNumber<T> > cholesky(const SparseMatrix<ComplexNumber<T> >& m);
 
 		// Doolittle
 		//template<typename T, Dimension D1, Dimension D2>

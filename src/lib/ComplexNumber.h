@@ -161,6 +161,19 @@ T magSqr_vt(const ComplexNumber<T>& t)
 	return t.magSqr();
 }
 
+template<typename T>
+T mag_by_complex_vt(const T& t)
+{
+	return t;
+}
+
+template<typename T>
+typename get_complex_internal<T>::type mag_by_complex_vt(const ComplexNumber<T>& t)
+{
+	return t.mag();
+}
+
+
 NS_END_NAMESPACE
 
 // Standard functions

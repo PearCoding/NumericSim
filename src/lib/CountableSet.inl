@@ -4,97 +4,113 @@
 
 NS_BEGIN_NAMESPACE
 
-template<typename T, Dimension D>
-CountableSet<T, D>::CountableSet() :
-	mData(D, (T)0)
+template<typename T>
+CountableSet<T>::CountableSet() :
+	CountableSet(1, (T)0)
 {
-	static_assert(D > 0, "Dimension has to be greater then 0.");
+}
+
+template<typename T>
+CountableSet<T>::CountableSet(Dimension size) :
+	CountableSet(size, (T)0)
+{
+}
+
+template<typename T>
+CountableSet<T>::CountableSet(Dimension size, const T& f) :
+	mData(size, f)
+{
 	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
 }
 
-template<typename T, Dimension D>
-CountableSet<T, D>::CountableSet(const T& f) :
-	CountableSet()
-{
-	fill(f);
-}
-
-template<typename T, Dimension D>
-CountableSet<T, D>::~CountableSet()
+template<typename T>
+CountableSet<T>::~CountableSet()
 {
 }
 
+template<typename T>
+void CountableSet<T>::resize(Dimension size)
+{
+	NS_ASSERT(size > 0);
+	mData.resize(size, (T)0);
+}
 // Index
-template<typename T, Dimension D>
-const T& CountableSet<T, D>::linear_at(Index i) const
+template<typename T>
+const T& CountableSet<T>::linear_at(Index i) const
 {
-	NS_ASSERT(i < D);
+	NS_ASSERT(i < size());
 	return mData[i];
 }
 
-template<typename T, Dimension D>
-void CountableSet<T, D>::linear_set(Index i, const T& v)
+template<typename T>
+void CountableSet<T>::linear_set(Index i, const T& v)
 {
-	NS_ASSERT(i < D);
+	NS_ASSERT(i < size());
 	mData[i] = v;
 }
 
 // Other
-template<typename T, Dimension D>
-T CountableSet<T, D>::sum() const
+template<typename T>
+T CountableSet<T>::sum() const
 {
 	T s = 0;
-	for (Index i = 0; i < D; ++i)
+	for (Index i = 0; i < size(); ++i)
 		s += mData[i];
 
 	return s;
 }
 
-template<typename T, Dimension D>
-T CountableSet<T, D>::max() const
+template<typename T>
+T CountableSet<T>::max() const
 {
-	T s = (T)std::numeric_limits<typename get_complex_internal<T>::type>::min();
-	for (Index i = 0; i < D; ++i)
+	typedef typename get_complex_internal<T>::type _t;
+
+	_t s = std::numeric_limits<_t>::min();
+	for (Index i = 0; i < size(); ++i)
 	{
-		if (mData[i] > s)
-			s = mData[i];
+		_t d = mag_by_complex_vt(mData[i]);
+		if (d > s)
+			s = d;
+	}
+
+	return (T)s;
+}
+
+template<typename T>
+T CountableSet<T>::min() const
+{
+	typedef typename get_complex_internal<T>::type _t;
+
+	_t s = std::numeric_limits<_t>::max();
+	for (Index i = 0; i < size(); ++i)
+	{
+		_t d = mag_by_complex_vt(mData[i]);
+		if (d < s)
+			s = d;
 	}
 
 	return s;
 }
 
-template<typename T, Dimension D>
-T CountableSet<T, D>::min() const
+template<typename T>
+T CountableSet<T>::avg() const
 {
-	T s = (T)std::numeric_limits<typename get_complex_internal<T>::type>::max();
-	for (Index i = 0; i < D; ++i)
-	{
-		if (mData[i] < s)
-			s = mData[i];
-	}
-
-	return s;
+	return sum() / (T)size();// Overflow?
 }
 
-template<typename T, Dimension D>
-T CountableSet<T, D>::avg() const
-{
-	return sum() / size();// Overflow?
-}
-
-template<typename T, Dimension D>
-void CountableSet<T, D>::do_reciprocal()
+template<typename T>
+void CountableSet<T>::do_reciprocal()
 {
 	NS_DEBUG_ASSERT(!hasZero());
 
-	for (Index i = 0; i < D; ++i)
+	for (Index i = 0; i < size(); ++i)
 		mData[i] = (T)1 / mData[i];
 }
 
-template<typename T, Dimension D>
-bool CountableSet<T, D>::hasNaN() const
+template<typename T>
+bool CountableSet<T>::hasNaN() const
 {
-	for (Index i = 0; i < D; ++i)
+	for (Index i = 0; i < size(); ++i)
 	{
 		if (std::isnan(mData[i]))
 			return true;
@@ -103,10 +119,10 @@ bool CountableSet<T, D>::hasNaN() const
 	return false;
 }
 
-template<typename T, Dimension D>
-bool CountableSet<T, D>::hasInf() const
+template<typename T>
+bool CountableSet<T>::hasInf() const
 {
-	for (Index i = 0; i < D; ++i)
+	for (Index i = 0; i < size(); ++i)
 	{
 		if (std::isinf(mData[i]))
 			return true;
@@ -115,10 +131,10 @@ bool CountableSet<T, D>::hasInf() const
 	return false;
 }
 
-template<typename T, Dimension D>
-bool CountableSet<T, D>::hasZero() const
+template<typename T>
+bool CountableSet<T>::hasZero() const
 {
-	for (Index i = 0; i < D; ++i)
+	for (Index i = 0; i < size(); ++i)
 	{
 		if (mData[i] == (T)0)// Epsilon?
 			return true;
@@ -127,15 +143,15 @@ bool CountableSet<T, D>::hasZero() const
 	return false;
 }
 
-template<typename T, Dimension D>
-void CountableSet<T, D>::fill(const T& f)
+template<typename T>
+void CountableSet<T>::fill(const T& f)
 {
-	for (Index i = 0; i < D; ++i)
+	for (Index i = 0; i < size(); ++i)
 		mData[i] = f;
 }
 
-template<typename T, Dimension D>
-void CountableSet<T, D>::swap(CountableSet<T, D>& v)
+template<typename T>
+void CountableSet<T>::swap(CountableSet<T>& v)
 {
 	std::swap(mData, v.mData);
 }

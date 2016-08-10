@@ -13,43 +13,39 @@ std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
 	return out;
 }
 
-template<typename T, NS::Dimension D>
-std::ostream& operator<<(std::ostream& out, const NS::Vector<T, D>& f)
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const NS::Vector<T>& f)
 {
 	out << "[ ";
-	for (Index i = 0; i < D; ++i)
-		out << f.at(i) << " ";
+	for (auto v : f)
+		out << v << " ";
 	out << "]";
 	return out;
 }
 
-template<typename T, NS::Dimension D1, NS::Dimension D2>
-std::ostream& operator<<(std::ostream& out, const NS::Matrix<T, D1, D2>& f)
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const NS::Matrix<T>& f)
 {
 	out << "[ ";
-	for (Index i = 0; i < D1; ++i)
+	for (Index i = 0; i < f.rows(); ++i)
 	{
-		for (Index j = 0; j < D2; ++j)
+		for (Index j = 0; j < f.columns(); ++j)
 			out << f.at(i, j) << " ";
 
-		if (i != D1 - 1)
+		if (i != f.rows() - 1)
 			out << "| ";
 	}
 	out << "]";
 	return out;
 }
 
-template<typename T, NS::Dimension D1, NS::Dimension D2>
-std::ostream& operator<<(std::ostream& out, const NS::SparseMatrix<T, D1, D2>& f)
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const NS::SparseMatrix<T>& f)
 {
 	out << "[ ";
-	for (Index i = 0; i < D2; ++i)
+	for (auto it = f.begin(); it != f.end(); ++it)
 	{
-		for (Index j = 0; j < D1; ++j)
-			out << f.at(j, i) << " ";
-
-		if (i != D2 - 1)
-			out << "| ";
+		out << "(" << it.row() << ", " << it.column() << "; " << *it << ") ";
 	}
 	out << "]";
 	return out;

@@ -5,14 +5,15 @@
 NS_BEGIN_NAMESPACE
 namespace LU {
 	namespace serial {
-		template<typename T, Dimension D1, Dimension D2>
-		Matrix<T, D1, D2> cholesky(const Matrix<T, D1, D2>& m)
+		template<typename T>
+		Matrix<T> cholesky(const Matrix<T>& m)
 		{
-			static_assert(D1 == D2, "Matrix must be square.");
+			if (m.rows() != m.columns())
+				throw NotSquareException();
 			// We assume symmetry!
 
-			Matrix<T, D1, D2> L;
-			for (Index j = 0; j < D1; ++j)
+			Matrix<T> L(m.rows(), m.columns());
+			for (Index j = 0; j < L.rows(); ++j)
 			{
 				T s = (T)0;
 				for (Index k = 0; k < j; ++k)
@@ -26,7 +27,7 @@ namespace LU {
 					throw NotPositiveDefiniteException();
 
 				L.set(j, j, std::sqrt(s));
-				for (Index i = j; i < D1; ++i)
+				for (Index i = j; i < L.rows(); ++i)
 				{
 					s = (T)0;
 					for (Index k = 0; k < i; ++k)
@@ -38,16 +39,18 @@ namespace LU {
 			return L;
 		}
 
-		template<typename T, Dimension D1, Dimension D2>
-		Matrix<ComplexNumber<T>, D1, D2> cholesky(const Matrix<ComplexNumber<T>, D1, D2>& m)
+		template<typename T>
+		Matrix<ComplexNumber<T> > cholesky(const Matrix<ComplexNumber<T> >& m)
 		{
 			// Question: How cholesky works with not positive definite complex matrices? -> Not unique anymore :)
 
-			static_assert(D1 == D2, "Matrix must be square.");
+			if (m.rows() != m.columns())
+				throw NotSquareException();
+
 			// We assume symmetry!
 
-			Matrix<ComplexNumber<T>, D1, D2> L;
-			for (Index j = 0; j < D1; ++j)
+			Matrix<ComplexNumber<T> > L;
+			for (Index j = 0; j < L.rows(); ++j)
 			{
 				ComplexNumber<T> s;
 				for (Index k = 0; k < j; ++k)
@@ -57,7 +60,7 @@ namespace LU {
 				}
 				
 				L.set(j, j, std::sqrt(m.at(j, j) - s));
-				for (Index i = j; i < D1; ++i)
+				for (Index i = j; i < L.rows(); ++i)
 				{
 					s = (ComplexNumber<T>)0;
 					for (Index k = 0; k < i; ++k)
@@ -70,14 +73,15 @@ namespace LU {
 		}
 
 		// TODO: Improve for sparse matrices!
-		template<typename T, Dimension D1, Dimension D2>
-		SparseMatrix<T, D1, D2> cholesky(const SparseMatrix<T, D1, D2>& m)
+		template<typename T>
+		SparseMatrix<T> cholesky(const SparseMatrix<T>& m)
 		{
-			static_assert(D1 == D2, "Matrix must be square.");
+			if (m.rows() != m.columns())
+				throw NotSquareException();
 			// We assume symmetry!
 
-			SparseMatrix<T, D1, D2> L;
-			for (Index j = 0; j < D1; ++j)// Rows
+			SparseMatrix<T> L(m.rows(), m.columns());
+			for (Index j = 0; j < L.rows(); ++j)// Rows
 			{
 				T s = (T)0;
 				for (Index k = 0; k < j; ++k)
@@ -91,7 +95,7 @@ namespace LU {
 					throw NotPositiveDefiniteException();
 
 				L.set(j, j, std::sqrt(s));
-				for (Index i = j; i < D1; ++i)
+				for (Index i = j; i < L.rows(); ++i)
 				{
 					s = (T)0;
 					for (Index k = 0; k < i; ++k)
@@ -104,16 +108,17 @@ namespace LU {
 		}
 
 
-		template<typename T, Dimension D1, Dimension D2>
-		SparseMatrix<ComplexNumber<T>, D1, D2> cholesky(const SparseMatrix<ComplexNumber<T>, D1, D2>& m)
+		template<typename T>
+		SparseMatrix<ComplexNumber<T> > cholesky(const SparseMatrix<ComplexNumber<T> >& m)
 		{
 			// Question: How cholesky works with not positive definite complex matrices? -> Not unique anymore :)
+			if (m.rows() != m.columns())
+				throw NotSquareException();
 
-			static_assert(D1 == D2, "Matrix must be square.");
 			// We assume symmetry!
 
-			SparseMatrix<ComplexNumber<T>, D1, D2> L;
-			for (Index j = 0; j < D1; ++j)
+			SparseMatrix<ComplexNumber<T> > L(m.rows(), m.columns());
+			for (Index j = 0; j < L.rows(); ++j)
 			{
 				ComplexNumber<T> s;
 				for (Index k = 0; k < j; ++k)
@@ -123,7 +128,7 @@ namespace LU {
 				}
 
 				L.set(j, j, std::sqrt(m.at(j, j) - s));
-				for (Index i = j; i < D1; ++i)
+				for (Index i = j; i < L.rows(); ++i)
 				{
 					s = (ComplexNumber<T>)0;
 					for (Index k = 0; k < i; ++k)
