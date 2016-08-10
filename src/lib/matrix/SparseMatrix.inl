@@ -109,7 +109,7 @@ SparseMatrixRowIterator<T, D1, D2>& SparseMatrixRowIterator<T, D1, D2>::operator
 		{
 			this->mIndex2 = this->mMatrix->mColumnPtr[this->mColumnPtrIndex];
 
-			if (this->mIndex1 != D1 - 1 && this->mMatrix->mRowPtr[mIndex1 + 1] <= this->mColumnPtrIndex)
+			if (this->mIndex1 != D1 - 1 && this->mMatrix->mRowPtr[this->mIndex1 + 1] <= this->mColumnPtrIndex)
 			{
 				this->mIndex1 = D1;
 				this->mIndex2 = D2;
