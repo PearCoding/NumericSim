@@ -6,4 +6,5 @@ add_executable(example_${name} ${src})
 set_target_properties(example_${name} PROPERTIES VERSION ${NS_Version})
 endfunction()
 
-add_subdirectory(poisson)
+NS_ADD_EXAMPLE(heat heat/main.cpp)
+NS_ADD_EXAMPLE(poisson poisson/main.cpp)
