@@ -27,14 +27,17 @@ namespace Iterative
 			{
 				for (Index i = 0; i < a.rows(); ++i)
 				{
+					T mid = (T)0;
 					T t = (T)0;
-					for (Index j = 0; j < a.rows(); ++j)
+					for (auto rit = a.row_begin(i); rit != a.row_end(i); ++rit)
 					{
-						if (j != i)
-							t += a.at(i, j)*x.at(j);
+						if (rit.column() != i)
+							t += (*rit)*x.at(rit.column());
+						else
+							mid = *rit;
 					}
 
-					xm.set(i, (b.at(i) - t) / a.at(i, i));
+					xm.set(i, (b.at(i) - t) / mid);
 				}
 
 				auto conv = magSqr_vt((xm - x).magSqr());
@@ -81,14 +84,19 @@ namespace Iterative
 			{
 				for (Index i = 0; i < a.rows(); ++i)
 				{
+					T mid = (T)0;
 					T t = (T)0;
-					for (Index j = 0; j < i; ++j)
-						t += a.at(i, j)*xm.at(j);
+					for (auto rit = a.row_begin(i); rit != a.row_end(i); ++rit)
+					{
+						if (rit.column() < i)
+							t += (*rit)*xm.at(rit.column());
+						else if (rit.column() > i)
+							t += (*rit)*x.at(rit.column());
+						else
+							mid = *rit;
+					}
 
-					for (Index j = i + 1; j < a.rows(); ++j)
-						t += a.at(i, j)*x.at(j);
-
-					t = (b.at(i) - t) / a.at(i, i);
+					t = (b.at(i) - t) / mid;
 					xm.set(i, rweight*xm.at(i) + weight*t);
 				}
 
