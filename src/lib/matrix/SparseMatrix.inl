@@ -96,25 +96,23 @@ SparseMatrixRowIterator<T, D1, D2>::SparseMatrixRowIterator(const SparseMatrix<T
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrixRowIterator<T, D1, D2>& SparseMatrixRowIterator<T, D1, D2>::operator++ ()
 {
-	using SparseMatrixIterator<T, D1, D2>;
-
-	if (mIndex1 < D1 && mIndex2 < D2)
+	if (this->mIndex1 < D1 && this->mIndex2 < D2)
 	{
-		mColumnPtrIndex++;
+		this->mColumnPtrIndex++;
 
-		if (mMatrix->mColumnPtr.size() <= mColumnPtrIndex)
+		if (this->mMatrix->mColumnPtr.size() <= this->mColumnPtrIndex)
 		{
-			mIndex1 = D1;
-			mIndex2 = D2;
+			this->mIndex1 = D1;
+			this->mIndex2 = D2;
 		}
 		else
 		{
-			mIndex2 = mMatrix->mColumnPtr[mColumnPtrIndex];
+			this->mIndex2 = this->mMatrix->mColumnPtr[this->mColumnPtrIndex];
 
-			if (mIndex1 != D1 - 1 && mMatrix->mRowPtr[mIndex1 + 1] <= mColumnPtrIndex)
+			if (this->mIndex1 != D1 - 1 && this->mMatrix->mRowPtr[mIndex1 + 1] <= this->mColumnPtrIndex)
 			{
-				mIndex1 = D1;
-				mIndex2 = D2;
+				this->mIndex1 = D1;
+				this->mIndex2 = D2;
 			}
 		}
 	}
@@ -139,35 +137,33 @@ SparseMatrixColumnIterator<T, D1, D2>::SparseMatrixColumnIterator(const SparseMa
 template<typename T, Dimension D1, Dimension D2>
 SparseMatrixColumnIterator<T, D1, D2>& SparseMatrixColumnIterator<T, D1, D2>::operator++ ()
 {
-	using SparseMatrixIterator<T, D1, D2>;
-
-	if (mIndex1 < D1 && mIndex2 < D2)
+	if (this->mIndex1 < D1 && this->mIndex2 < D2)
 	{
 		bool found = false;
 		do
 		{
-			mIndex1++;
+			this->mIndex1++;
 
-			if (mIndex1 >= D1)
+			if (this->mIndex1 >= D1)
 			{
-				mIndex1 = D1;
-				mIndex2 = D2;
+				this->mIndex1 = D1;
+				this->mIndex2 = D2;
 				break;
 			}
 
 			Index rowPtr;
-			size_t s = mMatrix->row_entry_count(mIndex1, rowPtr);
+			size_t s = this->mMatrix->row_entry_count(this->mIndex1, rowPtr);
 			
-			for (mColumnPtrIndex = rowPtr; mColumnPtrIndex < rowPtr + s; ++mColumnPtrIndex)// O(D2)
+			for (this->mColumnPtrIndex = rowPtr; this->mColumnPtrIndex < rowPtr + s; ++this->mColumnPtrIndex)// O(D2)
 			{
-				auto ci = mMatrix->mColumnPtr[mColumnPtrIndex];// O(1)
+				auto ci = this->mMatrix->mColumnPtr[this->mColumnPtrIndex];// O(1)
 				
-				if (ci == mIndex2)
+				if (ci == this->mIndex2)
 				{
 					found = true;
 					break;
 				}
-				else if (ci > mIndex2)
+				else if (ci > this->mIndex2)
 				{
 					break;
 				}
