@@ -33,7 +33,8 @@ namespace Construct
 	}
 
 	template<template<typename> class M, typename T>
-	Vector<T>	diag(const M<T>& m)
+	typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
+		diag(const M<T>& m)
 	{
 		Vector<T> v(std::min(m.rows(), m.columns()));
 

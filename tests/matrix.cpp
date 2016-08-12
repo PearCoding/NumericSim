@@ -4,6 +4,7 @@
 #include "OutputStream.h"
 
 #include "matrix/MatrixConstructor.h"
+#include "matrix/MatrixCheck.h"
 
 NS_USE_NAMESPACE;
 
@@ -223,6 +224,65 @@ NS_TEST("hilbert")
 	M<T> e = Construct::eye<M, T>(3,3);
 	M<T> m = h.mul(ih);
 	NS_CHECK_EQ(m, e);
+}
+NS_TEST("orthogonal")
+{
+	M<T> m1 = { {0,1},{1,0} };
+	M<T> m2 = { { 1,1 },{ 1,0 } };
+
+	NS_CHECK_TRUE(Check::matrixIsOrthogonal(m1));
+	NS_CHECK_FALSE(Check::matrixIsOrthogonal(m2));
+}
+NS_TEST("unitary")
+{
+	M<T> m1 = { { 0,1 },{ 1,0 } };// Should be complex 
+	M<T> m2 = { { 1,1 },{ 1,0 } };
+
+	NS_CHECK_TRUE(Check::matrixIsUnitary(m1));
+	NS_CHECK_FALSE(Check::matrixIsUnitary(m2));
+}
+NS_TEST("projection")
+{
+	M<T> m1 = { { 1,0 },{ 0,0 } };
+	M<T> m2 = { { 1,1 },{ 1,0 } };
+
+	NS_CHECK_TRUE(Check::matrixIsProjection(m1));
+	NS_CHECK_FALSE(Check::matrixIsProjection(m2));
+}
+NS_TEST("symmetric")
+{
+	M<T> m1 = { { 0,0,1 },{ 0,1,0 },{ 1,0,0 } };
+	M<T> m2 = { { 1,1 },{ 0,1 } };
+
+	NS_CHECK_TRUE(Check::matrixIsSymmetric(m1));
+	NS_CHECK_FALSE(Check::matrixIsSymmetric(m2));
+}
+NS_TEST("hermitian")
+{
+	M<T> m1 = { { 0,0,1 },{ 0,1,0 },{ 1,0,0 } };// Should be complex
+	M<T> m2 = { { 1,1 },{ 0,1 } };
+
+	NS_CHECK_TRUE(Check::matrixIsHermitian(m1));
+	NS_CHECK_FALSE(Check::matrixIsHermitian(m2));
+}
+NS_TEST("skew-symmetric")
+{
+	M<T> m1 = { { 0,0,1 },{ 0,0,0 },{ -1,0,0 } };
+	M<T> m2 = { { 1,1 },{ 0,1 } };
+
+	M<T> m3 = { { 0,0,1 },{ 0,0,0 },{ 1,0,0 } };
+	NS_CHECK_EQ(m3.transpose(), m3);
+
+	NS_CHECK_TRUE(Check::matrixIsSkewSymmetric(m1));
+	NS_CHECK_FALSE(Check::matrixIsSkewSymmetric(m2));
+}
+NS_TEST("skew-hermitian")
+{
+	M<T> m1 = { { 0,0,1 },{ 0,0,0 },{ -1,0,0 } };// Should be complex
+	M<T> m2 = { { 1,1 },{ 0,1 } };
+
+	NS_CHECK_TRUE(Check::matrixIsSkewHermitian(m1));
+	NS_CHECK_FALSE(Check::matrixIsSkewHermitian(m2));
 }
 NS_END_TESTCASE()
 

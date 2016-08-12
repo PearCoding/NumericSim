@@ -6,13 +6,13 @@ NS_BEGIN_NAMESPACE
 
 namespace Convert
 {
-	template<typename T, Dimension D1, Dimension D2>
-	SparseMatrix<T, D1, D2> toSparseMatrix(const Matrix<T, D1, D2>& m)
+	template<typename T>
+	SparseMatrix<T> toSparseMatrix(const Matrix<T>& m)
 	{
-		SparseMatrix<T, D1, D2> res;
-		for (Index i = 0; i < D1; ++i)
+		SparseMatrix<T> res(m.rows(), m.columns());
+		for (Index i = 0; i < m.rows(); ++i)
 		{
-			for (Index j = 0; j < D2; ++j)
+			for (Index j = 0; j < m.columns(); ++j)
 			{
 				auto v = m.at(i, j);
 				if (v != (T)0)
@@ -23,10 +23,10 @@ namespace Convert
 		return res;
 	}
 
-	template<typename T, Dimension D1, Dimension D2>
-	Matrix<T, D1, D2> toFullMatrix(const SparseMatrix<T, D1, D2>& m)
+	template<typename T>
+	Matrix<T> toDenseMatrix(const SparseMatrix<T>& m)
 	{
-		Matrix<T, D1, D2> res;
+		Matrix<T> res(m.rows(), m.columns());
 		for (auto it = m.begin(); it != m.end(); ++it)
 		{
 			res.set(it.row(), it.column(), *it);

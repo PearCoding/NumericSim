@@ -30,9 +30,9 @@ int main(int argc, char** argv)
 	constexpr double grid_width = 1;
 	constexpr double grid_height = 1;
 	constexpr double time_end = 1;
-	constexpr double HX = 0.05;
-	constexpr double HY = 0.05;
-	constexpr double HT = 0.05;
+	constexpr double HX = 0.01;
+	constexpr double HY = 0.01;
+	constexpr double HT = 0.01;
 
 	auto k = [=](double t, double x, double y) { return 0.6;};
 	auto f = [=](double t, double x, double y) { return 0;};
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	constexpr double IHT = 1 / HT;
 	constexpr double C = 2 * (IHX2 + IHY2);
 
-	std::cout << "TC " << TC << "XC " << XC << " YC " << YC << " D " << D << std::endl;
+	std::cout << "TC " << TC << " XC " << XC << " YC " << YC << " D " << D << std::endl;
 
 	SparseMatrix<double> A(D, D);
 	Vector<double> B(D);

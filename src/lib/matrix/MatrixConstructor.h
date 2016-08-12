@@ -16,7 +16,8 @@ namespace Construct
 		diag(const Vector<T>& v);
 
 	template<template<typename> class M, typename T>
-	Vector<T> diag(const M<T>& v);
+	typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
+		diag(const M<T>& v);
 
 	template<template<typename> class M, typename T>
 	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type

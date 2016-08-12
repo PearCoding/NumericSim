@@ -7,11 +7,21 @@ NS_BEGIN_NAMESPACE
 
 namespace Convert
 {
-	template<typename T, Dimension D1, Dimension D2>
-	SparseMatrix<T, D1, D2> toSparseMatrix(const Matrix<T, D1, D2>& m);
+	/**
+	* @brief Converts a dense matrix to a sparse matrix.
+	* @param m Matrix to convert.
+	* @return The new sparse matrix.
+	*/
+	template<typename T>
+	SparseMatrix<T> toSparseMatrix(const Matrix<T>& m);
 
-	template<typename T, Dimension D1, Dimension D2>
-	Matrix<T, D1, D2> toFullMatrix(const SparseMatrix<T, D1, D2>& m);
+	/**
+	* @brief Converts a sparse matrix to a dense matrix.
+	* @param m Sparse matrix to convert.
+	* @return The new dense matrix.
+	*/
+	template<typename T>
+	Matrix<T> toDenseMatrix(const SparseMatrix<T>& m);
 }
 
 NS_END_NAMESPACE

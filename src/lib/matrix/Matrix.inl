@@ -519,7 +519,7 @@ void Matrix<T>::swap(Matrix<T>& v)
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::transpose()
+Matrix<T> Matrix<T>::transpose() const
 {
 	Matrix<T> tmp(columns(), rows());
 	for (Index i = 0; i < columns(); ++i)
@@ -533,7 +533,7 @@ Matrix<T> Matrix<T>::transpose()
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::conjugate()
+Matrix<T> Matrix<T>::conjugate() const
 {
 	Matrix<T> tmp(rows(), columns());
 
@@ -549,7 +549,7 @@ Matrix<T> Matrix<T>::conjugate()
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::adjugate()
+Matrix<T> Matrix<T>::adjugate() const
 {
 	Matrix<T> tmp(columns(), rows());
 	for (Index i = 0; i < columns(); ++i)
@@ -651,7 +651,7 @@ template<typename T>
 Matrix<T> operator -(const Matrix<T>& v)
 {
 	Matrix<T>  tmp = v;
-	return (tmp *= -1);
+	return (tmp *= (T)-1);
 }
 
 template<typename T>

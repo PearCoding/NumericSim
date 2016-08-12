@@ -696,7 +696,7 @@ public:
 	* @return Transpose of the matrix \f$ A^T \f$
 	* @sa adjugate()
 	*/
-	SparseMatrix transpose();
+	SparseMatrix transpose() const;
 
 	/**
 	* @brief The conjugate of all entries if complex.
@@ -704,7 +704,7 @@ public:
 	* Worst case: \f$ O((D1*D2)^2) \f$
 	* @return Transpose of the matrix \f$ A^T \f$
 	*/
-	SparseMatrix conjugate();
+	SparseMatrix conjugate() const;
 
 	/**
 	* @brief The adjugate / conjugate transpose of the matrix.
@@ -714,7 +714,7 @@ public:
 	* @return Conjugate transpose of the matrix \f$ A^* \f$
 	* @sa transpose()
 	*/
-	SparseMatrix adjugate();
+	SparseMatrix adjugate() const;
 
 	/**
 	* @brief Returns the trace of the matrix.

@@ -247,20 +247,27 @@ const T& SparseMatrix<T>::internal_at(Index i1, Index i2, Index& columnPtrIndex,
 			tmp_i1 += 1;
 			s = row_entry_count(tmp_i1, rowPtr);
 		}
-
-		for (columnPtrIndex = rowPtr; columnPtrIndex < rowPtr + s; ++columnPtrIndex)// O(D2)
+		
+		if (tmp_i1 == i1)
 		{
-			auto ci = mColumnPtr[columnPtrIndex];// O(1)
-			
-			if (ci == i2)
+			for (columnPtrIndex = rowPtr; columnPtrIndex < rowPtr + s; ++columnPtrIndex)// O(D2)
 			{
-				found = (tmp_i1 == i1) ? true : false;
-				return mValues[columnPtrIndex];// O(1)
+				auto ci = mColumnPtr[columnPtrIndex];// O(1)
+
+				if (ci == i2)
+				{
+					found = true;
+					return mValues[columnPtrIndex];// O(1)
+				}
+				else if (ci > i2)
+				{
+					break;
+				}
 			}
-			else if (ci > i2)
-			{
-				break;
-			}
+		}
+		else
+		{
+			columnPtrIndex = rowPtr;
 		}
 	}
 
@@ -300,7 +307,7 @@ void SparseMatrix<T>::set_at(Index i1, Index i2, const T& v)
 	{
 		mValues.insert(mValues.begin() + columnPtrIndex, v);// O(D1*D2)
 		mColumnPtr.insert(mColumnPtr.begin() + columnPtrIndex, i2);// O(D1*D2)
-
+	
 		for (Index k = i1 + 1; k < rows(); ++k)// O(D1)
 			mRowPtr[k] += 1;
 	}
@@ -799,7 +806,7 @@ void SparseMatrix<T>::swap(SparseMatrix<T>& v)
 }
 
 template<typename T>
-SparseMatrix<T> SparseMatrix<T>::transpose()
+SparseMatrix<T> SparseMatrix<T>::transpose() const
 {
 	SparseMatrix<T> tmp(columns(), rows());
 
@@ -810,7 +817,7 @@ SparseMatrix<T> SparseMatrix<T>::transpose()
 }
 
 template<typename T>
-SparseMatrix<T> SparseMatrix<T>::conjugate()
+SparseMatrix<T> SparseMatrix<T>::conjugate() const
 {
 	SparseMatrix<T> tmp(rows(), columns());
 
@@ -821,7 +828,7 @@ SparseMatrix<T> SparseMatrix<T>::conjugate()
 }
 
 template<typename T>
-SparseMatrix<T> SparseMatrix<T>::adjugate()
+SparseMatrix<T> SparseMatrix<T>::adjugate() const
 {
 	SparseMatrix<T> tmp(columns(), rows());
 
@@ -854,9 +861,9 @@ SparseMatrix<T> SparseMatrix<T>::mul(const SparseMatrix<T>& m) const
 		for (Index k = 0; k < m.columns(); ++k)// O(D3)
 		{
 			T v = 0;
-			for (Index j = 0; j < columns(); ++j)// O(D2)
+			for (auto rit = row_begin(i); rit != row_end(i); ++rit)// O(D2)
 			{
-				v += at(i, j) * m.at(j, k);// O(D2) + O(D3)
+				v += (*rit) * m.at(rit.column(), k);// O(D2) + O(D3)
 			}
 			tmp.set(i, k, v);// O(D1*D3)
 		}
@@ -909,7 +916,7 @@ template<typename T>
 SparseMatrix<T> operator -(const SparseMatrix<T>& v)
 {
 	SparseMatrix<T> tmp = v;
-	return (tmp *= -1);
+	return (tmp *= (T)-1);
 }
 
 template<typename T>
@@ -938,12 +945,19 @@ bool operator ==(const SparseMatrix<T>& v1, const SparseMatrix<T>& v2)
 	if(v1.rows() != v2.rows() || v1.columns() != v2.columns() || v1.filledCount() != v2.filledCount())
 		return false;
 
-	for (auto it = v1.begin(); it != v1.end(); ++it)
+	auto v1it = v1.begin();
+	auto v2it = v2.begin();
+	while (v1it != v1.end() && v2it != v2.end())
 	{
-		T val;
-		if (!v2.has(it.row(), it.column(), val) || *it != val)
+		if (v1it.row() != v2it.row() || v1it.column() != v2it.column() || *v1it != *v2it)
 			return false;
+
+		++v1it;
+		++v2it;
 	}
+
+	if (v1it != v1.end() || v2it != v2.end())
+		return false;
 
 	return true;
 }

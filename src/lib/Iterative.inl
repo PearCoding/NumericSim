@@ -25,7 +25,7 @@ namespace Iterative
 
 			for (uint32 it = 0; it < maxIter; ++it)
 			{
-				for (Index i = 0; i < a.rows(); ++i)
+				for (Index i = 0; i < a.rows(); ++i)// Could be parallel
 				{
 					T mid = (T)0;
 					T t = (T)0;
@@ -82,7 +82,7 @@ namespace Iterative
 
 			for (uint32 it = 0; it < maxIter; ++it)
 			{
-				for (Index i = 0; i < a.rows(); ++i)
+				for (Index i = 0; i < a.rows(); ++i)// Could be parallel
 				{
 					T mid = (T)0;
 					T t = (T)0;

@@ -18,6 +18,8 @@ SET(SRC_MAIN
 SET(SRC_MATRIX
  matrix/Matrix.h
  matrix/Matrix.inl
+ matrix/MatrixCheck.h
+ matrix/MatrixCheck.inl
  matrix/MatrixConstructor.h
  matrix/MatrixConstructor.inl
  matrix/MatrixConverter.h

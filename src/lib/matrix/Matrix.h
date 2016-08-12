@@ -667,7 +667,7 @@ public:
 	* @return Transpose of the matrix \f$ A^T \f$
 	* @sa adjugate()
 	*/
-	Matrix transpose();
+	Matrix transpose() const;
 
 	/**
 	* @brief The conjugate of all entries if complex.
@@ -675,7 +675,7 @@ public:
 	* Worst case: \f$ O(D1*D2) \f$
 	* @return Transpose of the matrix \f$ A^T \f$
 	*/
-	Matrix conjugate();
+	Matrix conjugate() const;
 
 	/**
 	* @brief The adjugate / conjugate transpose of the matrix.
@@ -685,7 +685,7 @@ public:
 	* @return Conjugate transpose of the matrix \f$ A^* \f$
 	* @sa transpose()
 	*/
-	Matrix adjugate();
+	Matrix adjugate() const;
 
 	/**
 	* @brief Returns the trace of the matrix.
