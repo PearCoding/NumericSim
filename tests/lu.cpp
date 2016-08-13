@@ -1,3 +1,5 @@
+#define NS_ALLOW_CHECKS
+
 #include "Test.h"
 #include "LU.h"
 #include "OutputStream.h"

@@ -1,4 +1,6 @@
 SET(SRC_MAIN
+ CG.h
+ CG.inl
  Config.h
  ComplexNumber.h
  ComplexNumber.inl

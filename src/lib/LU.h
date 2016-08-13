@@ -3,6 +3,8 @@
 #include "Types.h"
 #include "Exceptions.h"
 
+#include "matrix/MatrixCheck.h"
+
 NS_BEGIN_NAMESPACE
 
 namespace LU

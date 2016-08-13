@@ -92,7 +92,31 @@ namespace Check
 	template<template<typename> class M, typename T>
 	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSkewHermitian(const M<T>& m);
 
-	/*TODO: Positive definite*/
+	/**
+	* @brief Checks if the matrix is symmetric positive definite.
+	* @details A matrix \f$ A \f$ is symmetric positive definite when it is symmetric and :
+	* \f[
+	*  \sum_{j<i} |A_{ij}| < A_{ii}
+	* \f]
+	* @note This only works for non complex matrices.
+	* @param m Matrix to check.
+	* @return True if symmetric positive definite, false otherwise.
+	*/
+	/*template<template<typename> class M, typename T>
+	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetricPositveDefinite(const M<T>& m);*/
+
+	/**
+	* @brief Checks if the matrix is symmetric negative definite.
+	* @details A matrix \f$ A \f$ is symmetric negative definite when it is symmetric and :
+	* \f[
+	*  \sum_{j<i} |A_{ij}| < -A_{ii}
+	* \f]
+	* @note This only works for non complex matrices.
+	* @param m Matrix to check.
+	* @return True if symmetric negative definite, false otherwise.
+	*/
+	/*template<template<typename> class M, typename T>
+	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetricPositveDefinite(const M<T>& m);*/
 }
 
 NS_END_NAMESPACE

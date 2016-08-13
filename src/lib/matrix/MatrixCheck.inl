@@ -68,6 +68,37 @@ namespace Check
 
 		return -(m.adjugate()) == m;
 	}
+
+	/*template<template<typename> class M, typename T>
+	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetricPositveDefinite(const M<T>& m)
+	{
+		if (!matrixIsSymmetric(m))
+			return false;
+
+		for (Index i = 0; i < m.rows(); ++i)
+		{
+			T t = (T)0;
+			T mid = (T)0;
+			for (auto it = m.row_begin(i); it != m.row_end(i) && it.column() <= i; ++it)
+			{
+				if (it.column() < i)
+					t += std::abs(*it);
+				else
+					mid = *it;
+			}
+
+			if (t >= mid)
+				return false;
+		}
+
+		return true;
+	}
+
+	template<template<typename> class M, typename T>
+	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetricPositveDefinite(const M<T>& m)
+	{
+		return matrixIsSymmetricPositveDefinite(-m);
+	}*/
 }
 
 NS_END_NAMESPACE

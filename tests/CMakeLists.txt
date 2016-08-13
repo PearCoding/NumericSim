@@ -12,6 +12,7 @@ endif()
 endfunction()
 
 # TESTS
+NS_ADD_TEST(cg cg.cpp)
 NS_ADD_TEST(complex complex.cpp)
 NS_ADD_TEST(iterative iterative.cpp)
 NS_ADD_TEST(lu lu.cpp)

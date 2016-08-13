@@ -10,7 +10,11 @@ namespace LU {
 		{
 			if (m.rows() != m.columns())
 				throw NotSquareException();
-			// We assume symmetry!
+
+#ifdef NS_ALLOW_CHECKS
+			if (!Check::matrixIsHermitian(m))
+				throw NotHermitianException();
+#endif
 
 			Matrix<T> L(m.rows(), m.columns());
 			for (Index j = 0; j < L.rows(); ++j)
@@ -47,7 +51,10 @@ namespace LU {
 			if (m.rows() != m.columns())
 				throw NotSquareException();
 
-			// We assume symmetry!
+#ifdef NS_ALLOW_CHECKS
+			if (!Check::matrixIsHermitian(m))
+				throw NotHermitianException();
+#endif
 
 			Matrix<ComplexNumber<T> > L(m.rows(), m.columns());
 			for (Index j = 0; j < L.rows(); ++j)
@@ -78,7 +85,11 @@ namespace LU {
 		{
 			if (m.rows() != m.columns())
 				throw NotSquareException();
-			// We assume symmetry!
+
+#ifdef NS_ALLOW_CHECKS
+			if (!Check::matrixIsHermitian(m))
+				throw NotHermitianException();
+#endif
 
 			SparseMatrix<T> L(m.rows(), m.columns());
 			for (Index j = 0; j < L.rows(); ++j)// Rows
@@ -115,7 +126,10 @@ namespace LU {
 			if (m.rows() != m.columns())
 				throw NotSquareException();
 
-			// We assume symmetry!
+#ifdef NS_ALLOW_CHECKS
+			if (!Check::matrixIsHermitian(m))
+				throw NotHermitianException();
+#endif
 
 			SparseMatrix<ComplexNumber<T> > L(m.rows(), m.columns());
 			for (Index j = 0; j < L.rows(); ++j)

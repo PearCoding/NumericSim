@@ -1,3 +1,5 @@
+#define NS_ALLOW_CHECKS
+
 #include "Test.h"
 #include "Iterative.h"
 #include "OutputStream.h"
