@@ -38,11 +38,9 @@ SparseMatrixIterator<T>& SparseMatrixIterator<T>::operator++ ()
 				if (mMatrix->mRowPtr[s1] == mColumnPtrIndex)
 				{
 					mIndex1 = s1;
-					break;
 				}
 				else if (mMatrix->mRowPtr[s1] > mColumnPtrIndex)
 				{
-					mIndex1 = s1 - 1;
 					break;
 				}
 			}

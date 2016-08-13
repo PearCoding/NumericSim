@@ -49,7 +49,7 @@ namespace LU {
 
 			// We assume symmetry!
 
-			Matrix<ComplexNumber<T> > L;
+			Matrix<ComplexNumber<T> > L(m.rows(), m.columns());
 			for (Index j = 0; j < L.rows(); ++j)
 			{
 				ComplexNumber<T> s;
