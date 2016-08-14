@@ -270,8 +270,9 @@ public:
 	* @brief Constructs an empty sparse matrix of size(d1,d2)
 	* @param d1 Row dimension
 	* @param d2 Column dimension
+	* @param expected How much entries are expected. Gives performance benefits if known. Keep it 0 if unknown.
 	 */
-	SparseMatrix(Dimension d1, Dimension d2);
+	SparseMatrix(Dimension d1, Dimension d2, size_t expected = 0);
 
 	/**
 	 * @brief Constructs a sparse matrix from the two dimensional initializer list.

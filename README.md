@@ -9,4 +9,4 @@ Experimental header-only library for numerical simulation.
 
 # Installation
 Just use cmake to build,
-or copy the src/lib folder to your system include/ directory to use it with other applications.
+or copy the `src/lib` folder to your system `include/` directory to use it with other applications.

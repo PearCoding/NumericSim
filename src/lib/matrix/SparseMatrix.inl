@@ -183,12 +183,18 @@ SparseMatrixColumnIterator<T> SparseMatrixColumnIterator<T>::operator++ (int)
 
 // Main
 template<typename T>
-SparseMatrix<T>::SparseMatrix(Dimension d1, Dimension d2) :
+SparseMatrix<T>::SparseMatrix(Dimension d1, Dimension d2, size_t expected) :
 	mValues(), mColumnPtr(), mRowPtr(d1), mColumnCount(d2), mEmpty((T)0)
 {
 	NS_ASSERT(d1 > 0);
 	NS_ASSERT(d2 > 0);
 	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
+
+	if (expected > 0)
+	{
+		mValues.reserve(expected);
+		mColumnPtr.reserve(expected);
+	}
 }
 
 template<typename T>

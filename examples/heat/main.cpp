@@ -11,7 +11,7 @@ NS_USE_NAMESPACE;
 * Heat equation solver for boundary and initial value problems.
 */
 
-//#define SPARSE_PATTER_OUTPUT // Enable this to create a huge file showing the patterns of the sparse matrix
+//#define SPARSE_PATTERN_OUTPUT // Enable this to create a huge file showing the patterns of the sparse matrix
 
 /* Boundary modes:
 * 0 - Dirichlet boundaries
@@ -20,7 +20,7 @@ NS_USE_NAMESPACE;
 */
 #define BOUNDARY_MODE (0)
 
-#define LIN(t,x,y) ((y)*XC*TC + (x)*TC + (t))
+#define LIN(t,x,y) ((t)*YC*XC + (y)*XC + (x))
 int main(int argc, char** argv)
 {
 	constexpr double pi = 3.141592;
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	auto b = [=](double t, double x, double y) { return 0;};// Boundary condition
 	auto t0 = [=](double x, double y) { return 2 * (std::exp(10 * x*(1 - x)*y*(1 - y)) - 1);};// Initial condition
 
-												   // Everything after this comment does not need to be changed.
+	// Everything after this comment does not need to be changed.
 	constexpr Dimension XC = grid_width / HX + 1;
 	constexpr Dimension YC = grid_height / HY + 1;
 	constexpr Dimension TC = time_end / HT + 1;
@@ -53,9 +53,17 @@ int main(int argc, char** argv)
 	constexpr double IHT = 1 / HT;
 	constexpr double C = 2 * (IHX2 + IHY2);
 
-	std::cout << "TC " << TC << " XC " << XC << " YC " << YC << " D " << D << std::endl;
+#if BOUNDARY_MODE == 1
+# define ST (2)
+#else
+# define ST (1)
+#endif
 
-	SparseMatrix<double> A(D, D);
+	constexpr size_t expected = TC*(XC + YC) * 2 + (XC - 2 * ST)*(YC - 2 * ST) * 2 + (TC - 1)*(XC - 2 * ST)*(YC - 2 * ST) * 6;
+
+	std::cout << "TC " << TC << " XC " << XC << " YC " << YC << " D " << D << " Expected Entries: " << expected << std::endl;
+
+	SparseMatrix<double> A(D, D, expected);
 	Vector<double> B(D);
 
 	auto p1_start = std::chrono::high_resolution_clock::now();
@@ -63,69 +71,48 @@ int main(int argc, char** argv)
 	// Boundary conditions
 	for (Index t = 0; t < TC; ++t)
 	{
-		for (Index x = 0; x < XC; ++x)
-		{
-#if BOUNDARY_MODE == 1//Neumann
-#else// Dirichlet
-			A.set(LIN(t, x, 0), LIN(t, x, 0), 1);
-			A.set(LIN(t, x, YC - 1), LIN(t, x, YC - 1), 1);
-#endif
-			B.set(LIN(t, x, 0), b(t*HT, x*HX, 0));
-			B.set(LIN(t, x, YC - 1), b(t*HT, x*HX, (YC - 1)*HY));
-		}
-
 		for (Index y = 0; y < YC; ++y)
 		{
-#if BOUNDARY_MODE == 1// Neumann
-#else// Dirichlet
-			A.set(LIN(t, 0, y), LIN(t, 0, y), 1);
-			A.set(LIN(t, XC - 1, y), LIN(t, XC - 1, y), 1);
-#endif
-			B.set(LIN(t, 0, y), b(t*HT, 0, y*HY));
-			B.set(LIN(t, XC - 1, y), b(t*HT, (XC - 1)*HX, y*HY));
-		}
-	}
-
-	// Matrix
-#if BOUNDARY_MODE == 1
-# define ST (2)
-#else
-# define ST (1)
-#endif
-	// Initial condition
-	for (Index x = ST; x < XC - ST; ++x)
-	{
-		for (Index y = ST; y < YC - ST; ++y)
-		{
-			A.set(LIN(0, x, y), LIN(0, x, y), 1);
-			A.set(LIN(0, x, y), LIN(0, x, y), 1);
-
-			B.set(LIN(0, x, y), t0(x*HX, y*HY));
-			B.set(LIN(0, x, y), t0(x*HX, y*HY));
-		}
-	}
-
-	for (Index t = 1; t < TC; ++t)
-	{
-		for (Index y = ST; y < YC - ST; ++y)
-		{
-			for (Index x = ST; x < XC - ST; ++x)
+			for (Index x = 0; x < XC; ++x)
 			{
-				const auto kf = k(t, x, y);
+				const double ft = t * HT;
+				const double fx = x * HX;
+				const double fy = y * HY;
 
-				A.set(LIN(t, x, y), LIN(t, x, y), C*kf + IHT);
+				const Index mid = LIN(t, x, y);
 
-				A.set(LIN(t, x, y), LIN(t - 1, x, y), -IHT);
+				if (t == 0 || y == 0 || x == 0 || y == YC - 1 || x == XC - 1) // Initial conditions
+				{
+#if BOUNDARY_MODE == 1//Neumann
+#else// Dirichlet
+					A.set(mid, mid, 1);
 
-				A.set(LIN(t, x, y), LIN(t, x - 1, y), -IHX2*kf);
-				A.set(LIN(t, x, y), LIN(t, x + 1, y), -IHX2*kf);
+					if(t != 0)
+						B.set(mid, b(ft, fx, fy)); // Boundary
+					else
+						B.set(mid, t0(fx, fy)); // Initial
+#endif
+				}
+				else
+				{
+					const auto kf = k(ft, fx, fy);
 
-				A.set(LIN(t, x, y), LIN(t, x, y - 1), -IHY2*kf);
-				A.set(LIN(t, x, y), LIN(t, x, y + 1), -IHY2*kf);
+					// This is in topological order and important for efficiency
+					A.set(mid, LIN(t - 1, x, y), -IHT);
+					A.set(mid, LIN(t, x, y - 1), -IHY2*kf);
+					A.set(mid, LIN(t, x - 1, y), -IHX2*kf);
 
-				B.set(LIN(t, x, y), f(t*HT, x*HX, y*HY));
+					A.set(mid, mid, C*kf + IHT);
+
+					A.set(mid, LIN(t, x + 1, y), -IHX2*kf);
+					A.set(mid, LIN(t, x, y + 1), -IHY2*kf);
+
+					B.set(mid, f(ft, fx, fy));
+				}
 			}
 		}
+
+		std::cout << "t=" << t << std::endl;
 	}
 
 	auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
@@ -136,7 +123,7 @@ int main(int argc, char** argv)
 		<< " ms]" << std::endl;
 
 	// Output matrix
-#ifdef SPARSE_PATTER_OUTPUT
+#ifdef SPARSE_PATTERN_OUTPUT
 	std::ofstream sparse_pattern("heat_pattern.txt");
 	for (Index y = 0; y < D; ++y)
 	{
