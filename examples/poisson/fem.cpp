@@ -188,8 +188,9 @@ int main(int argc, char** argv)
 	Vector<Number> B(VertexSize);
 	for(uint32 xi = 0; xi < VertexCount; ++xi)
 	{
-		uint32 factor = 1;
 		const float bc = 0.33333f*AreaTriangle*std::sin(NS_PI_F * xi * H[0]);
+		
+		uint32 factor = 1;
 		if(xi>0)
 			factor++;
 		if(xi<VertexCount-1)
@@ -197,21 +198,22 @@ int main(int argc, char** argv)
 		
 		for(uint32 yi = 0; yi < VertexCount; ++yi)
 		{
+			uint32 factor2 = factor;
 			if(yi>0)
 			{
-				factor++;
+				factor2++;
 				if(xi>0)
-					factor++;
+					factor2++;
 			}
 
 			if(yi<VertexCount-1)
 			{
-				factor++;
+				factor2++;
 				if(xi<VertexCount-1)
-					factor++;
+					factor2++;
 			}
-			
-			B.set(yi*VertexCount+xi, factor*bc*std::sin(NS_PI_F * yi * H[1]));
+
+			B.set(yi*VertexCount+xi, factor2*bc*std::sin(NS_PI_F * yi * H[1]));
 		}
 	}
 
