@@ -7,4 +7,5 @@ set_target_properties(example_${name} PROPERTIES VERSION ${NS_Version})
 endfunction()
 
 NS_ADD_EXAMPLE(heat heat/main.cpp)
-NS_ADD_EXAMPLE(poisson poisson/main.cpp)
+NS_ADD_EXAMPLE(poisson_fdm poisson/fdm.cpp)
+NS_ADD_EXAMPLE(poisson_fem poisson/fem.cpp)
