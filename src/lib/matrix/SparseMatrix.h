@@ -5,7 +5,6 @@
 #include "Utils.h"
 #include "Exceptions.h"
 
-#include <vector>
 #include <algorithm>
 
 NS_BEGIN_NAMESPACE
@@ -265,6 +264,11 @@ public:
 	* @sa SparseMatrixIterator
 	*/
 	typedef const SparseMatrixColumnIterator<T> const_column_iterator;
+
+	/**
+	* @brief Constructs an empty sparse matrix of zero size (Not useful)
+	 */
+	SparseMatrix();
 
 	/**
 	* @brief Constructs an empty sparse matrix of size(d1,d2)
@@ -751,7 +755,8 @@ public:
 	* @return A vector with the same size as the row count.
 	* @todo This method is critical. A better sparse solution is needed.
 	*/
-	Vector<T> mul(const Vector<T>& right) const;
+	template<typename DC>
+	DynamicVector<T> mul(const Vector<T,DC>& right) const;
 
 	/**
 	* @brief Left side matrix vector multiplication.
@@ -761,7 +766,8 @@ public:
 	* @return A vector with the same size as the column count.
 	* @todo This method is critical. A better sparse solution is needed.
 	*/
-	Vector<T> mul_left(const Vector<T>& left) const;
+	template<typename DC>
+	DynamicVector<T> mul_left(const Vector<T,DC>& left) const;
 };
 
 // Element wise operations

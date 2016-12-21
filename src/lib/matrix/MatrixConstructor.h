@@ -22,9 +22,9 @@ namespace Construct
 	* @param v The vector representing the diagonal of the new matrix.
 	* @return A new matrix with the size `v.size() x v.size()` and vector v at the diagonal.
 	*/
-	template<template<typename> class M, typename T>
+	template<template<typename> class M, typename T, typename DC>
 	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
-		diag(const Vector<T>& v);
+		diag(const Vector<T,DC>& v);
 
 	/**
 	* @brief Returns the diagonal of the matrix as a vector.
@@ -32,7 +32,7 @@ namespace Construct
 	* @return A new vector with the size `min(m.rows(),m.columns())` and the diagonal of the matrix as his content.
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
+	typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
 		diag(const M<T>& m);
 
 	/**

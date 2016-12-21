@@ -51,7 +51,8 @@ int main(int argc, char** argv)
 	std::cout << "XC " << XC << " YC " << YC << " D " << D << std::endl;
 
 	SparseMatrix<double> A(D, D);
-	Vector<double> B(D);
+	DynamicVector<double> B;
+	B.resize(D);
 
 	auto p1_start = std::chrono::high_resolution_clock::now();
 	for (Index x = 0; x < XC; ++x)
@@ -132,7 +133,8 @@ int main(int argc, char** argv)
 
 	// Iterations
 	uint32 iterations = 0;
-	Vector<double> X(D);
+	DynamicVector<double> X;
+	X.resize(D);
 
 	auto p2_start = std::chrono::high_resolution_clock::now();
 	X = Iterative::serial::sor<SparseMatrix, double>(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);

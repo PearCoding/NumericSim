@@ -24,10 +24,17 @@ namespace Math
 {
 
 	template<typename T>
-	typename std::enable_if<std::is_integral<T>::value, int8>::type
+	constexpr typename std::enable_if<std::is_integral<T>::value, int8>::type
 		sign_pow(const T& k)
 	{
 		return (k % 2 == 0) ? 1 : -1;
+	}
+
+	template<typename T>
+	constexpr typename std::enable_if<std::is_integral<T>::value, T>::type
+		factorial(const T& k)
+	{
+		return k > (T)0 ? (k * factorial<T>(k-1)) : 1;
 	}
 
 	template<typename T>

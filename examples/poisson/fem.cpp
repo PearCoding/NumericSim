@@ -5,11 +5,17 @@
 
 #include "matrix/SparseMatrix.h"
 #include "Iterative.h"
+#include "CG.h"
 #include "Vector.h"
-#include "Triangle.h"
+#include "Simplex.h"
 #include "OutputStream.h"
 
 NS_USE_NAMESPACE;
+
+/*
+ * Undef if you want to use the iterative SOR algorithm
+ */
+#define USE_CG
 
 /**
  * Program to solve the poisson equation in 2d with
@@ -30,6 +36,7 @@ constexpr float DomainDistance[2] = {DomainEnd[0]-DomainStart[0],
 									 DomainEnd[1]-DomainStart[1]};
 
 constexpr double RELAX_PAR = 1.2;// SOR weight parameter (0,2]
+
 
 /**
  * Main entry
@@ -71,7 +78,7 @@ int main(int argc, char** argv)
 
 	const int32 TriangleCount = 2*N;
 
-	const Triangle2D<float> ReferenceTriangle(0,0, H[0],0, 0,H[1]);
+	const Triangle<float> ReferenceTriangle({{0,0}, {H[0],0}, {0,H[1]}});
 	const float AreaTriangle = ReferenceTriangle.area();
 	std::cout << "  Triangle Area: " << AreaTriangle << std::endl;
 
@@ -221,13 +228,17 @@ int main(int argc, char** argv)
 	std::cout << "Calculating..." << std::endl;
 
 	uint32 iterations = 0;
-	Vector<Number> X(VertexSize);
+	DynamicVector<Number> X(VertexSize);
 
 	auto p2_start = std::chrono::high_resolution_clock::now();
+#ifdef USE_CG
+	X = CG::serial::cg<SparseMatrix, Number>(A, B, X, 1024, 1e-4, &iterations);
+#else
 	X = Iterative::serial::sor<SparseMatrix, Number>(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
+#endif
 	auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
-	std::cout << iterations << "Iterations ["
+	std::cout << iterations << " Iterations ["
 		<< std::chrono::duration_cast<std::chrono::seconds>(p2_diff).count()
 		<< " s]" << std::endl;
 

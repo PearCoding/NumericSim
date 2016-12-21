@@ -12,6 +12,8 @@ SET(SRC_MAIN
  LU.h
  LU.inl
  OutputStream.h
+ Simplex.h
+ Simplex.inl
  Types.h
  Utils.h
  Vector.h
@@ -26,6 +28,8 @@ SET(SRC_MATRIX
  matrix/MatrixConstructor.inl
  matrix/MatrixConverter.h
  matrix/MatrixConverter.inl
+ matrix/MatrixOperations.h
+ matrix/MatrixOperations.inl
  matrix/SparseMatrix.h
  matrix/SparseMatrix.inl)
 SOURCE_GROUP("Header Files\\Matrix" FILES ${SRC_MATRIX})

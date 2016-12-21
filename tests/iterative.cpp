@@ -14,9 +14,9 @@ NS_BEGIN_TESTCASE_T1(Iterative)
 NS_TEST("jacobi")
 {
 	Matrix<T> m = { {4,1,2},{1,3,2},{1,1,2} };
-	Vector<T> b = { 12, 13, 9 };
-	Vector<T> x0(3);
-	Vector<T> res = { 1, 2, 3 };
+	DynamicVector<T> b = { 12, 13, 9 };
+	DynamicVector<T> x0;
+	DynamicVector<T> res = { 1, 2, 3 };
 
 	uint32 iterations;
 	auto l = Iterative::serial::jacobi(m, b, x0, MAX_ITERATIONS, ITER_EPSILON, &iterations);
@@ -26,9 +26,9 @@ NS_TEST("jacobi")
 NS_TEST("gauss-seidel")
 {
 	Matrix<T> m = { { 4,1,2 },{ 1,3,2 },{ 1,1,2 } };
-	Vector<T> b = { 12, 13, 9 };
-	Vector<T> x0(3);
-	Vector<T> res = { 1, 2, 3 };
+	DynamicVector<T> b = { 12, 13, 9 };
+	DynamicVector<T> x0;
+	DynamicVector<T> res = { 1, 2, 3 };
 
 	uint32 iterations;
 	auto l = Iterative::serial::sor(m, b, x0, (T)1, MAX_ITERATIONS, ITER_EPSILON, &iterations);
@@ -38,9 +38,9 @@ NS_TEST("gauss-seidel")
 NS_TEST("sor")
 {
 	Matrix<T> m = { { 4,1,2 },{ 1,3,2 },{ 1,1,2 } };
-	Vector<T> b = { 12, 13, 9 };
-	Vector<T> x0(3);
-	Vector<T> res = { 1, 2, 3 };
+	DynamicVector<T> b = { 12, 13, 9 };
+	DynamicVector<T> x0;
+	DynamicVector<T> res = { 1, 2, 3 };
 
 	uint32 iterations;
 	auto l = Iterative::serial::sor(m, b, x0, (T)1.1, MAX_ITERATIONS, ITER_EPSILON, &iterations);

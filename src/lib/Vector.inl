@@ -4,26 +4,22 @@
 
 NS_BEGIN_NAMESPACE
 
-template<typename T>
-Vector<T>::Vector() :
-	CountableSet<T>()
+template<typename T, class DC>
+Vector<T,DC>::Vector() :
+	CountableSet<T,DC>()
 {
 }
 
-template<typename T>
-Vector<T>::Vector(Dimension size) :
-	CountableSet<T>(size)
+template<typename T, class DC>
+template<class TMP>
+Vector<T, DC>::Vector(size_t size, typename std::enable_if<std::is_same<TMP, dynamic_container_t<T>>::value>::type*) :
+	CountableSet<T,DC>(size)
 {
 }
 
-template<typename T>
-Vector<T>::Vector(Dimension size, const T& f) :
-	CountableSet<T>(size, f)
-{
-}
-
-template<typename T>
-Vector<T>::Vector(std::initializer_list<T> l) : 
+template<typename T, class DC>
+template<class TMP>
+Vector<T,DC>::Vector(std::initializer_list<T> l, typename std::enable_if<std::is_same<TMP, dynamic_container_t<T>>::value>::type*) : 
 	Vector(l.size())
 {
 	Index i = 0;
@@ -34,26 +30,39 @@ Vector<T>::Vector(std::initializer_list<T> l) :
 	}
 }
 
-template<typename T>
-Vector<T>::~Vector()
+template<typename T, class DC>
+template<class TMP>
+Vector<T,DC>::Vector(std::initializer_list<T> l, typename std::enable_if<!std::is_same<TMP, dynamic_container_t<T>>::value>::type*) : 
+	Vector()
+{
+	Index i = 0;
+	for (const T& v : l)
+	{
+		set(i, v);
+		i++;
+	}
+}
+
+template<typename T, class DC>
+Vector<T,DC>::~Vector()
 {
 }
 
-template<typename T>
-const T& Vector<T>::at(Index i) const 
+template<typename T, class DC>
+const T& Vector<T,DC>::at(Index i) const 
 {
 	return this->linear_at(i);
 }
 
-template<typename T>
-void Vector<T>::set(Index i, const T& v) 
+template<typename T, class DC>
+void Vector<T,DC>::set(Index i, const T& v) 
 { 
 	this->linear_set(i, v);
 }
 
 // Other
-template<typename T>
-T Vector<T>::dot(const Vector& v) const
+template<typename T, class DC>
+T Vector<T,DC>::dot(const Vector& v) const
 {
 	if (this->size() != v.size())
 		throw VectorSizeMismatchException();
@@ -64,36 +73,36 @@ T Vector<T>::dot(const Vector& v) const
 	return s;
 }
 
-template<typename T>
-T Vector<T>::mag() const
+template<typename T, class DC>
+T Vector<T,DC>::mag() const
 {
 	return std::sqrt(magSqr());
 }
 
-template<typename T>
-T Vector<T>::magSqr() const
+template<typename T, class DC>
+T Vector<T,DC>::magSqr() const
 {
 	return dot(*this);
 }
 
 // Boolean set operations
-template<typename T>
-Vector<T> Vector<T>::left(Index i) const
+template<typename T, class DC>
+Vector<T,DC> Vector<T,DC>::left(Index i) const
 {
 	NS_ASSERT(i < this->size());
-	Vector<T> tmp(i+1);
+	Vector<T,DC> tmp;//Size i+1
 	for (Index j = 0; j < i + 1; ++j)
 		tmp.set(j, at(j));
 
 	return tmp;
 }
 
-template<typename T>
-Vector<T> Vector<T>::right(Index i) const
+template<typename T, class DC>
+Vector<T,DC> Vector<T,DC>::right(Index i) const
 {
 	NS_ASSERT(i < this->size());
 	
-	Vector<T> tmp(this->size() - i);
+	Vector<T,DC> tmp;//(this->size() - i)
 
 	for (Index j = i; j < this->size(); ++j)
 		tmp.set(j - i, at(j));
@@ -101,12 +110,12 @@ Vector<T> Vector<T>::right(Index i) const
 	return tmp;
 }
 
-template<typename T>
-Vector<T> Vector<T>::mid(Index start, Index end) const
+template<typename T, class DC>
+Vector<T,DC> Vector<T,DC>::mid(Index start, Index end) const
 {
 	NS_ASSERT(start < end);
 
-	Vector<T> tmp(end-start);
+	Vector<T,DC> tmp;//(end-start)
 	for (Index i = start; i < end && i < this->size(); ++i)
 		tmp.set(i - start, at(i));
 
@@ -114,8 +123,8 @@ Vector<T> Vector<T>::mid(Index start, Index end) const
 }
 
 // Elementwise operations
-template<typename T>
-Vector<T>& Vector<T>::operator +=(const Vector<T>& v)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator +=(const Vector<T,DC>& v)
 {
 	if (this->size() != v.size())
 		throw VectorSizeMismatchException();
@@ -126,8 +135,8 @@ Vector<T>& Vector<T>::operator +=(const Vector<T>& v)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator +=(const T& f)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator +=(const T& f)
 {
 	for (Index i = 0; i < this->size(); ++i)
 		this->mData[i] += f;
@@ -135,8 +144,8 @@ Vector<T>& Vector<T>::operator +=(const T& f)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator -=(const Vector<T>& v)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator -=(const Vector<T,DC>& v)
 {
 	if (this->size() != v.size())
 		throw VectorSizeMismatchException();
@@ -147,8 +156,8 @@ Vector<T>& Vector<T>::operator -=(const Vector<T>& v)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator -=(const T& f)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator -=(const T& f)
 {
 	for (Index i = 0; i < this->size(); ++i)
 		this->mData[i] -= f;
@@ -156,8 +165,8 @@ Vector<T>& Vector<T>::operator -=(const T& f)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator *=(const Vector<T>& v)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator *=(const Vector<T,DC>& v)
 {
 	if (this->size() != v.size())
 		throw VectorSizeMismatchException();
@@ -168,8 +177,8 @@ Vector<T>& Vector<T>::operator *=(const Vector<T>& v)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator *=(const T& f)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator *=(const T& f)
 {
 	for (Index i = 0; i < this->size(); ++i)
 		this->mData[i] *= f;
@@ -177,8 +186,8 @@ Vector<T>& Vector<T>::operator *=(const T& f)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator /=(const Vector<T>& v)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator /=(const Vector<T,DC>& v)
 {
 	if (this->size() != v.size())
 		throw VectorSizeMismatchException();
@@ -189,8 +198,8 @@ Vector<T>& Vector<T>::operator /=(const Vector<T>& v)
 	return *this;
 }
 
-template<typename T>
-Vector<T>& Vector<T>::operator /=(const T& f)
+template<typename T, class DC>
+Vector<T,DC>& Vector<T,DC>::operator /=(const T& f)
 {
 	T invF = (T)1 / f;// TODO: NAN?
 	for (Index i = 0; i < this->size(); ++i)
@@ -201,99 +210,99 @@ Vector<T>& Vector<T>::operator /=(const T& f)
 
 // Non member functions
 // Element wise operations
-template<typename T>
-Vector<T> operator +(const Vector<T>& v1, const Vector<T>& v2)
+template<typename T, class DC>
+Vector<T,DC> operator +(const Vector<T,DC>& v1, const Vector<T,DC>& v2)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp += v2);
 }
 
-template<typename T>
-Vector<T> operator +(const Vector<T>& v1, T f)
+template<typename T, class DC>
+Vector<T,DC> operator +(const Vector<T,DC>& v1, T f)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp += f);
 }
 
-template<typename T>
-Vector<T> operator +(T f, const Vector<T>& v1)
+template<typename T, class DC>
+Vector<T,DC> operator +(T f, const Vector<T,DC>& v1)
 {
 	return v1 + f;
 }
 
-template<typename T>
-Vector<T> operator -(const Vector<T>& v1, const Vector<T>& v2)
+template<typename T, class DC>
+Vector<T,DC> operator -(const Vector<T,DC>& v1, const Vector<T,DC>& v2)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp -= v2);
 }
 
-template<typename T>
-Vector<T> operator -(const Vector<T>& v1, T f)
+template<typename T, class DC>
+Vector<T,DC> operator -(const Vector<T,DC>& v1, T f)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp -= f);
 }
 
-template<typename T>
-Vector<T> operator -(T f, const Vector<T>& v1)
+template<typename T, class DC>
+Vector<T,DC> operator -(T f, const Vector<T,DC>& v1)
 {
-	Vector<T> tmp = -v1;
+	Vector<T,DC> tmp = -v1;
 	return (tmp += f);
 }
 
-template<typename T>
-Vector<T> operator -(const Vector<T>& v)
+template<typename T, class DC>
+Vector<T,DC> operator -(const Vector<T,DC>& v)
 {
-	Vector<T> tmp = v;
+	Vector<T,DC> tmp = v;
 	return (tmp *= -1);
 }
 
-template<typename T>
-Vector<T> operator *(const Vector<T>& v1, const Vector<T>& v2)
+template<typename T, class DC>
+Vector<T,DC> operator *(const Vector<T,DC>& v1, const Vector<T,DC>& v2)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp *= v2);
 }
 
-template<typename T>
-Vector<T> operator *(const Vector<T>& v1, T f)
+template<typename T, class DC>
+Vector<T,DC> operator *(const Vector<T,DC>& v1, T f)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp *= f);
 }
 
-template<typename T>
-Vector<T> operator *(T f, const Vector<T>& v1)
+template<typename T, class DC>
+Vector<T,DC> operator *(T f, const Vector<T,DC>& v1)
 {
 	return v1 * f;
 }
 
-template<typename T>
-Vector<T> operator /(const Vector<T>& v1, const Vector<T>& v2)
+template<typename T, class DC>
+Vector<T,DC> operator /(const Vector<T,DC>& v1, const Vector<T,DC>& v2)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp /= v2);
 }
 
-template<typename T>
-Vector<T> operator /(const Vector<T>& v1, T f)
+template<typename T, class DC>
+Vector<T,DC> operator /(const Vector<T,DC>& v1, T f)
 {
-	Vector<T> tmp = v1;
+	Vector<T,DC> tmp = v1;
 	return (tmp /= f);
 }
 
-template<typename T>
-Vector<T> operator /(T f, const Vector<T>& v1)
+template<typename T, class DC>
+Vector<T,DC> operator /(T f, const Vector<T,DC>& v1)
 {
-	Vector<T>tmp = v1;
+	Vector<T,DC>tmp = v1;
 	tmp.do_reciprocal();
 	return (tmp *= f);
 }
 
 // Comparison
-template<typename T>
-bool operator ==(const Vector<T>& v1, const Vector<T>& v2)
+template<typename T, class DC>
+bool operator ==(const Vector<T,DC>& v1, const Vector<T,DC>& v2)
 {
 	if (v1.size() != v2.size())
 		throw VectorSizeMismatchException();
@@ -307,8 +316,8 @@ bool operator ==(const Vector<T>& v1, const Vector<T>& v2)
 	return true;
 }
 
-template<typename T>
-bool operator !=(const Vector<T>& v1, const Vector<T>& v2)
+template<typename T, class DC>
+bool operator !=(const Vector<T,DC>& v1, const Vector<T,DC>& v2)
 {
 	return !(v1 == v2);
 }

@@ -13,8 +13,8 @@ std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
 	return out;
 }
 
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::Vector<T>& f)
+template<typename T, class DC>
+std::ostream& operator<<(std::ostream& out, const NS::Vector<T,DC>& f)
 {
 	out << "[ ";
 	for (auto v : f)

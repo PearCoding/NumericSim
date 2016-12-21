@@ -6,8 +6,8 @@ NS_BEGIN_NAMESPACE
 namespace CG {
 	namespace serial {
 		template<template<typename> class M, typename T>
-		typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
-			cg(const M<T>& a, const Vector<T>& b, const Vector<T>& x0,
+		typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
+			cg(const M<T>& a, const DynamicVector<T>& b, const DynamicVector<T>& x0,
 				uint32 maxIter, double eps, uint32* it_stat)
 		{
 			if (a.rows() != a.columns())
@@ -22,13 +22,13 @@ namespace CG {
 
 			const double eps2 = eps*eps;
 
-			Vector<T> x = x0;
-			Vector<T> r = b - a.mul(x0);
-			Vector<T> p = r;
+			DynamicVector<T> x = x0;
+			DynamicVector<T> r = b - a.mul(x0);
+			DynamicVector<T> p = r;
 
 			T rs = r.magSqr();
 
-			Vector<T> l;
+			DynamicVector<T> l;
 			for (uint32 k = 0; k < maxIter; ++k)
 			{
 				if (it_stat)

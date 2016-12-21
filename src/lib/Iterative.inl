@@ -9,8 +9,8 @@ namespace Iterative
 	namespace serial
 	{
 		template<template<typename> class M, typename T>
-		typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
-			jacobi(const M<T>& a, const Vector<T>& b, const Vector<T>& x0,
+		typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
+			jacobi(const M<T>& a, const DynamicVector<T>& b, const DynamicVector<T>& x0,
 				uint32 maxIter, double eps, uint32* it_stat)
 		{
 			if (a.rows() != a.columns())
@@ -20,8 +20,9 @@ namespace Iterative
 
 			const double eps2 = eps*eps;
 
-			Vector<T> x = x0;
-			Vector<T> xm(a.rows());
+			DynamicVector<T> x = x0;
+			DynamicVector<T> xm;
+			xm.resize(a.rows());
 
 			for (uint32 it = 0; it < maxIter; ++it)
 			{
@@ -65,8 +66,8 @@ namespace Iterative
 		}
 
 		template<template<typename> class M, typename T>
-		typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
-			sor(const M<T>& a, const Vector<T>& b, const Vector<T>& x0,
+		typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
+			sor(const M<T>& a, const DynamicVector<T>& b, const DynamicVector<T>& x0,
 				const T& weight, uint32 maxIter, double eps, uint32* it_stat)
 		{
 			if (a.rows() != a.columns())
@@ -77,8 +78,9 @@ namespace Iterative
 			const double eps2 = eps*eps;
 			const T rweight = (T)1 - weight;
 
-			Vector<T> x = x0;
-			Vector<T> xm(a.rows());
+			DynamicVector<T> x = x0;
+			DynamicVector<T> xm;
+			xm.resize(a.rows());
 
 			for (uint32 it = 0; it < maxIter; ++it)
 			{

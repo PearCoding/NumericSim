@@ -5,6 +5,7 @@
 
 #include "matrix/MatrixConstructor.h"
 #include "matrix/MatrixCheck.h"
+#include "matrix/MatrixOperations.h"
 
 NS_USE_NAMESPACE;
 
@@ -144,11 +145,11 @@ NS_TEST("Mul")
 NS_TEST("Mul Vector")
 {
 	M<T> m = { { 1,2 },{ 0,5 },{ 7,0 } };
-	Vector<T> r = { 1,2 };
-	Vector<T> l = { 1,2,3 };
+	DynamicVector<T> r = { 1,2 };
+	DynamicVector<T> l = { 1,2,3 };
 
-	Vector<T> res1 = { 5,10,7 };
-	Vector<T> res2 = { 22,12 };
+	DynamicVector<T> res1 = { 5,10,7 };
+	DynamicVector<T> res2 = { 22,12 };
 	auto ret1 = m.mul(r);
 	auto ret2 = m.mul_left(l);
 
@@ -166,7 +167,7 @@ NS_TEST("eye")
 }
 NS_TEST("diag")
 {
-	Vector<T> v = { 1,2,3 };
+	DynamicVector<T> v = { 1,2,3 };
 	M<T> m = Construct::diag<M>(v);
 	M<T> res1 = { { 1,0,0 },{ 0,2,0 },{ 0,0,3 } };
 
@@ -283,6 +284,11 @@ NS_TEST("skew-hermitian")
 
 	NS_CHECK_TRUE(Check::matrixIsSkewHermitian(m1));
 	NS_CHECK_FALSE(Check::matrixIsSkewHermitian(m2));
+}
+NS_TEST("determinant")
+{
+	M<T> m = { {1,1,1},{2,3,5},{4,6,8} };
+	NS_CHECK_EQ(Operations::determinant(m), (T)-2);
 }
 NS_END_TESTCASE()
 

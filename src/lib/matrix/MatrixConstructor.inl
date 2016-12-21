@@ -11,37 +11,32 @@ namespace Construct
 	{
 		M<T> m(d1, d2);
 		for (Index i = 0; i < std::min(d1, d2); ++i)
-		{
 			m.set(i, i, (T)1);
-		}
 
 		return m;
 	}
 
-	template<template<typename> class M, typename T>
+	template<template<typename> class M, typename T, typename DC>
 	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
-		diag(const Vector<T>& v)
+		diag(const Vector<T,DC>& v)
 	{
 		M<T> m(v.size(), v.size());
 
 		for (Index i = 0; i < v.size(); ++i)
-		{
 			m.set(i, i, v.at(i));
-		}
 
 		return m;
 	}
 
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, Vector<T> >::type
+	typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
 		diag(const M<T>& m)
 	{
-		Vector<T> v(std::min(m.rows(), m.columns()));
+		DynamicVector<T> v;
+		v.resize(std::min(m.rows(), m.columns()));
 
 		for (Index i = 0; i < std::min(m.rows(), m.columns()); ++i)
-		{
 			v.set(i, m.at(i, i));
-		}
 
 		return v;
 	}

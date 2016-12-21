@@ -40,6 +40,54 @@ NS_TEST("cholesky-sparse")
 		NS_GOT_EXCEPTION(exception);
 	}
 }
+NS_TEST("doolittle")
+{
+	Matrix<T> A = { {1,1,1},{2,3,5},{4,6,8} };
+	Matrix<T> L = { {1, 0, 0},{0.25,1,0},{0.5,0,1} };
+	Matrix<T> U = { {4, 6, 8},{0,-0.5,-1},{0,0,1} };
+	Matrix<T> P = { {0, 0, 1},{1,0,0},{0,1,0} };
+
+	try
+	{
+		Matrix<T> rL, rU, rP;
+		size_t pivotCount;
+		LU::serial::doolittle(A, rL, rU, rP, &pivotCount);
+
+		NS_CHECK_EQ(rL, L);
+		NS_CHECK_EQ(rU, U);
+		NS_CHECK_EQ(rP, P);
+		NS_CHECK_EQ(pivotCount, 2);
+		NS_CHECK_EQ(rL.mul(rU), P.mul(A));
+	}
+	catch (const NSException& exception)
+	{
+		NS_GOT_EXCEPTION(exception);
+	}
+}
+NS_TEST("doolittle-sparse")
+{
+	SparseMatrix<T> A = { {1,1,1},{2,3,5},{4,6,8} };
+	SparseMatrix<T> L = { {1, 0, 0},{0.25,1,0},{0.5,0,1} };
+	SparseMatrix<T> U = { {4, 6, 8},{0,-0.5,-1},{0,0,1} };
+	SparseMatrix<T> P = { {0, 0, 1},{1,0,0},{0,1,0} };
+
+	try
+	{
+		SparseMatrix<T> rL(3,3), rU(3,3), rP(3,3);
+		size_t pivotCount;
+		LU::serial::doolittle(A, rL, rU, rP, &pivotCount);
+
+		NS_CHECK_EQ(rL, L);
+		NS_CHECK_EQ(rU, U);
+		NS_CHECK_EQ(rP, P);
+		NS_CHECK_EQ(pivotCount, 2);
+		NS_CHECK_EQ(rL.mul(rU), P.mul(A));
+	}
+	catch (const NSException& exception)
+	{
+		NS_GOT_EXCEPTION(exception);
+	}
+}
 NS_END_TESTCASE()
 
 NST_BEGIN_MAIN

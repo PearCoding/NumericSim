@@ -1,24 +1,30 @@
 #pragma once
 
-#include "Config.h"
 #include "ComplexNumber.h"
 
 #include <type_traits>
 #include <vector>
+#include <array>
 #include <limits>
 
 NS_BEGIN_NAMESPACE
 
 template<typename T>
+using dynamic_container_t = std::vector<T>;
+
+template<typename T, Dimension N>
+using fixed_container_t = std::array<T, N>;
+
+template<typename T, class DC>
 class CountableSet;
 
-template<typename T>
+template<typename T, class DC>
 class CountableSetIterator
 {
-	friend CountableSet<T>;
+	friend CountableSet<T, DC>;
 
 private:
-	CountableSetIterator(const CountableSet<T>& vec, Index pos) :
+	CountableSetIterator(const CountableSet<T, DC>& vec, Index pos) :
 		mPos(pos), mVec(vec)
 	{}
 public:
@@ -57,23 +63,22 @@ public:
 	}
 private:
 	Index mPos;
-	const CountableSet<T>& mVec;
+	const CountableSet<T,DC>& mVec;
 };
 
 /** A utility class useful for big dimensions
  */
-template<typename T>
+template<typename T, class DC>
 class CountableSet
 {
 public:
-	typedef CountableSetIterator<T> iterator;
+	typedef CountableSetIterator<T, DC> iterator;
 
 	CountableSet();
-	explicit CountableSet(Dimension size);
-	CountableSet(Dimension size, const T& f);
+	
+	template<class TMP = DC>
+	CountableSet(size_t size, typename std::enable_if<std::is_same<TMP, dynamic_container_t<T>>::value>::type* = nullptr);
 	virtual ~CountableSet();
-
-	void resize(Dimension size);
 
 	// Index
 	const T& linear_at(Index i) const;
@@ -90,7 +95,8 @@ public:
 	}
 
 	// Other
-	Dimension size() const { return mData.size(); }
+	size_t size() const;
+
 	T sum() const;
 	T max() const;
 	T min() const;
@@ -105,9 +111,29 @@ public:
 	bool hasInf() const;
 	bool hasZero() const;
 
+	template<class TMP = DC>
+	typename std::enable_if<std::is_same<TMP, dynamic_container_t<T>>::value>::type 
+	resize(Dimension size);
+
 protected:
-	std::vector<T> mData;
+	DC mData;
 };
+
+// Typedefs
+template<typename T>
+using DynamicCountableSet = CountableSet<T, dynamic_container_t<T> >;
+
+template<typename T, Dimension N>
+using FixedCountableSet = CountableSet<T, fixed_container_t<T,N> >;
+
+// Type traits
+template<template<typename,class> class S, typename T, class DC>
+struct is_dynamic_countable_set : std::integral_constant<bool,
+	std::is_same<DynamicCountableSet<T>, typename std::remove_cv<class S<T,DC> >::type>::value > {};
+
+template<template<typename,class> class S, typename T, class DC>
+struct is_fixed_countable_set : std::integral_constant<bool,
+	!is_dynamic_countable_set<S,T,DC>::value > {};
 
 NS_END_NAMESPACE
 

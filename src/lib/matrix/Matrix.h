@@ -721,7 +721,8 @@ public:
 	* @return A vector with the same size as the row count.
 	* @todo Complexity?
 	*/
-	Vector<T> mul(const Vector<T>& right) const;
+	template<typename DC>
+	DynamicVector<T> mul(const Vector<T,DC>& right) const;
 
 	/**
 	* @brief Left side matrix vector multiplication.
@@ -731,7 +732,8 @@ public:
 	* @return A vector with the same size as the column count.
 	* @todo Complexity?
 	*/
-	Vector<T> mul_left(const Vector<T>& left) const;
+	template<typename DC>
+	DynamicVector<T> mul_left(const Vector<T,DC>& left) const;
 };
 
 // Element wise operations

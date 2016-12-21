@@ -183,6 +183,13 @@ SparseMatrixColumnIterator<T> SparseMatrixColumnIterator<T>::operator++ (int)
 
 // Main
 template<typename T>
+SparseMatrix<T>::SparseMatrix() :
+	mValues(), mColumnPtr(), mRowPtr(0), mColumnCount(0), mEmpty((T)0)
+{
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
+}
+
+template<typename T>
 SparseMatrix<T>::SparseMatrix(Dimension d1, Dimension d2, size_t expected) :
 	mValues(), mColumnPtr(), mRowPtr(d1), mColumnCount(d2), mEmpty((T)0)
 {
@@ -877,12 +884,15 @@ SparseMatrix<T> SparseMatrix<T>::mul(const SparseMatrix<T>& m) const
 }
 
 template<typename T>
-Vector<T> SparseMatrix<T>::mul(const Vector<T>& v) const
+template<typename DC>
+DynamicVector<T> SparseMatrix<T>::mul(const Vector<T,DC>& v) const
 {
 	if (columns() != v.size())
 		throw MatrixMulMismatchException();
 
-	Vector<T> r(rows());
+	DynamicVector<T> r;
+	r.resize(rows());
+
 	for (auto it = begin(); it != end(); ++it)// O(D1*D2)
 		r.set(it.row(), r.at(it.row()) + *it * v.at(it.column()));// 2*O(D1)+O(D2)
 
@@ -890,12 +900,15 @@ Vector<T> SparseMatrix<T>::mul(const Vector<T>& v) const
 }
 
 template<typename T>
-Vector<T> SparseMatrix<T>::mul_left(const Vector<T>& v) const
+template<typename DC>
+DynamicVector<T> SparseMatrix<T>::mul_left(const Vector<T,DC>& v) const
 {
 	if (rows() != v.size())
 		throw MatrixMulMismatchException();
 
-	Vector<T> r(columns());
+	DynamicVector<T> r;
+	r.resize(columns());
+
 	for (auto it = begin(); it != end(); ++it)// O(D1*D2)
 		r.set(it.column(), r.at(it.column()) + *it * v.at(it.row()));// 2*O(D1)+O(D2)
 

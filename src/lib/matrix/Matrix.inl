@@ -596,38 +596,40 @@ Matrix<T> Matrix<T>::mul(const Matrix<T>& m) const
 }
 
 template<typename T>
-Vector<T> Matrix<T>::mul(const Vector<T>& v) const
+template<typename DC>
+DynamicVector<T> Matrix<T>::mul(const Vector<T,DC>& v) const
 {
 	if(columns() != v.size())
 		throw MatrixMulMismatchException();
 
-	Vector<T> r(rows());
+	DynamicVector<T> r;
+	r.resize(rows());
+
 	for (Index i = 0; i < rows(); ++i)
 	{
 		T t = (T)0;
 		for (Index j = 0; j < columns(); ++j)
-		{
 			t += at(i, j)*v.linear_at(j);
-		}
 		r.linear_set(i, t);
 	}
 	return r;
 }
 
 template<typename T>
-Vector<T> Matrix<T>::mul_left(const Vector<T>& v) const
+template<typename DC>
+DynamicVector<T> Matrix<T>::mul_left(const Vector<T,DC>& v) const
 {
 	if (rows() != v.size())
 		throw MatrixMulMismatchException();
 
-	Vector<T> r(columns());
+	DynamicVector<T> r;
+	r.resize(columns());
+	
 	for (Index j = 0; j < columns(); ++j)
 	{
 		T t = (T)0;
 		for (Index i = 0; i < rows(); ++i)
-		{
 			t += at(i, j)*v.linear_at(i);
-		}
 		r.linear_set(j, t);
 	}
 	return r;

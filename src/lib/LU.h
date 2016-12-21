@@ -22,8 +22,10 @@ namespace LU
 		SparseMatrix<ComplexNumber<T> > cholesky(const SparseMatrix<ComplexNumber<T> >& m);
 
 		// Doolittle
-		//template<typename T, Dimension D1, Dimension D2>
-		//void doolittle(const Matrix<T, D1, D2>& m, Matrix<T, D1, D2>& L, Matrix<T, D1, D2>& U);
+		template<typename T>
+		void doolittle(const Matrix<T>& m, Matrix<T>& L, Matrix<T>& U, Matrix<T>& P, size_t* pivotCount=nullptr);
+		template<typename T>
+		void doolittle(const SparseMatrix<T>& m, SparseMatrix<T>& L, SparseMatrix<T>& U, SparseMatrix<T>& P, size_t* pivotCount=nullptr);
 	}
 }
 
