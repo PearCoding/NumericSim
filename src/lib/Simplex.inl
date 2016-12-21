@@ -15,7 +15,7 @@ template<typename T, Dimension K, Dimension N>
 Simplex<T,K,N>::Simplex(std::initializer_list<std::initializer_list<T> > list) :
 	Simplex()
 {
-	NS_ASSERT(list.size() == N);//, "Given list is not of the same size as the Simplex");
+	NS_ASSERT(list.size() == (K+1));//, "Given list is not of the same size as the Simplex");
 	
 	Index i = 0;
 	for (const auto& v : list)

@@ -32,6 +32,12 @@ const T& CountableSet<T, DC>::linear_at(Index i) const
 }
 
 template<typename T, class DC>
+const T& CountableSet<T, DC>::operator[](Index i) const
+{
+	return linear_at(i);
+}
+
+template<typename T, class DC>
 void CountableSet<T, DC>::linear_set(Index i, const T& v)
 {
 	NS_ASSERT(i < size());

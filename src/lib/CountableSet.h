@@ -82,6 +82,8 @@ public:
 
 	// Index
 	const T& linear_at(Index i) const;
+	const T& operator[](Index i) const;
+	
 	void linear_set(Index i, const T& v);
 
 	iterator begin() const

@@ -78,8 +78,8 @@ int main(int argc, char** argv)
 
 	const int32 TriangleCount = 2*N;
 
-	const Triangle<float> ReferenceTriangle({{0,0}, {H[0],0}, {0,H[1]}});
-	const float AreaTriangle = ReferenceTriangle.area();
+	const Triangle2D<Number> ReferenceTriangle({{0,0}, {H[0],0}, {0,H[1]}});
+	const Number AreaTriangle = ReferenceTriangle.volume();
 	std::cout << "  Triangle Area: " << AreaTriangle << std::endl;
 
 	const int32 VertexCount = N+1;
@@ -90,11 +90,6 @@ int main(int argc, char** argv)
 	std::cout << "  Matrix size = " << VertexSize << "x" << VertexSize << "  (" << MatrixSize << ")" << std::endl;
 
 	// --------------------------------
-	// Generating Mesh (and result map)
-	// Returns row or column index (Not matrix element!)
-	const auto toMatrixIndex = [=](int32 x, int32 y){ return y*VertexCount + x; };
-//#define toMatrixIndex(x,y) ((y)*VertexCount + (x))
-
 	// Assembly matrix
 	// Calculate for one row
 	Number row[7] = {0,0,0, 0, 0,0,0};
@@ -112,12 +107,12 @@ int main(int argc, char** argv)
 		 *   |           \  |           \  |
 		 *   ...   ----- (Hx,2Hy) ----- (2Hx,2Hy)
 		 */
-		Triangle2D<Number> t1(   0,   0,/**/   H[0],  H[1],/**/   H[0],     0);
-		Triangle2D<Number> t2(   0,   0,/**/      0,  H[1],/**/   H[0],  H[1]);
-		Triangle2D<Number> t3(H[0],   0,/**/   H[0],  H[1],/**/ 2*H[0],  H[1]);
-		Triangle2D<Number> t4(   0,H[1],/**/   H[0],2*H[1],/**/   H[0],  H[1]);
-		Triangle2D<Number> t5(H[0],H[1],/**/ 2*H[0],2*H[1],/**/ 2*H[0],  H[1]);
-		Triangle2D<Number> t6(H[0],H[1],/**/   H[0],2*H[1],/**/ 2*H[0],2*H[1]);
+		Triangle2D<Number> t1({{   0,   0},{   H[0],  H[1]},{   H[0],     0}});
+		Triangle2D<Number> t2({{   0,   0},{      0,  H[1]},{   H[0],  H[1]}});
+		Triangle2D<Number> t3({{H[0],   0},{   H[0],  H[1]},{ 2*H[0],  H[1]}});
+		Triangle2D<Number> t4({{   0,H[1]},{   H[0],2*H[1]},{   H[0],  H[1]}});
+		Triangle2D<Number> t5({{H[0],H[1]},{ 2*H[0],2*H[1]},{ 2*H[0],  H[1]}});
+		Triangle2D<Number> t6({{H[0],H[1]},{   H[0],2*H[1]},{ 2*H[0],2*H[1]}});
 
 		Triangle2D<Number> dt1 = t1.gradient();
 		Triangle2D<Number> dt2 = t2.gradient();
@@ -131,29 +126,29 @@ int main(int argc, char** argv)
 		// << t5.area() << " " << t6.area() << std::endl;
 
 		//T1
-		row[0] += dt1.v1[0]*dt1.v1[0] + dt1.v1[1]*dt1.v1[1];
-		row[3] += dt1.v2[0]*dt1.v2[0] + dt1.v2[1]*dt1.v2[1];//Sii
-		row[1] += dt1.v3[0]*dt1.v3[0] + dt1.v3[1]*dt1.v3[1];
+		row[0] += dt1.vertices[0][0]*dt1.vertices[0][0] + dt1.vertices[0][1]*dt1.vertices[0][1];
+		row[3] += dt1.vertices[1][0]*dt1.vertices[1][0] + dt1.vertices[1][1]*dt1.vertices[1][1];//Sii
+		row[1] += dt1.vertices[2][0]*dt1.vertices[2][0] + dt1.vertices[2][1]*dt1.vertices[2][1];
 		//T2
-		row[0] += dt2.v1[0]*dt2.v1[0] + dt2.v1[1]*dt2.v1[1];
-		row[2] += dt2.v2[0]*dt2.v2[0] + dt2.v2[1]*dt2.v2[1];
-		row[3] += dt2.v3[0]*dt2.v3[0] + dt2.v3[1]*dt2.v3[1];//Sii
+		row[0] += dt2.vertices[0][0]*dt2.vertices[0][0] + dt2.vertices[0][1]*dt2.vertices[0][1];
+		row[2] += dt2.vertices[1][0]*dt2.vertices[1][0] + dt2.vertices[1][1]*dt2.vertices[1][1];
+		row[3] += dt2.vertices[2][0]*dt2.vertices[2][0] + dt2.vertices[2][1]*dt2.vertices[2][1];//Sii
 		//T3
-		row[1] += dt3.v1[0]*dt3.v1[0] + dt3.v1[1]*dt3.v1[1];
-		row[3] += dt3.v2[0]*dt3.v2[0] + dt3.v2[1]*dt3.v2[1];//Sii
-		row[4] += dt3.v3[0]*dt3.v3[0] + dt3.v3[1]*dt3.v3[1];
+		row[1] += dt3.vertices[0][0]*dt3.vertices[0][0] + dt3.vertices[0][1]*dt3.vertices[0][1];
+		row[3] += dt3.vertices[1][0]*dt3.vertices[1][0] + dt3.vertices[1][1]*dt3.vertices[1][1];//Sii
+		row[4] += dt3.vertices[2][0]*dt3.vertices[2][0] + dt3.vertices[2][1]*dt3.vertices[2][1];
 		//T4
-		row[2] += dt4.v1[0]*dt4.v1[0] + dt4.v1[1]*dt4.v1[1];
-		row[5] += dt4.v2[0]*dt4.v2[0] + dt4.v2[1]*dt4.v2[1];
-		row[3] += dt4.v3[0]*dt4.v3[0] + dt4.v3[1]*dt4.v3[1];//Sii
+		row[2] += dt4.vertices[0][0]*dt4.vertices[0][0] + dt4.vertices[0][1]*dt4.vertices[0][1];
+		row[5] += dt4.vertices[1][0]*dt4.vertices[1][0] + dt4.vertices[1][1]*dt4.vertices[1][1];
+		row[3] += dt4.vertices[2][0]*dt4.vertices[2][0] + dt4.vertices[2][1]*dt4.vertices[2][1];//Sii
 		//T5
-		row[3] += dt5.v1[0]*dt5.v1[0] + dt5.v1[1]*dt5.v1[1];//Sii
-		row[6] += dt5.v2[0]*dt5.v2[0] + dt5.v2[1]*dt5.v2[1];
-		row[4] += dt5.v3[0]*dt5.v3[0] + dt5.v3[1]*dt5.v3[1];
+		row[3] += dt5.vertices[0][0]*dt5.vertices[0][0] + dt5.vertices[0][1]*dt5.vertices[0][1];//Sii
+		row[6] += dt5.vertices[1][0]*dt5.vertices[1][0] + dt5.vertices[1][1]*dt5.vertices[1][1];
+		row[4] += dt5.vertices[2][0]*dt5.vertices[2][0] + dt5.vertices[2][1]*dt5.vertices[2][1];
 		//T6
-		row[3] += dt6.v1[0]*dt6.v1[0] + dt6.v1[1]*dt6.v1[1];//Sii
-		row[5] += dt6.v2[0]*dt6.v2[0] + dt6.v2[1]*dt6.v2[1];
-		row[6] += dt6.v3[0]*dt6.v3[0] + dt6.v3[1]*dt6.v3[1];
+		row[3] += dt6.vertices[0][0]*dt6.vertices[0][0] + dt6.vertices[0][1]*dt6.vertices[0][1];//Sii
+		row[5] += dt6.vertices[1][0]*dt6.vertices[1][0] + dt6.vertices[1][1]*dt6.vertices[1][1];
+		row[6] += dt6.vertices[2][0]*dt6.vertices[2][0] + dt6.vertices[2][1]*dt6.vertices[2][1];
 	}
 	for(uint32 i = 0; i < 7; ++i)
 		row[i] /= AreaTriangle;
@@ -192,7 +187,7 @@ int main(int argc, char** argv)
 
 	// --------------------------------
 	std::cout << "Assembling right-hand side..." << std::endl;
-	Vector<Number> B(VertexSize);
+	DynamicVector<Number> B(VertexSize);
 	for(uint32 xi = 0; xi < VertexCount; ++xi)
 	{
 		const float bc = 0.33333f*AreaTriangle*std::sin(NS_PI_F * xi * H[0]);
