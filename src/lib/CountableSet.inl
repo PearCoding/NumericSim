@@ -7,7 +7,7 @@ NS_BEGIN_NAMESPACE
 template<typename T, class DC>
 CountableSet<T, DC>::CountableSet()
 {
-	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_arithmetic.");
 }
 
 template<typename T, class DC>
@@ -42,6 +42,13 @@ void CountableSet<T, DC>::linear_set(Index i, const T& v)
 {
 	NS_ASSERT(i < size());
 	mData[i] = v;
+}
+
+template<typename T, class DC>
+T& CountableSet<T, DC>::operator[](Index i)
+{
+	NS_ASSERT(i < size());
+	return mData[i];
 }
 
 // Other

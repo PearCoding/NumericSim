@@ -10,13 +10,15 @@ template<typename T, Dimension K, Dimension N>
 class Simplex
 {	
 public:
-	FixedVector<T,N> vertices[K+1];
+	static constexpr Dimension Order = K;
+	static constexpr Dimension VertexCount = K+1;
+
+	FixedVector<T,N> Vertices[K+1];
 	
 	inline Simplex();
 	inline Simplex(std::initializer_list<std::initializer_list<T> > list);
 
 	inline T volume() const;
-	inline Simplex gradient() const;
 };
 
 // Typedefs

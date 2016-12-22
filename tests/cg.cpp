@@ -18,7 +18,7 @@ NS_TEST("cg")
 	DynamicVector<T> x0 = { 2,1 };
 	DynamicVector<T> res = { 1/11.0, 7/11.0 };
 
-	uint32 iterations;
+	size_t iterations;
 	try
 	{
 		auto l = CG::serial::cg(m, b, x0, MAX_ITERATIONS, ITER_EPSILON, &iterations);

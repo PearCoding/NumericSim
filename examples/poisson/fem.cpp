@@ -28,7 +28,7 @@ NS_USE_NAMESPACE;
  * Internally a triangle representation is used.
  */
 
-typedef float Number;
+typedef double Number;
 
 constexpr float DomainStart[2]    = {0,0};
 constexpr float DomainEnd[2]      = {1,1};
@@ -37,6 +37,21 @@ constexpr float DomainDistance[2] = {DomainEnd[0]-DomainStart[0],
 
 constexpr double RELAX_PAR = 1.2;// SOR weight parameter (0,2]
 
+template<typename T>
+Triangle2D<T> gradient(const Triangle2D<T>& s)
+{
+	Triangle2D<T> t;
+	t.Vertices[0][0] = s.Vertices[1][1] - s.Vertices[2][1];
+	t.Vertices[0][1] = s.Vertices[2][0] - s.Vertices[1][0];
+
+	t.Vertices[1][0] = s.Vertices[2][1] - s.Vertices[0][1];
+	t.Vertices[1][1] = s.Vertices[0][1] - s.Vertices[2][1];
+
+	t.Vertices[2][0] = s.Vertices[0][1] - s.Vertices[1][1];
+	t.Vertices[2][1] = s.Vertices[1][1] - s.Vertices[0][1];
+
+	return t;
+}
 
 /**
  * Main entry
@@ -114,41 +129,41 @@ int main(int argc, char** argv)
 		Triangle2D<Number> t5({{H[0],H[1]},{ 2*H[0],2*H[1]},{ 2*H[0],  H[1]}});
 		Triangle2D<Number> t6({{H[0],H[1]},{   H[0],2*H[1]},{ 2*H[0],2*H[1]}});
 
-		Triangle2D<Number> dt1 = t1.gradient();
-		Triangle2D<Number> dt2 = t2.gradient();
-		Triangle2D<Number> dt3 = t3.gradient();
-		Triangle2D<Number> dt4 = t4.gradient();
-		Triangle2D<Number> dt5 = t5.gradient();
-		Triangle2D<Number> dt6 = t6.gradient();
+		Triangle2D<Number> dt1 = gradient(t1);
+		Triangle2D<Number> dt2 = gradient(t2);
+		Triangle2D<Number> dt3 = gradient(t3);
+		Triangle2D<Number> dt4 = gradient(t4);
+		Triangle2D<Number> dt5 = gradient(t5);
+		Triangle2D<Number> dt6 = gradient(t6);
 
 		// std::cout << t1.area() << " "  << t2.area() << " " 
 		// << t3.area() << " " << t4.area() << " " 
 		// << t5.area() << " " << t6.area() << std::endl;
 
 		//T1
-		row[0] += dt1.vertices[0][0]*dt1.vertices[0][0] + dt1.vertices[0][1]*dt1.vertices[0][1];
-		row[3] += dt1.vertices[1][0]*dt1.vertices[1][0] + dt1.vertices[1][1]*dt1.vertices[1][1];//Sii
-		row[1] += dt1.vertices[2][0]*dt1.vertices[2][0] + dt1.vertices[2][1]*dt1.vertices[2][1];
+		row[0] += dt1.Vertices[0][0]*dt1.Vertices[0][0] + dt1.Vertices[0][1]*dt1.Vertices[0][1];
+		row[3] += dt1.Vertices[1][0]*dt1.Vertices[1][0] + dt1.Vertices[1][1]*dt1.Vertices[1][1];//Sii
+		row[1] += dt1.Vertices[2][0]*dt1.Vertices[2][0] + dt1.Vertices[2][1]*dt1.Vertices[2][1];
 		//T2
-		row[0] += dt2.vertices[0][0]*dt2.vertices[0][0] + dt2.vertices[0][1]*dt2.vertices[0][1];
-		row[2] += dt2.vertices[1][0]*dt2.vertices[1][0] + dt2.vertices[1][1]*dt2.vertices[1][1];
-		row[3] += dt2.vertices[2][0]*dt2.vertices[2][0] + dt2.vertices[2][1]*dt2.vertices[2][1];//Sii
+		row[0] += dt2.Vertices[0][0]*dt2.Vertices[0][0] + dt2.Vertices[0][1]*dt2.Vertices[0][1];
+		row[2] += dt2.Vertices[1][0]*dt2.Vertices[1][0] + dt2.Vertices[1][1]*dt2.Vertices[1][1];
+		row[3] += dt2.Vertices[2][0]*dt2.Vertices[2][0] + dt2.Vertices[2][1]*dt2.Vertices[2][1];//Sii
 		//T3
-		row[1] += dt3.vertices[0][0]*dt3.vertices[0][0] + dt3.vertices[0][1]*dt3.vertices[0][1];
-		row[3] += dt3.vertices[1][0]*dt3.vertices[1][0] + dt3.vertices[1][1]*dt3.vertices[1][1];//Sii
-		row[4] += dt3.vertices[2][0]*dt3.vertices[2][0] + dt3.vertices[2][1]*dt3.vertices[2][1];
+		row[1] += dt3.Vertices[0][0]*dt3.Vertices[0][0] + dt3.Vertices[0][1]*dt3.Vertices[0][1];
+		row[3] += dt3.Vertices[1][0]*dt3.Vertices[1][0] + dt3.Vertices[1][1]*dt3.Vertices[1][1];//Sii
+		row[4] += dt3.Vertices[2][0]*dt3.Vertices[2][0] + dt3.Vertices[2][1]*dt3.Vertices[2][1];
 		//T4
-		row[2] += dt4.vertices[0][0]*dt4.vertices[0][0] + dt4.vertices[0][1]*dt4.vertices[0][1];
-		row[5] += dt4.vertices[1][0]*dt4.vertices[1][0] + dt4.vertices[1][1]*dt4.vertices[1][1];
-		row[3] += dt4.vertices[2][0]*dt4.vertices[2][0] + dt4.vertices[2][1]*dt4.vertices[2][1];//Sii
+		row[2] += dt4.Vertices[0][0]*dt4.Vertices[0][0] + dt4.Vertices[0][1]*dt4.Vertices[0][1];
+		row[5] += dt4.Vertices[1][0]*dt4.Vertices[1][0] + dt4.Vertices[1][1]*dt4.Vertices[1][1];
+		row[3] += dt4.Vertices[2][0]*dt4.Vertices[2][0] + dt4.Vertices[2][1]*dt4.Vertices[2][1];//Sii
 		//T5
-		row[3] += dt5.vertices[0][0]*dt5.vertices[0][0] + dt5.vertices[0][1]*dt5.vertices[0][1];//Sii
-		row[6] += dt5.vertices[1][0]*dt5.vertices[1][0] + dt5.vertices[1][1]*dt5.vertices[1][1];
-		row[4] += dt5.vertices[2][0]*dt5.vertices[2][0] + dt5.vertices[2][1]*dt5.vertices[2][1];
+		row[3] += dt5.Vertices[0][0]*dt5.Vertices[0][0] + dt5.Vertices[0][1]*dt5.Vertices[0][1];//Sii
+		row[6] += dt5.Vertices[1][0]*dt5.Vertices[1][0] + dt5.Vertices[1][1]*dt5.Vertices[1][1];
+		row[4] += dt5.Vertices[2][0]*dt5.Vertices[2][0] + dt5.Vertices[2][1]*dt5.Vertices[2][1];
 		//T6
-		row[3] += dt6.vertices[0][0]*dt6.vertices[0][0] + dt6.vertices[0][1]*dt6.vertices[0][1];//Sii
-		row[5] += dt6.vertices[1][0]*dt6.vertices[1][0] + dt6.vertices[1][1]*dt6.vertices[1][1];
-		row[6] += dt6.vertices[2][0]*dt6.vertices[2][0] + dt6.vertices[2][1]*dt6.vertices[2][1];
+		row[3] += dt6.Vertices[0][0]*dt6.Vertices[0][0] + dt6.Vertices[0][1]*dt6.Vertices[0][1];//Sii
+		row[5] += dt6.Vertices[1][0]*dt6.Vertices[1][0] + dt6.Vertices[1][1]*dt6.Vertices[1][1];
+		row[6] += dt6.Vertices[2][0]*dt6.Vertices[2][0] + dt6.Vertices[2][1]*dt6.Vertices[2][1];
 	}
 	for(uint32 i = 0; i < 7; ++i)
 		row[i] /= AreaTriangle;
@@ -190,7 +205,7 @@ int main(int argc, char** argv)
 	DynamicVector<Number> B(VertexSize);
 	for(uint32 xi = 0; xi < VertexCount; ++xi)
 	{
-		const float bc = 0.33333f*AreaTriangle*std::sin(NS_PI_F * xi * H[0]);
+		const Number bc = (AreaTriangle/3)*std::sin(NS_PI_F * xi * H[0]);
 		
 		uint32 factor = 1;
 		if(xi>0)
@@ -222,7 +237,7 @@ int main(int argc, char** argv)
 	// --------------------------------
 	std::cout << "Calculating..." << std::endl;
 
-	uint32 iterations = 0;
+	size_t iterations = 0;
 	DynamicVector<Number> X(VertexSize);
 
 	auto p2_start = std::chrono::high_resolution_clock::now();
@@ -233,7 +248,7 @@ int main(int argc, char** argv)
 #endif
 	auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
-	std::cout << iterations << " Iterations ["
+	std::cout << "  " << iterations << " Iterations ["
 		<< std::chrono::duration_cast<std::chrono::seconds>(p2_diff).count()
 		<< " s]" << std::endl;
 

@@ -6,7 +6,7 @@ NS_BEGIN_NAMESPACE
 
 template<typename T, Dimension K, Dimension N>
 Simplex<T,K,N>::Simplex() :
-	vertices()
+	Vertices()
 {
 	static_assert(K <= N, "Simplex of k-order is bigger than parent dimension");
 }
@@ -20,7 +20,7 @@ Simplex<T,K,N>::Simplex(std::initializer_list<std::initializer_list<T> > list) :
 	Index i = 0;
 	for (const auto& v : list)
 	{
-		vertices[i] = FixedVector<T,N>(v);
+		Vertices[i] = FixedVector<T,N>(v);
 		i++;
 	}	
 }
@@ -32,7 +32,7 @@ T Simplex<T,K,N>::volume() const
 	Matrix<T> s(K,K);
 
 	for(Index i = 0; i < K; ++i)
-		subs[i] = vertices[i+1]-vertices[i];
+		subs[i] = Vertices[i+1]-Vertices[i];
 	
 	for(Index i = 0; i < K; ++i)
 	{
@@ -41,14 +41,6 @@ T Simplex<T,K,N>::volume() const
 	}
 
 	return (1.0/Math::factorial(K))*std::sqrt(Operations::determinant(s));
-}
-
-template<typename T, Dimension K, Dimension N>
-Simplex<T,K,N> Simplex<T,K,N>::gradient() const
-{
-	Simplex<T,K,N> t;
-	// TODO
-	return t;
 }
 
 NS_END_NAMESPACE

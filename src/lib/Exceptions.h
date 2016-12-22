@@ -53,4 +53,15 @@ NS_DECLARE_EXCEPTION(VectorSizeMismatch, Dimension, "Size of vectors do not matc
 NS_DECLARE_EXCEPTION(MatrixSizeMismatch, Dimension, "Size of matrix do not match.");
 NS_DECLARE_EXCEPTION(MatrixMulMismatch, Dimension, "Dimensional requirement for multiplication not fulfilled.");
 
+NS_DECLARE_EXCEPTION_GROUP(Mesh, NS);
+NS_DECLARE_EXCEPTION(IsolatedVertex, Mesh, "Vertex is isolated and not associated to atleast one simplex.");
+NS_DECLARE_EXCEPTION(MalformedVertexSimplexConnection, Mesh, "Vertex-Simplex relationship do not contain to eachother.");
+NS_DECLARE_EXCEPTION(IncompleteSimplex, Mesh, "Not all vertices of a simplex set.");
+NS_DECLARE_EXCEPTION(ZeroVolumeSimplex, Mesh, "Simplex has a volume of zero.");
+NS_DECLARE_EXCEPTION(MalformedSimplexNeighborConnection, Mesh, "Simplex-Simplex relationship do not contain to eachother.");
+NS_DECLARE_EXCEPTION(SimplexNeighborVertex, Mesh, "Not all shared vertices set.");
+NS_DECLARE_EXCEPTION(InvalidElementCount, Mesh, "Invalid count of elements.");
+NS_DECLARE_EXCEPTION(TooManySharedFaces, Mesh, "Too many faces shared with simplices. Result of bad construction.");
+
+
 NS_END_NAMESPACE

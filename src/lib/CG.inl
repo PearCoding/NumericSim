@@ -8,7 +8,7 @@ namespace CG {
 		template<template<typename> class M, typename T>
 		typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
 			cg(const M<T>& a, const DynamicVector<T>& b, const DynamicVector<T>& x0,
-				uint32 maxIter, double eps, uint32* it_stat)
+				size_t maxIter, double eps, size_t* it_stat)
 		{
 			if (a.rows() != a.columns())
 				throw NotSquareException();
@@ -29,10 +29,9 @@ namespace CG {
 			T rs = r.magSqr();
 
 			DynamicVector<T> l;
-			for (uint32 k = 0; k < maxIter; ++k)
+			size_t k = 0;
+			for (; k < maxIter; ++k)
 			{
-				if (it_stat)
-					*it_stat = k;
 
 				const T ak = rs / (a.mul(p).dot(p));
 				x += ak*p;
@@ -48,6 +47,9 @@ namespace CG {
 				r = l;
 				rs = ls;
 			}
+
+			if (it_stat)
+				*it_stat = k + 1;
 
 			return x;
 		}

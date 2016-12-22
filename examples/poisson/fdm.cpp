@@ -29,11 +29,13 @@ int main(int argc, char** argv)
 	constexpr double RELAX_PAR = 1.2;// SOR weight parameter (0,2]
 	constexpr double grid_width = 1;
 	constexpr double grid_height = 1;
-	constexpr double H = 0.05;
-	constexpr double K = 0.05;
+	constexpr double H = 0.005;
+	constexpr double K = 0.005;
 
-	auto f = [=](double x, double y) { return std::exp(-100 * (y + x));};
-	auto b = [=](double x, double y) { return std::sin(2 * pi * x / grid_width) + std::cos(2 * pi * y / grid_height);};
+	//auto f = [=](double x, double y) { return std::exp(-100 * (y + x));};
+	auto f = [=](double x, double y) { return -std::sin(pi * x)*std::sin(pi * y);};
+	//auto b = [=](double x, double y) { return std::sin(2 * pi * x / grid_width) + std::cos(2 * pi * y / grid_height);};
+	auto b = [=](double x, double y) { return 0;};
 
 	// Everything after this comment does not need to be changed.
 	constexpr Dimension XC = grid_width / H + 1;
@@ -145,7 +147,7 @@ int main(int argc, char** argv)
 		<< " s]" << std::endl;
 
 	// Writing dat
-	std::ofstream data("poisson_data.dat");
+	std::ofstream data("poisson_fdm.dat");
 	for (Index y = 0; y < YC; ++y)
 	{
 		for (Index x = 0; x < XC; ++x)

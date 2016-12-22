@@ -108,7 +108,7 @@ struct is_complex : std::integral_constant<bool,
 */
 template<class T>
 struct is_number : std::integral_constant<bool,
-	std::is_floating_point<T>::value ||
+	std::is_arithmetic<T>::value ||
 	is_complex<T>::value> {};
 
 
