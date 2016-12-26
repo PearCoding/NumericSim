@@ -13,7 +13,7 @@ template<typename T>
 NS_BEGIN_TESTCASE_T1(CG)
 NS_TEST("cg")
 {
-	Matrix<T> m = { { 4,1 },{ 1,3 } };
+	DenseMatrix<T> m = { { 4,1 },{ 1,3 } };
 	DynamicVector<T> b = { 1,2 };
 	DynamicVector<T> x0 = { 2,1 };
 	DynamicVector<T> res = { 1/11.0, 7/11.0 };

@@ -5,18 +5,22 @@
 NS_BEGIN_NAMESPACE
 namespace LU {
 	namespace serial {
-		template<typename T>
-		Matrix<T> cholesky(const Matrix<T>& m)
+		template<class M>
+		void cholesky(const M& m, M& L)
 		{
 			if (m.rows() != m.columns())
 				throw NotSquareException();
+
+			if (m.rows() != L.rows() || m.columns() != L.columns())
+				throw InvalidOutputMatrixException();
 
 #ifdef NS_ALLOW_CHECKS
 			if (!Check::matrixIsHermitian(m))
 				throw NotHermitianException();
 #endif
 
-			Matrix<T> L(m.rows(), m.columns());
+			typedef typename M::value_type T;
+
 			for (Index j = 0; j < L.rows(); ++j)
 			{
 				T s = (T)0;
@@ -27,7 +31,7 @@ namespace LU {
 				}
 
 				s = m.at(j, j) - s;
-				if (s <= (T)0)
+				if (mag_by_complex_vt(s) <= 0)
 					throw NotPositiveDefiniteException();
 
 				L.set(j, j, std::sqrt(s));
@@ -39,133 +43,23 @@ namespace LU {
 					L.set(i, j, (m.at(i, j) - s) / L.at(j, j));
 				}
 			}
-
-			return L;
-		}
-
-		template<typename T>
-		Matrix<ComplexNumber<T> > cholesky(const Matrix<ComplexNumber<T> >& m)
-		{
-			// Question: How cholesky works with not positive definite complex matrices? -> Not unique anymore :)
-
-			if (m.rows() != m.columns())
-				throw NotSquareException();
-
-#ifdef NS_ALLOW_CHECKS
-			if (!Check::matrixIsHermitian(m))
-				throw NotHermitianException();
-#endif
-
-			Matrix<ComplexNumber<T> > L(m.rows(), m.columns());
-			for (Index j = 0; j < L.rows(); ++j)
-			{
-				ComplexNumber<T> s;
-				for (Index k = 0; k < j; ++k)
-				{
-					ComplexNumber<T> v = L.at(j, k);
-					s += v * v.conjugate();
-				}
-				
-				L.set(j, j, std::sqrt(m.at(j, j) - s));
-				for (Index i = j; i < L.rows(); ++i)
-				{
-					s = (ComplexNumber<T>)0;
-					for (Index k = 0; k < i; ++k)
-						s += L.at(i, k)*L.at(j, k).conjugate();
-					L.set(i, j, (m.at(i, j) - s) / L.at(j, j));
-				}
-			}
-
-			return L;
-		}
-
-		// TODO: Improve for sparse matrices!
-		template<typename T>
-		SparseMatrix<T> cholesky(const SparseMatrix<T>& m)
-		{
-			if (m.rows() != m.columns())
-				throw NotSquareException();
-
-#ifdef NS_ALLOW_CHECKS
-			if (!Check::matrixIsHermitian(m))
-				throw NotHermitianException();
-#endif
-
-			SparseMatrix<T> L(m.rows(), m.columns());
-			for (Index j = 0; j < L.rows(); ++j)// Rows
-			{
-				T s = (T)0;
-				for (Index k = 0; k < j; ++k)
-				{
-					T v = L.at(j, k);
-					s += v*v;
-				}
-
-				s = m.at(j, j) - s;
-				if (s <= (T)0)// FIXME: Complex?
-					throw NotPositiveDefiniteException();
-
-				L.set(j, j, std::sqrt(s));
-				for (Index i = j; i < L.rows(); ++i)
-				{
-					s = (T)0;
-					for (Index k = 0; k < i; ++k)
-						s += L.at(i, k)*L.at(j, k);
-					L.set(i, j, (m.at(i, j) - s) / L.at(j, j));
-				}
-			}
-
-			return L;
-		}
-
-
-		template<typename T>
-		SparseMatrix<ComplexNumber<T> > cholesky(const SparseMatrix<ComplexNumber<T> >& m)
-		{
-			// Question: How cholesky works with not positive definite complex matrices? -> Not unique anymore :)
-			if (m.rows() != m.columns())
-				throw NotSquareException();
-
-#ifdef NS_ALLOW_CHECKS
-			if (!Check::matrixIsHermitian(m))
-				throw NotHermitianException();
-#endif
-
-			SparseMatrix<ComplexNumber<T> > L(m.rows(), m.columns());
-			for (Index j = 0; j < L.rows(); ++j)
-			{
-				ComplexNumber<T> s;
-				for (Index k = 0; k < j; ++k)
-				{
-					ComplexNumber<T> v = L.at(j, k);
-					s += v*v.conjugate();
-				}
-
-				L.set(j, j, std::sqrt(m.at(j, j) - s));
-				for (Index i = j; i < L.rows(); ++i)
-				{
-					s = (ComplexNumber<T>)0;
-					for (Index k = 0; k < i; ++k)
-						s += L.at(i, k)*L.at(j, k).conjugate();
-					L.set(i, j, (m.at(i, j) - s) / L.at(j, j));
-				}
-			}
-
-			return L;
 		}
 
 		//---------------------------------------------------------------------
-		template<typename T>
-		void doolittle(const Matrix<T>& A, Matrix<T>& L, Matrix<T>& U, Matrix<T>& P, size_t* pivotCount)
+		template<typename T, class DC>
+		void doolittle(const BaseMatrix<T,DC>& A, BaseMatrix<T,DC>& L, BaseMatrix<T,DC>& U, BaseMatrix<T,DC>& P, size_t* pivotCount)
 		{
 			if (A.rows() != A.columns())
 				throw NotSquareException();
+
+			if (A.rows() != L.rows() || A.columns() != L.columns() ||
+				A.rows() != P.rows() || A.columns() != P.columns())
+				throw InvalidOutputMatrixException();
 
 			const size_t n = A.rows();
 
 			// Setup matrices
 			U = A;
-			L = Matrix<T>(n,n);
 			if(pivotCount)
 				*pivotCount = 0;
 
@@ -231,7 +125,6 @@ namespace LU {
 			}
 
 			// Build pivot matrix
-			P = Matrix<T>(n,n);
 			for (Index i = 0; i < n; ++i)
 				P.set(i,rowTable[i], (T)1);
 			

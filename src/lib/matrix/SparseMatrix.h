@@ -266,6 +266,11 @@ public:
 	typedef const SparseMatrixColumnIterator<T> const_column_iterator;
 
 	/**
+	* @brief A typedef of the underlying value type.
+	*/
+	typedef T value_type;
+
+	/**
 	* @brief Constructs an empty sparse matrix of zero size (Not useful)
 	 */
 	SparseMatrix();

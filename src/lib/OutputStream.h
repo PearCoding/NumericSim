@@ -23,8 +23,8 @@ std::ostream& operator<<(std::ostream& out, const NS::Vector<T,DC>& f)
 	return out;
 }
 
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::Matrix<T>& f)
+template<typename T, class DC>
+std::ostream& operator<<(std::ostream& out, const NS::BaseMatrix<T, DC>& f)
 {
 	out << "[ ";
 	for (Index i = 0; i < f.rows(); ++i)

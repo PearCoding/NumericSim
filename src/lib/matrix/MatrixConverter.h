@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matrix/Matrix.h"
+#include "matrix/DynamicMatrix.h"
 #include "matrix/SparseMatrix.h"
 
 NS_BEGIN_NAMESPACE
@@ -12,8 +12,8 @@ namespace Convert
 	* @param m Matrix to convert.
 	* @return The new sparse matrix.
 	*/
-	template<typename T>
-	SparseMatrix<T> toSparseMatrix(const Matrix<T>& m);
+	template<typename T, class DC>
+	SparseMatrix<T> toSparseMatrix(const BaseMatrix<T, DC>& m);
 
 	/**
 	* @brief Converts a sparse matrix to a dense matrix.
@@ -21,7 +21,7 @@ namespace Convert
 	* @return The new dense matrix.
 	*/
 	template<typename T>
-	Matrix<T> toDenseMatrix(const SparseMatrix<T>& m);
+	DynamicMatrix<T> toDenseMatrix(const SparseMatrix<T>& m);
 }
 
 NS_END_NAMESPACE

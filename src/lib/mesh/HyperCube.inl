@@ -4,40 +4,40 @@
 
 NS_BEGIN_NAMESPACE
 namespace Mesh {
-	template<typename T, Dimension K, Dimension N>
-	Mesh<T,K,N> HyperCube<T,K,N>::generate(
+	template<typename T, Dimension K>
+	Mesh<T,K> HyperCube<T,K>::generate(
 		const FixedVector<Dimension,K>& elements,
 		const FixedVector<T,K>& size,
-		const FixedVector<T,N>& offset)
+		const FixedVector<T,K>& offset)
 	{
-		Mesh<T,K,N> mesh;
+		Mesh<T,K> mesh;
 
 		//TODO
 		return mesh;
 	}
 
-	template<typename T, Dimension N>
-	Mesh<T,2,N> HyperCube<T,2,N>::generate(const FixedVector<Dimension,2>& elements,
+	template<typename T>
+	Mesh<T,2> HyperCube<T,2>::generate(const FixedVector<Dimension,2>& elements,
 			const FixedVector<T,2>& size,
-			const FixedVector<T,N>& offset)
+			const FixedVector<T,2>& offset)
 	{
-		typedef MeshVertex<T,2,N> MV;
-		typedef MeshSimplex<T,2,N> MS;
+		typedef MeshVertex<T,2> MV;
+		typedef MeshElement<T,2> ME;
 
-		Mesh<T,2,N> mesh;
+		Mesh<T,2> mesh;
 
 		if(elements[0] < 1 || elements[1] < 1)
 			throw InvalidElementCountException();
 
 		// Reserve container
 		mesh.reserveVertices((elements[0]+1)*(elements[1]+1));
-		mesh.reserveSimplices(elements[0]*elements[1]*2);
+		mesh.reserveElements(elements[0]*elements[1]*2);
 
 		// Unit vectors
-		FixedVector<T,N> ex;
+		FixedVector<T,2> ex;
 		ex.fill((T)0);
 		ex[0] = size[0]/(T)elements[0];
-		FixedVector<T,N> ey;
+		FixedVector<T,2> ey;
 		ey.fill((T)0);
 		ey[1] = size[1]/(T)elements[1];
 		
@@ -63,17 +63,17 @@ namespace Mesh {
 				MV* v = new MV(offset + ex*(T)j + py);
 				mesh.addVertex(v);
 
-				MS* s1 = new MS();
+				ME* s1 = new ME();
 				s1->Vertices[0] = lastRowVertices[j-1];
 				s1->Vertices[1] = lastVertex;
 				s1->Vertices[2] = v;
-				mesh.addSimplex(s1);
+				mesh.addElement(s1);
 
-				MS* s2 = new MS();
+				ME* s2 = new ME();
 				s2->Vertices[0] = lastRowVertices[j-1];
 				s2->Vertices[1] = v;
 				s2->Vertices[2] = lastRowVertices[j];
-				mesh.addSimplex(s2);
+				mesh.addElement(s2);
 
 				lastRowVertices[j-1] = lastVertex;
 				lastVertex = v;

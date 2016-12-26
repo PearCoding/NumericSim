@@ -6,28 +6,44 @@
 
 NS_BEGIN_NAMESPACE
 
-template<typename T, Dimension K, Dimension N>
+template<typename T, Dimension K>
 class Simplex
 {	
 public:
 	static constexpr Dimension Order = K;
 	static constexpr Dimension VertexCount = K+1;
 
-	FixedVector<T,N> Vertices[K+1];
+	typedef FixedVector<T,K> vertex_t;
+	typedef FixedMatrix<T,K,K> matrix_t;
 	
-	inline Simplex();
-	inline Simplex(std::initializer_list<std::initializer_list<T> > list);
+	Simplex();
+	Simplex(std::initializer_list<std::initializer_list<T> > list);
 
-	inline T volume() const;
+	void prepare();
+
+	const vertex_t& operator[](Index i) const;
+	vertex_t& operator[](Index i);
+
+	T volume() const;
+
+	//vertex_t toLocal(const vertex_t& global) const;
+	vertex_t toGlobal(const vertex_t& local) const;
+
+	const matrix_t& matrix() const;
+	//const matrix_t& inverseMatrix() const;
+	T determinant() const;
+
+private:
+	vertex_t mVertices[K+1];
+	bool mPrepared;
+	matrix_t mMatrix;
+	//matrix_t mInverseMatrix;
+	T mDeterminant;
 };
 
 // Typedefs
-template<typename T, Dimension N>
-using Triangle = Simplex<T, 2, N>;
 template<typename T>
-using Triangle2D = Triangle<T, 2>;
-template<typename T>
-using Triangle3D = Triangle<T, 3>;
+using Triangle = Simplex<T, 2>;
 
 NS_END_NAMESPACE
 

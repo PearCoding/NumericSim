@@ -18,7 +18,11 @@ namespace Check
 	 * @return True if orthogonal, false otherwise.
 	 */
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsOrthogonal(const M<T>& m);
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, bool >::type
+	matrixIsOrthogonal(const M<T>& m);
+
+	template<typename T, Dimension K1, Dimension K2>
+	bool matrixIsOrthogonal(const FixedMatrix<T,K1,K2>& m);
 
 	/**
 	* @brief Checks if the matrix is unitary.
@@ -30,7 +34,11 @@ namespace Check
 	* @return True if unitary, false otherwise.
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsUnitary(const M<T>& m);
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, bool >::type
+	matrixIsUnitary(const M<T>& m);
+
+	template<typename T, Dimension K1, Dimension K2>
+	bool matrixIsUnitary(const FixedMatrix<T,K1,K2>& m);
 
 	/**
 	* @brief Checks if the matrix is a projection.
@@ -41,8 +49,8 @@ namespace Check
 	* @param m Matrix to check
 	* @return True if a projection, false otherwise.
 	*/
-	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsProjection(const M<T>& m);
+	template<class M>
+	bool matrixIsProjection(const M& m);
 
 	/**
 	* @brief Checks if the matrix is symmetric.
@@ -53,8 +61,8 @@ namespace Check
 	* @param m Matrix to check
 	* @return True if symmetric, false otherwise.
 	*/
-	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetric(const M<T>& m);
+	template<class M>
+	bool matrixIsSymmetric(const M& m);
 
 	/**
 	* @brief Checks if the matrix is hermitian.
@@ -65,8 +73,8 @@ namespace Check
 	* @param m Matrix to check
 	* @return True if hermitian, false otherwise.
 	*/
-	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsHermitian(const M<T>& m);
+	template<class M>
+	bool matrixIsHermitian(const M& m);
 
 	/**
 	* @brief Checks if the matrix is skew-symmetric.
@@ -77,8 +85,8 @@ namespace Check
 	* @param m Matrix to check
 	* @return True if skew-symmetric, false otherwise.
 	*/
-	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSkewSymmetric(const M<T>& m);
+	template<class M>
+	bool matrixIsSkewSymmetric(const M& m);
 
 	/**
 	* @brief Checks if the matrix is skew-hermitian.
@@ -89,34 +97,8 @@ namespace Check
 	* @param m Matrix to check
 	* @return True if skew-hermitian, false otherwise.
 	*/
-	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSkewHermitian(const M<T>& m);
-
-	/**
-	* @brief Checks if the matrix is symmetric positive definite.
-	* @details A matrix \f$ A \f$ is symmetric positive definite when it is symmetric and :
-	* \f[
-	*  \sum_{j<i} |A_{ij}| < A_{ii}
-	* \f]
-	* @note This only works for non complex matrices.
-	* @param m Matrix to check.
-	* @return True if symmetric positive definite, false otherwise.
-	*/
-	/*template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetricPositveDefinite(const M<T>& m);*/
-
-	/**
-	* @brief Checks if the matrix is symmetric negative definite.
-	* @details A matrix \f$ A \f$ is symmetric negative definite when it is symmetric and :
-	* \f[
-	*  \sum_{j<i} |A_{ij}| < -A_{ii}
-	* \f]
-	* @note This only works for non complex matrices.
-	* @param m Matrix to check.
-	* @return True if symmetric negative definite, false otherwise.
-	*/
-	/*template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, bool >::type matrixIsSymmetricPositveDefinite(const M<T>& m);*/
+	template<class M>
+	bool matrixIsSkewHermitian(const M& m);
 }
 
 NS_END_NAMESPACE

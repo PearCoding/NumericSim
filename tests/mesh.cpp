@@ -14,15 +14,16 @@ NS_TEST("generator")
 	constexpr Dimension S = 10;
 	try
 	{
-		Mesh::Mesh<T,2,3> mesh = Mesh::HyperCube<T,2,3>::generate(
-			Vector2D<Dimension>({S,S}),
-			Vector2D<T>({1,1}),
-			Vector3D<T>({0,0,0}));
+		Mesh::Mesh<T,2> mesh = Mesh::HyperCube<T,2>::generate(
+			Vector2D<Dimension>{S,S},
+			Vector2D<T>{1,1},
+			Vector2D<T>{0,0});
 		
+		mesh.prepare();
 		mesh.validate();
 
 		NS_CHECK_EQ(mesh.vertices().size(), (S+1)*(S+1));
-		NS_CHECK_EQ(mesh.simplices().size(), S*S*2);
+		NS_CHECK_EQ(mesh.elements().size(), S*S*2);
 	}
 	catch (const NSException& exception)
 	{

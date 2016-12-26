@@ -86,6 +86,7 @@ T Vector<T,DC>::magSqr() const
 }
 
 // Boolean set operations
+// NOT WORKING
 template<typename T, class DC>
 Vector<T,DC> Vector<T,DC>::left(Index i) const
 {
@@ -97,6 +98,7 @@ Vector<T,DC> Vector<T,DC>::left(Index i) const
 	return tmp;
 }
 
+// NOT WORKING
 template<typename T, class DC>
 Vector<T,DC> Vector<T,DC>::right(Index i) const
 {
@@ -110,6 +112,7 @@ Vector<T,DC> Vector<T,DC>::right(Index i) const
 	return tmp;
 }
 
+// NOT WORKING
 template<typename T, class DC>
 Vector<T,DC> Vector<T,DC>::mid(Index start, Index end) const
 {

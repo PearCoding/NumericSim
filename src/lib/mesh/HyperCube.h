@@ -6,25 +6,25 @@ NS_BEGIN_NAMESPACE
 
 namespace Mesh
 {
-	template<typename T, Dimension K, Dimension N>
+	template<typename T, Dimension K>
 	class HyperCube
 	{
 	public:
-		static Mesh<T,K,N> generate(const FixedVector<Dimension,K>& elements,
+		static Mesh<T,K> generate(const FixedVector<Dimension,K>& elements,
 			const FixedVector<T,K>& size,
-			const FixedVector<T,N>& offset);
+			const FixedVector<T,K>& offset);
 	};
 
 	/**
 	 * Grid 2D
 	 */
-	template<typename T, Dimension N>
-	class HyperCube<T,2,N>
+	template<typename T>
+	class HyperCube<T,2>
 	{
 	public:
-		static Mesh<T,2,N> generate(const FixedVector<Dimension,2>& elements,
+		static Mesh<T,2> generate(const FixedVector<Dimension,2>& elements,
 			const FixedVector<T,2>& size,
-			const FixedVector<T,N>& offset);
+			const FixedVector<T,2>& offset);
 	};
 }
 

@@ -4,11 +4,9 @@
 
 NS_BEGIN_NAMESPACE
 namespace Mesh {
-	template<typename T, Dimension N>
-	Mesh<T,2,N> MeshObjLoader<T,N>::loadFile(const std::string& file)
-	{
-		static_assert(N == 2 || N == 3, "Obj loader only supports 2d or 3d data.");
-		
+	template<typename T>
+	Mesh<T,2> MeshObjLoader<T>::loadFile(const std::string& file)
+	{		
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;// We ignore materials
 		std::string err;
@@ -19,11 +17,9 @@ namespace Mesh {
 		return load(shapes);
 	}
 
-	template<typename T, Dimension N>
-	Mesh<T,2,N> MeshObjLoader<T,N>::loadString(const std::string& str)
-	{
-		static_assert(N == 2 || N == 3, "Obj loader only supports 2d or 3d data.");
-		
+	template<typename T>
+	Mesh<T,2> MeshObjLoader<T>::loadString(const std::string& str)
+	{		
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;// We ignore materials
 		std::string err;
@@ -37,37 +33,37 @@ namespace Mesh {
 		return load(shapes);
 	}
 
-	template<typename T, Dimension N>
-	Mesh<T,2,N> MeshObjLoader<T,N>::load(const std::vector<tinyobj::shape_t>& shapes)
+	template<typename T>
+	Mesh<T,2> MeshObjLoader<T>::load(const std::vector<tinyobj::shape_t>& shapes)
 	{
-		typedef MeshVertex<T,2,N> MV;
-		typedef MeshSimplex<T,2,N> MS;
+		typedef MeshVertex<T,2> MV;
+		typedef MeshElement<T,2> ME;
 
-		Mesh<T,2,N> mesh;
+		Mesh<T,2> mesh;
 
 		for (tinyobj::shape_t shape : shapes)
 		{
 			mesh.reserveVertices(shape.mesh.positions.size() / 3);
-			mesh.reserveSimplices(shape.mesh.indices.size() / 3);
+			mesh.reserveElements(shape.mesh.indices.size() / 3);
 
 			for (size_t i = 0; i < shape.mesh.positions.size() / 3; ++i)
 			{
 				MV* v = new MV;
-				for(Dimension j = 0; j < N; ++j)
+				for(Dimension j = 0; j < 2; ++j)
 					v->Vertex[j] = (T)shape.mesh.positions[3*i + j];
 				mesh.addVertex(v);
 			}
 
 			for (size_t i = 0; i < shape.mesh.indices.size() / 3; ++i)
 			{
-				MS* s = new MS;
+				ME* s = new ME;
 				for (Dimension j = 0; j < 3; ++j)
 				{
 					Index idx = shape.mesh.indices[3 * i + j];
 					s->Vertices[j] = mesh.vertex(idx);
 				}
 
-				mesh.addSimplex(s);
+				mesh.addElement(s);
 			}
 
 			break;// Only one

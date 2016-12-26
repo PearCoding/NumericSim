@@ -12,6 +12,8 @@ template<typename T, class DC>
 class Vector : public CountableSet<T, DC>
 {
 public:
+	typedef T value_type;
+	
 	Vector();
 
 	template<class TMP = DC>//Dynamic

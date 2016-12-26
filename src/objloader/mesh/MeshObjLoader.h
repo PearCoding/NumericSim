@@ -13,15 +13,15 @@ NS_DECLARE_EXCEPTION(LoadObjError, ObjLoader, "Error while loading the obj file.
 
 namespace Mesh
 {
-	template<typename T, Dimension N>
+	template<typename T>
 	class MeshObjLoader
 	{
 	public:
-		static Mesh<T,2,N> loadFile(const std::string& file);
-		static Mesh<T,2,N> loadString(const std::string& str);
+		static Mesh<T,2> loadFile(const std::string& file);
+		static Mesh<T,2> loadString(const std::string& str);
 
 	private:
-		static Mesh<T,2,N> load(const std::vector<tinyobj::shape_t>& shapes);
+		static Mesh<T,2> load(const std::vector<tinyobj::shape_t>& shapes);
 	};
 }
 

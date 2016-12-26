@@ -7,7 +7,7 @@ NS_BEGIN_NAMESPACE
 namespace Construct
 {
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type eye(Dimension d1, Dimension d2)
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type eye(Dimension d1, Dimension d2)
 	{
 		M<T> m(d1, d2);
 		for (Index i = 0; i < std::min(d1, d2); ++i)
@@ -16,8 +16,18 @@ namespace Construct
 		return m;
 	}
 
+	template<typename T, Dimension K1, Dimension K2>
+	FixedMatrix<T,K1,K2> eye()
+	{
+		FixedMatrix<T,K1,K2> m;
+		for (Index i = 0; i < std::min(K1, K2); ++i)
+			m.set(i, i, (T)1);
+
+		return m;
+	}
+
 	template<template<typename> class M, typename T, typename DC>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		diag(const Vector<T,DC>& v)
 	{
 		M<T> m(v.size(), v.size());
@@ -29,7 +39,7 @@ namespace Construct
 	}
 
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, DynamicVector<T> >::type
 		diag(const M<T>& m)
 	{
 		DynamicVector<T> v;
@@ -42,7 +52,7 @@ namespace Construct
 	}
 
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		tril(const M<T>& m, int32 k)
 	{
 		M<T> r(m.rows(), m.columns());
@@ -64,7 +74,7 @@ namespace Construct
 	}
 
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		triu(const M<T>& m, int32 k)
 	{
 		M<T> r(m.rows(), m.columns());
@@ -86,7 +96,7 @@ namespace Construct
 	}
 
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type hilbert(Dimension d)
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type hilbert(Dimension d)
 	{
 		M<T> m(d, d);
 		for (Index i = 0; i < d; ++i)
@@ -102,7 +112,7 @@ namespace Construct
 	}
 
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type inv_hilbert(Dimension d)
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type inv_hilbert(Dimension d)
 	{
 		M<T> m(d, d);
 		for (Index i = 0; i < d; ++i)

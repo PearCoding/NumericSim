@@ -9,44 +9,44 @@ namespace Mesh
 {
 	/* Mesh representation of a simplical complex */
 
-	template<typename T, Dimension K, Dimension N>
+	template<typename T, Dimension K>
 	class MeshVertex;
 
-	template<typename T, Dimension K, Dimension N>
-	class MeshSimplex
+	template<typename T, Dimension K>
+	class MeshElement
 	{
 	public:
 		struct Neighbor
 		{
-			MeshSimplex* Pointer;
-			MeshVertex<T,K,N>* SharedVertices[K];
+			MeshElement* Pointer;
+			MeshVertex<T,K>* SharedVertices[K];
 		};
 
-		MeshVertex<T,K,N>* Vertices[K+1];
+		Simplex<T,K> Element;
+		MeshVertex<T,K>* Vertices[K+1];
 		Neighbor Neighbors[K+1];
 
-		MeshSimplex();
-
-		Simplex<T,K,N> toSimplex() const;
+		MeshElement();
 	};
 
-	template<typename T, Dimension K, Dimension N>
+	template<typename T, Dimension K>
 	class MeshVertex
 	{
 	public:
-		FixedVector<T,N> Vertex;
-		std::vector<MeshSimplex<T,K,N>*> Simplices;
+		Index GlobalIndex;
+		FixedVector<T,K> Vertex;
+		std::vector<MeshElement<T,K>*> Elements;
 
 		MeshVertex();
-		MeshVertex(const FixedVector<T,N>& vertex);
+		MeshVertex(const FixedVector<T,K>& vertex);
 	};
 
-	template<typename T, Dimension K, Dimension N>
+	template<typename T, Dimension K>
 	class Mesh
 	{
 	public:
-		typedef std::vector<MeshVertex<T,K,N>*> MeshVertexList;
-		typedef std::vector<MeshSimplex<T,K,N>*> MeshSimplexList;
+		typedef std::vector<MeshVertex<T,K>*> MeshVertexList;
+		typedef std::vector<MeshElement<T,K>*> MeshElementList;
 
 		Mesh();
 		~Mesh();
@@ -55,24 +55,26 @@ namespace Mesh
 
 		// First: Add vertices
 		void reserveVertices(size_t count);
-		void addVertex(MeshVertex<T,K,N>* vertex);// If successful the owner of the pointer is now the Mesh. Do not delete it
-		MeshVertex<T,K,N>* vertex(Index i) const;
-		void setVertex(Index i, MeshVertex<T,K,N>* vertex);
+		void addVertex(MeshVertex<T,K>* vertex);// If successful the owner of the pointer is now the Mesh. Do not delete it
+		MeshVertex<T,K>* vertex(Index i) const;
+		void setVertex(Index i, MeshVertex<T,K>* vertex);
 		const MeshVertexList& vertices() const;
 
 		// Second: Group vertices together and form simplex 
-		void reserveSimplices(size_t count);
-		void addSimplex(MeshSimplex<T,K,N>* simplex);// If successful the owner of the pointer is now the Mesh. Do not delete it
-		MeshSimplex<T,K,N>* simplex(Index i) const;
-		void setSimplex(Index i, MeshSimplex<T,K,N>* simplex);
-		const MeshSimplexList& simplices() const;
+		void reserveElements(size_t count);
+		void addElement(MeshElement<T,K>* element);// If successful the owner of the pointer is now the Mesh. Do not delete it
+		MeshElement<T,K>* element(Index i) const;
+		void setElement(Index i, MeshElement<T,K>* element);
+		const MeshElementList& elements() const;
 
 		// Third: After build, setup the neighbors
 		void setupNeighbors();
 
+		void prepare();
+
 		void validate() const throw(MeshException);
 	private:
-		MeshSimplexList mSimplices;
+		MeshElementList mElements;
 		MeshVertexList mVertices;
 	};
 }

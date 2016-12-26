@@ -14,8 +14,11 @@ namespace Construct
 	* @return A new matrix with the size `d1 x d2` and ones at the diagonal.
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		eye(Dimension d1, Dimension d2);
+
+	template<typename T, Dimension K1, Dimension K2>
+	FixedMatrix<T,K1,K2> eye();
 
 	/**
 	* @brief Generates a square matrix with the given diagonal element.
@@ -23,7 +26,7 @@ namespace Construct
 	* @return A new matrix with the size `v.size() x v.size()` and vector v at the diagonal.
 	*/
 	template<template<typename> class M, typename T, typename DC>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		diag(const Vector<T,DC>& v);
 
 	/**
@@ -32,7 +35,7 @@ namespace Construct
 	* @return A new vector with the size `min(m.rows(),m.columns())` and the diagonal of the matrix as his content.
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, DynamicVector<T> >::type
 		diag(const M<T>& m);
 
 	/**
@@ -43,7 +46,7 @@ namespace Construct
 	* @sa triu
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		tril(const M<T>& m, int32 k = 0);
 
 	/**
@@ -54,7 +57,7 @@ namespace Construct
 	* @sa tril
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		triu(const M<T>& m, int32 k = 0);
 
 	/**
@@ -66,7 +69,7 @@ namespace Construct
 	* @sa inv_hilbert
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		hilbert(Dimension d);
 
 	/**
@@ -78,7 +81,7 @@ namespace Construct
 	* @sa hilbert
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, M<T> >::type
+	typename std::enable_if<is_dynamic_matrix<M, T>::value, M<T> >::type
 		inv_hilbert(Dimension d);
 }
 

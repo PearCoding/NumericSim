@@ -6,8 +6,8 @@ NS_BEGIN_NAMESPACE
 
 namespace Convert
 {
-	template<typename T>
-	SparseMatrix<T> toSparseMatrix(const Matrix<T>& m)
+	template<typename T, class DC>
+	SparseMatrix<T> toSparseMatrix(const BaseMatrix<T, DC>& m)
 	{
 		SparseMatrix<T> res(m.rows(), m.columns());
 		for (Index i = 0; i < m.rows(); ++i)
@@ -24,7 +24,7 @@ namespace Convert
 	}
 
 	template<typename T>
-	Matrix<T> toDenseMatrix(const SparseMatrix<T>& m)
+	DynamicMatrix<T> toDenseMatrix(const SparseMatrix<T>& m)
 	{
 		Matrix<T> res(m.rows(), m.columns());
 		for (auto it = m.begin(); it != m.end(); ++it)

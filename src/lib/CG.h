@@ -11,9 +11,8 @@ namespace CG
 {
 	namespace serial
 	{
-		template<template<typename> class M, typename T>
-		typename std::enable_if<is_matrix<M, T>::value, DynamicVector<T> >::type
-			cg(const M<T>& a, const DynamicVector<T>& b, const DynamicVector<T>& x0,
+		template<class M, class V1, class V2>
+		V1 cg(const M& a, const V2& b, const V1& x0,
 				size_t maxIter = 1024, double eps = 10e-6, size_t* it_stat = nullptr);
 	}
 }

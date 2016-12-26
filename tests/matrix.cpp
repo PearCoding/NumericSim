@@ -1,5 +1,6 @@
 #include "Test.h"
-#include "matrix/Matrix.h"
+#include "matrix/DenseMatrix.h"
+#include "matrix/FixedMatrix.h"
 #include "matrix/SparseMatrix.h"
 #include "OutputStream.h"
 
@@ -279,7 +280,7 @@ NS_TEST("skew-symmetric")
 }
 NS_TEST("skew-hermitian")
 {
-	M<T> m1 = { { 0,0,1 },{ 0,0,0 },{ -1,0,0 } };// Should be complex
+	M<T> m1 = { { 0,0,1 },{ 0,0,0 },{ -1,0,0 } };
 	M<T> m2 = { { 1,1 },{ 0,1 } };
 
 	NS_CHECK_TRUE(Check::matrixIsSkewHermitian(m1));
@@ -293,9 +294,9 @@ NS_TEST("determinant")
 NS_END_TESTCASE()
 
 NST_BEGIN_MAIN
-NST_TESTCASE_T2(Matrix, Matrix, float);
-NST_TESTCASE_T2(Matrix, Matrix, double);
-NST_TESTCASE_T2(Matrix, Matrix, ComplexNumber<double>);
+NST_TESTCASE_T2(Matrix, DenseMatrix, float);
+NST_TESTCASE_T2(Matrix, DenseMatrix, double);
+NST_TESTCASE_T2(Matrix, DenseMatrix, ComplexNumber<double>);
 NST_TESTCASE_T2(Matrix, SparseMatrix, float);
 NST_TESTCASE_T2(Matrix, SparseMatrix, double);
 NST_TESTCASE_T2(Matrix, SparseMatrix, ComplexNumber<double>);

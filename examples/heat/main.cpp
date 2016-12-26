@@ -143,12 +143,12 @@ int main(int argc, char** argv)
 	std::cout << "Calculating..." << std::endl;
 
 	// Iterations
-	uint32 iterations = 0;
+	size_t iterations = 0;
 	DynamicVector<double> X;
 	X.resize(D);
 
 	auto p2_start = std::chrono::high_resolution_clock::now();
-	X = Iterative::serial::sor<SparseMatrix, double>(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
+	X = Iterative::serial::sor(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
 	auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
 	std::cout << iterations << " Iterations ["

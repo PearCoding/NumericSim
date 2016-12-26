@@ -47,6 +47,7 @@ NS_DECLARE_EXCEPTION(Singular, Math, "Matrix is singular.");
 NS_DECLARE_EXCEPTION(NotPositiveDefinite, Math, "Matrix is not positive definite.");
 NS_DECLARE_EXCEPTION(NotHermitian, Math, "Matrix is not hermitian.");
 NS_DECLARE_EXCEPTION(IterativeMatrixVectorMismatch, Math, "Matrix and vectors for iterative methods do not match in dimensions.");
+NS_DECLARE_EXCEPTION(InvalidOutputMatrix, Math, "Given Matrix does not match output specifications.");
 
 NS_DECLARE_EXCEPTION_GROUP(Dimension, NS);
 NS_DECLARE_EXCEPTION(VectorSizeMismatch, Dimension, "Size of vectors do not match.");
@@ -54,12 +55,13 @@ NS_DECLARE_EXCEPTION(MatrixSizeMismatch, Dimension, "Size of matrix do not match
 NS_DECLARE_EXCEPTION(MatrixMulMismatch, Dimension, "Dimensional requirement for multiplication not fulfilled.");
 
 NS_DECLARE_EXCEPTION_GROUP(Mesh, NS);
+NS_DECLARE_EXCEPTION(InvalidVertexIndex, Mesh, "Vertex has an invalid global index.");
 NS_DECLARE_EXCEPTION(IsolatedVertex, Mesh, "Vertex is isolated and not associated to atleast one simplex.");
-NS_DECLARE_EXCEPTION(MalformedVertexSimplexConnection, Mesh, "Vertex-Simplex relationship do not contain to eachother.");
-NS_DECLARE_EXCEPTION(IncompleteSimplex, Mesh, "Not all vertices of a simplex set.");
+NS_DECLARE_EXCEPTION(MalformedVertexElementConnection, Mesh, "Vertex-Simplex relationship do not contain to eachother.");
+NS_DECLARE_EXCEPTION(IncompleteElement, Mesh, "Not all vertices of a simplex set.");
 NS_DECLARE_EXCEPTION(ZeroVolumeSimplex, Mesh, "Simplex has a volume of zero.");
-NS_DECLARE_EXCEPTION(MalformedSimplexNeighborConnection, Mesh, "Simplex-Simplex relationship do not contain to eachother.");
-NS_DECLARE_EXCEPTION(SimplexNeighborVertex, Mesh, "Not all shared vertices set.");
+NS_DECLARE_EXCEPTION(MalformedElementNeighborConnection, Mesh, "Simplex-Simplex relationship do not contain to eachother.");
+NS_DECLARE_EXCEPTION(ElementNeighborVertex, Mesh, "Not all shared vertices set.");
 NS_DECLARE_EXCEPTION(InvalidElementCount, Mesh, "Invalid count of elements.");
 NS_DECLARE_EXCEPTION(TooManySharedFaces, Mesh, "Too many faces shared with simplices. Result of bad construction.");
 

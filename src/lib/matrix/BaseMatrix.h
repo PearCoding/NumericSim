@@ -10,8 +10,41 @@
 
 NS_BEGIN_NAMESPACE
 
+// Types for dynamic and fixed matrix types
+template<typename T, Dimension K1, Dimension K2>
+struct DataContainer2D
+{};
+
 template<typename T>
-class Matrix;
+struct DataContainer2D<std::vector<T>,0,0>
+{
+	typedef std::vector<T> container_type;
+
+	container_type Container;
+	Dimension RowCount=0;
+	Dimension ColumnCount=0;
+};
+
+template<typename T, Dimension K1, Dimension K2>
+struct DataContainer2D<std::array<T,K1*K2>,K1,K2>
+{
+	typedef std::array<T,K1*K2> container_type;
+
+	container_type Container;
+	static constexpr Dimension RowCount = K1;
+	static constexpr Dimension ColumnCount = K2;
+};
+
+template<typename T>
+using dynamic_container2d_t = DataContainer2D<std::vector<T>,0,0>;
+
+template<typename T, Dimension K1, Dimension K2>
+using fixed_container2d_t = DataContainer2D<std::array<T,K1*K2>,K1,K2>;
+
+// -----------------------------------------------
+
+template<typename T, class DC>
+class BaseMatrix;
 
 /**
 * @brief An Iterator to traverse through the entries of a (dense) matrix.
@@ -21,12 +54,12 @@ class Matrix;
 * @sa MatrixRowIterator
 * @sa MatrixColumnIterator
 */
-template<typename T>
+template<typename T, class DC>
 class MatrixIterator
 {
 protected:
-	friend Matrix<T>;
-	MatrixIterator(const Matrix<T>& m, Index i1, Index i2);
+	friend BaseMatrix<T,DC>;
+	MatrixIterator(const BaseMatrix<T,DC>& m, Index i1, Index i2);
 
 public:
 	/**
@@ -117,7 +150,7 @@ public:
 	MatrixIterator operator++ (int);
 
 protected:
-	const Matrix<T>* mMatrix;
+	const BaseMatrix<T,DC>* mMatrix;
 	Index mIndex1;
 	Index mIndex2;
 };
@@ -130,12 +163,12 @@ protected:
 * @sa MatrixIterator
 * @sa MatrixColumnIterator
 */
-template<typename T>
-class MatrixRowIterator : public MatrixIterator<T>
+template<typename T, class DC>
+class MatrixRowIterator : public MatrixIterator<T,DC>
 {
 private:
-	friend Matrix<T>;
-	MatrixRowIterator(const Matrix<T>& m, Index i1, Index i2);
+	friend BaseMatrix<T,DC>;
+	MatrixRowIterator(const BaseMatrix<T,DC>& m, Index i1, Index i2);
 
 public:
 	/**
@@ -163,12 +196,12 @@ public:
 * @sa MatrixIterator
 * @sa MatrixRowIterator
 */
-template<typename T>
-class MatrixColumnIterator : public MatrixIterator<T>
+template<typename T, class DC>
+class MatrixColumnIterator : public MatrixIterator<T,DC>
 {
 private:
-	friend Matrix<T>;
-	MatrixColumnIterator(const Matrix<T>& m, Index i1, Index i2);
+	friend BaseMatrix<T,DC>;
+	MatrixColumnIterator(const BaseMatrix<T,DC>& m, Index i1, Index i2);
 
 public:
 	/**
@@ -204,91 +237,65 @@ public:
 * @tparam T Internal data type.
 * @sa SparseMatrix
 */
-template<typename T>
-class Matrix
+template<typename T, class DC>
+class BaseMatrix
 {
-	friend MatrixIterator<T>;
-	friend MatrixRowIterator<T>;
-	friend MatrixColumnIterator<T>;
+	friend MatrixIterator<T,DC>;
+	friend MatrixRowIterator<T,DC>;
+	friend MatrixColumnIterator<T,DC>;
 
-private:
-	std::vector<T> mValues;
+protected:
+	DC mValues;
 	T mEmpty;//Used for references; Could also be static, but that would break the header only approach
-
-	Dimension mRowCount;
-	Dimension mColumnCount;
 
 public:
 	/**
 	* @brief The standard iterator.
 	* @sa MatrixIterator
 	*/
-	typedef MatrixIterator<T> iterator;
+	typedef MatrixIterator<T,DC> iterator;
 
 	/**
 	* @brief A const variant of the standard iterator.
 	* @sa MatrixIterator
 	*/
-	typedef const MatrixIterator<T> const_iterator;
+	typedef const iterator const_iterator;
 
 	/**
 	* @brief The row iterator.
 	* @sa MatrixRowIterator
 	*/
-	typedef MatrixRowIterator<T> row_iterator;
+	typedef MatrixRowIterator<T,DC> row_iterator;
 
 	/**
 	* @brief A const variant of the row iterator.
 	* @sa MatrixRowIterator
 	*/
-	typedef const MatrixRowIterator<T> const_row_iterator;
+	typedef const row_iterator const_row_iterator;
 
 	/**
 	* @brief The column iterator.
 	* @sa MatrixIterator
 	*/
-	typedef MatrixColumnIterator<T> column_iterator;
+	typedef MatrixColumnIterator<T,DC> column_iterator;
 
 	/**
 	* @brief A const variant of the column iterator.
 	* @sa MatrixIterator
 	*/
-	typedef const MatrixColumnIterator<T> const_column_iterator;
+	typedef const column_iterator const_column_iterator;
 	
 	/**
-	* @brief Constructs an empty (dense) matrix of size(d1,d2)
-	* @param d1 Row dimension
-	* @param d2 Column dimension
+	* @brief A typedef of the underlying value type.
 	*/
-	Matrix(Dimension d1 = 1, Dimension d2 = 1);
+	typedef T value_type;
 
 	/**
-	* @brief Constructs a sparse matrix from the two dimensional initializer list.
-	* @details The initializer list size dynamically sets the dimension of the matrix.
-	*
-	* @par Example
-	* `Matrix<float> A = { {1,0,1},{0,1,0},{2,0,2} }` will generate the (dense) matrix
-	* `[1,0,1; 0,1,0; 2,0,2]`\n
-	* Here every semicolon starts a new row.
-	*
-	* @note Every missing entry will be initialized with 0.
-	*
-	* @param list A two dimensional initializer list.
-	* @throw MatrixInitializerListFailedException
+	* @brief Constructs an empty (dense) matrix
 	*/
-	Matrix(std::initializer_list<std::initializer_list<T> > list);
+	BaseMatrix();
 
-	virtual ~Matrix();
-
-	/**
-	 * @brief Resize dimension of the matrix.
-	 * @par Complexity
-	 * Unknown
-	 * @param d1 New row dimension.
-	 * @param d2 New column dimension.
-	 * @todo Implement this!
-	 */
-	void resize(Dimension d1, Dimension d2);
+	virtual ~BaseMatrix();
 
 	/**
 	* @brief Returns an iterator pointing at the first topological entry.
@@ -522,45 +529,6 @@ public:
 	iterator erase(const iterator& it);
 
 	/**
-	* @brief Adds entries element wise.
-	* @par Complexity
-	* Worst case: \f$ O((D1*D2)^2) \f$
-	* @param m The other matrix.
-	* @return A reference to this matrix.
-	*/
-	Matrix& operator +=(const Matrix& m);
-
-	/**
-	* @brief Subtracts entries element wise.
-	* @par Complexity
-	* Worst case: \f$ O((D1*D2)^2) \f$
-	* @param m The other matrix.
-	* @return A reference to this matrix.
-	*/
-	Matrix& operator -=(const Matrix& m);
-
-	/**
-	* @brief Multiplies entries element wise.
-	* @note Don't mistake this with real matrix matrix multiplication.\n
-	* Use mul() instead for matrix matrix multiplication.
-	* @par Complexity
-	* Worst case: \f$ O((D1*D2)^2) \f$
-	* @param m The other matrix.
-	* @return A reference to this matrix.
-	* @todo Is there a better approach?
-	*/
-	Matrix& operator *=(const Matrix& m);
-
-	/**
-	* @brief Multiplies entries with a scalar.
-	* @par Complexity
-	* Worst case: \f$ O(D1*D2) \f$
-	* @param f Scalar.
-	* @return A reference to this matrix.
-	*/
-	Matrix& operator *=(const T& f);
-
-	/**
 	* @brief The column count
 	* @par Complexity
 	* Always: \f$ O(1) \f$
@@ -617,14 +585,6 @@ public:
 	T avg() const;
 
 	/**
-	* @brief Swaps the entries of the matrices.
-	* @par Complexity
-	* Always: \f$ O(1) \f$
-	* @param m The other matrix.
-	*/
-	void swap(Matrix& m);
-
-	/**
 	* @brief Returns true if matrix has NaN entries
 	* @par Complexity
 	* Worst case: \f$ O(D1*D2) \f$
@@ -657,35 +617,6 @@ public:
 	* @sa hasZero()
 	*/
 	bool isEmpty() const;
-	
-	/**
-	* @brief Transpose matrix.
-	* @par Complexity
-	* Worst case: \f$ O(D1*D2) \f$
-	* @note When using complex matrices most of the time you need the adjugate() operation,\n
-	* as it is the most reasonable one in most of the cases. (Consider looking at your script)
-	* @return Transpose of the matrix \f$ A^T \f$
-	* @sa adjugate()
-	*/
-	Matrix transpose() const;
-
-	/**
-	* @brief The conjugate of all entries if complex.
-	* @par Complexity
-	* Worst case: \f$ O(D1*D2) \f$
-	* @return Transpose of the matrix \f$ A^T \f$
-	*/
-	Matrix conjugate() const;
-
-	/**
-	* @brief The adjugate / conjugate transpose of the matrix.
-	* @note If the matrix has no complex entries, it is the same as transpose().
-	* @par Complexity
-	* Worst case: \f$ O(D1*D2) \f$
-	* @return Conjugate transpose of the matrix \f$ A^* \f$
-	* @sa transpose()
-	*/
-	Matrix adjugate() const;
 
 	/**
 	* @brief Returns the trace of the matrix.
@@ -698,66 +629,16 @@ public:
 	* @return The trace of the matrix
 	*/
 	T trace() const;
-
-	/**
-	* @brief Right side matrix matrix multiplication.
-	* @details The matrix matrix multiplication is defined as:\n
-	* \f[
-	* A.mul(B) := A \cdot B \textrm{ with } A \in T^{D1 \times D2} \times B \in T^{D2 \times D3} \to C \in T^{D1 \times D3}
-	* \f]
-	* @par Complexity
-	* Worst case: UNKNOWN
-	* @param right The other matrix, which row count must match the column count of this matrix.
-	* @return The result of the matrix multiplication.
-	* @todo Complexity?
-	*/
-	Matrix mul(const Matrix& right) const;
-
-	/**
-	* @brief Right side matrix vector multiplication.
-	* @par Complexity
-	* Worst case: UNKNOWN
-	* @param right A vector with the same size as the column count of the matrix.
-	* @return A vector with the same size as the row count.
-	* @todo Complexity?
-	*/
-	template<typename DC>
-	DynamicVector<T> mul(const Vector<T,DC>& right) const;
-
-	/**
-	* @brief Left side matrix vector multiplication.
-	* @par Complexity
-	* Worst case: UNKNOWN
-	* @param left A vector with the same size as the row count of the matrix.
-	* @return A vector with the same size as the column count.
-	* @todo Complexity?
-	*/
-	template<typename DC>
-	DynamicVector<T> mul_left(const Vector<T,DC>& left) const;
 };
 
-// Element wise operations
-template<typename T>
-Matrix<T> operator +(const Matrix<T>& v1, const Matrix<T>& v2);
-template<typename T>
-Matrix<T> operator -(const Matrix<T>& v1, const Matrix<T>& v2);
-template<typename T>
-Matrix<T> operator -(const Matrix<T>& v);
-template<typename T>
-Matrix<T> operator *(const Matrix<T>& v1, const Matrix<T>& v2);
-template<typename T>
-Matrix<T> operator *(const Matrix<T>& v1, T f);
-template<typename T>
-Matrix<T> operator *(T f, const Matrix<T>& v1);
-
 // Comparison
-template<typename T>
-bool operator ==(const Matrix<T>& v1, const Matrix<T>& v2);
-template<typename T>
-bool operator !=(const Matrix<T>& v1, const Matrix<T>& v2);
+template<typename T, class DC>
+bool operator ==(const BaseMatrix<T,DC>& v1, const BaseMatrix<T,DC>& v2);
+template<typename T, class DC>
+bool operator !=(const BaseMatrix<T,DC>& v1, const BaseMatrix<T,DC>& v2);
 
 NS_END_NAMESPACE
 
-#define _NS_MATRIX_INL
-# include "Matrix.inl"
-#undef _NS_MATRIX_INL
+#define _NS_BASEMATRIX_INL
+# include "BaseMatrix.inl"
+#undef _NS_BASEMATRIX_INL

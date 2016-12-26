@@ -13,8 +13,10 @@ namespace Operations
 	* @return 0 if non square or singular, determinant else
 	*/
 	template<template<typename> class M, typename T>
-	typename std::enable_if<is_matrix<M, T>::value, T >::type
-		determinant(const M<T>& m);
+	T determinant(const M<T>& m);
+	
+	template<typename T, Dimension K1, Dimension K2>
+	T determinant(const FixedMatrix<T, K1, K2>& m);
 }
 
 NS_END_NAMESPACE
