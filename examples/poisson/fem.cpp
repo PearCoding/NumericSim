@@ -13,6 +13,8 @@
 #include "mesh/HyperCube.h"
 #include "mesh/Mesh.h"
 
+#include "sf/PolyShapeFunction.h"
+
 NS_USE_NAMESPACE;
 
 /*
@@ -106,15 +108,23 @@ int main(int argc, char** argv)
 
 	std::cout << "Assembling matrix... (" << ExpectedEntries << " entries expected)" << std::endl;
 
-	auto p1_start = std::chrono::high_resolution_clock::now();
+	const auto p1_start = std::chrono::high_resolution_clock::now();
 
-	constexpr Index permutationRow[3][2] = {{1,2}, {2,0}, {0,1}};
-	constexpr Index permutationMatrix[3][3] = {{0,2,1}, {2,1,0}, {1,0,2}};
+	SF::PolyShapeFunction<Number,2,1> sf;
+	const auto d0 = sf.gradient(0,FixedVector<Number,2>{0,0});
+	const auto d1 = sf.gradient(1,FixedVector<Number,2>{0,0});
+	const auto d2 = sf.gradient(2,FixedVector<Number,2>{0,0});
 
+	std::cout << d0 << std::endl;
+	std::cout << d1 << std::endl;
+	std::cout << d2 << std::endl;
+	
+	// Cell based assembling
 	for(Mesh::MeshElement<Number,2>* element : mesh.elements())
 	{
-		Number invD = 0.5/std::abs(element->Element.determinant());
-		NS_ASSERT(!std::isnan(invD));
+		const Number integral = Simplex<Number,2>::unitVolume() * std::abs(element->Element.determinant());
+		const auto mat = element->Element.gradient();
+		const FixedVector<Number,2> delta[3] = {mat.mul(d0), mat.mul(d1), mat.mul(d2)};
 
 		for(Index i = 0; i < 3; ++i)
 		{
@@ -123,33 +133,16 @@ int main(int argc, char** argv)
 			for(Index j = 0; j < 3; ++j)
 			{
 				const Index globalJ = element->Vertices[j]->GlobalIndex;
-				const Number prev = A.at(globalI,globalJ);
+				const Number prev = A.at(globalI, globalJ);
 
-				if(i == j)
-				{
-					const Index k = permutationRow[i][0];
-					const Index l = permutationRow[i][1];
-					const Number v = (element->Element[k] - element->Element[l]).magSqr();
-					A.set(globalI,globalJ, prev + invD * v);
-				}
-				else
-				{
-					NS_ASSERT(globalI != globalJ);
-					
-					const Index l = permutationMatrix[i][j];
-					const auto v1 = element->Element[i] - element->Element[l];
-					const auto v2 = element->Element[l] - element->Element[j];
-					const Number v = v1.dot(v2);
-					A.set(globalI,globalJ, prev + invD * v);
-				}
+				A.set(globalI, globalJ,
+					prev + integral * delta[i].dot(delta[j]));
 			}
 		}
 	}
 
 	std::cout << "  Entries: " << A.filledCount() 
 				<< " (Efficiency: " << 100*(1-A.filledCount()/(float)A.size()) << "%)" << std::endl;
-
-	//std::cout << A << std::endl;
 
 	// --------------------------------
 	std::cout << "Assembling right-hand side..." << std::endl;
@@ -158,7 +151,7 @@ int main(int argc, char** argv)
 	const auto boundary_function = [](const FixedVector<Number,2>& v) {
 		return std::sin(NS_PI_F * v[0])*std::sin(NS_PI_F * v[1]); };
 
-	// Simple quadrature
+	// Vertex based simple quadrature for linear shape function
 	for(Mesh::MeshVertex<Number,2>* v : mesh.vertices())
 	{
 		Number val = boundary_function(v->Vertex)/3;
@@ -170,12 +163,10 @@ int main(int argc, char** argv)
 		B.set(v->GlobalIndex, val*f);
 	}
 
-	auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
+	const auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
 	std::cout << "Assembling took " 
 		<< std::chrono::duration_cast<std::chrono::seconds>(p1_diff).count()
 		<< " s" << std::endl;
-
-	//std::cout << B << std::endl;
 
 	// --------------------------------
 	std::cout << "Calculating..." << std::endl;
@@ -183,13 +174,13 @@ int main(int argc, char** argv)
 	size_t iterations = 0;
 	DynamicVector<Number> X(VertexSize);
 
-	auto p2_start = std::chrono::high_resolution_clock::now();
+	const auto p2_start = std::chrono::high_resolution_clock::now();
 #ifdef USE_CG
 	X = CG::serial::cg(A, B, X, 1024, 1e-4, &iterations);
 #else
 	X = Iterative::serial::sor(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
 #endif
-	auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
+	const auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
 	std::cout << "  " << iterations << " Iterations ["
 		<< std::chrono::duration_cast<std::chrono::seconds>(p2_diff).count()

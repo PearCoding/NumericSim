@@ -24,10 +24,13 @@ public:
 	const vertex_t& operator[](Index i) const;
 	vertex_t& operator[](Index i);
 
+	static T unitVolume();
 	T volume() const;
 
 	//vertex_t toLocal(const vertex_t& global) const;
 	vertex_t toGlobal(const vertex_t& local) const;
+
+	matrix_t gradient() const;
 
 	const matrix_t& matrix() const;
 	//const matrix_t& inverseMatrix() const;

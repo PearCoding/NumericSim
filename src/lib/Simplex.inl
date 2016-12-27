@@ -54,6 +54,12 @@ typename Simplex<T,K>::vertex_t& Simplex<T,K>::operator[](Index i)
 }
 
 template<typename T, Dimension K>
+T Simplex<T,K>::unitVolume()
+{
+	return 1.0/Math::factorial(K);
+}
+
+template<typename T, Dimension K>
 T Simplex<T,K>::volume() const
 {
 	NS_ASSERT(mPrepared);
@@ -65,6 +71,28 @@ T Simplex<T,K>::volume() const
 // {
 // 	NS_ASSERT(mPrepared);
 // }
+
+template<typename T, Dimension K>
+typename Simplex<T,K>::matrix_t Simplex<T,K>::gradient() const
+{
+	NS_ASSERT(mPrepared);
+
+	// We have to solve a linear equation to find the transformation vectors.
+	// But it is easy to find for the case of 2d:
+
+	static_assert(K==2, "Gradient currently only implemented for 2D!");
+
+	const vertex_t d1 = mVertices[1] - mVertices[0];
+	const vertex_t d2 = mVertices[2] - mVertices[0];
+
+	matrix_t m;
+	m.set(0,0, d2[1]);
+	m.set(0,1, -d2[0]);
+	m.set(1,0, -d1[1]);
+	m.set(1,1, d1[0]);
+	
+	return m * (1/mDeterminant);
+}
 
 template<typename T, Dimension K>
 typename Simplex<T,K>::vertex_t Simplex<T,K>::toGlobal(const vertex_t& local) const
