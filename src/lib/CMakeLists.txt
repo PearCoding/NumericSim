@@ -20,8 +20,12 @@ SET(SRC_MAIN
  Vector.inl)
 
 SET(SRC_MATRIX
- matrix/Matrix.h
- matrix/Matrix.inl
+ matrix/BaseMatrix.h
+ matrix/BaseMatrix.inl
+ matrix/DenseMatrix.h
+ matrix/DenseMatrix.inl
+ matrix/FixedMatrix.h
+ matrix/FixedMatrix.inl
  matrix/MatrixCheck.h
  matrix/MatrixCheck.inl
  matrix/MatrixConstructor.h
@@ -34,7 +38,21 @@ SET(SRC_MATRIX
  matrix/SparseMatrix.inl)
 SOURCE_GROUP("Header Files\\Matrix" FILES ${SRC_MATRIX})
 
-SET(SRC ${SRC_MAIN} ${SRC_MATRIX})
+SET(SRC_MESH
+ mesh/HyperCube.h
+ mesh/HyperCube.inl
+ mesh/Mesh.h
+ mesh/Mesh.inl)
+SOURCE_GROUP("Header Files\\Mesh" FILES ${SRC_MESH})
+
+SET(SRC_SF
+ sf/PolyShapeFunction.h
+ sf/PolyShapeFunction.inl
+ sf/ShapeFunction.h
+ sf/ShapeFunction.inl)
+SOURCE_GROUP("Header Files\\ShapeFunction" FILES ${SRC_SF})
+
+SET(SRC ${SRC_MAIN} ${SRC_MATRIX} ${SRC_MESH} ${SRC_SF})
  
 add_library(ns_lib STATIC ${SRC})
 set_target_properties(ns_lib PROPERTIES LINKER_LANGUAGE CXX)
