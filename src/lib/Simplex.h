@@ -27,6 +27,10 @@ public:
 	static T unitVolume();
 	T volume() const;
 
+	vertex_t center() const;
+	// Radius of the circumscribed hypersphere
+	T outerRadius() const;
+
 	//vertex_t toLocal(const vertex_t& global) const;
 	vertex_t toGlobal(const vertex_t& local) const;
 

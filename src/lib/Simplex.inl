@@ -66,11 +66,21 @@ T Simplex<T,K>::volume() const
 	return std::abs((1.0/Math::factorial(K))*mDeterminant);
 }
 
-// template<typename T, Dimension K>
-// typename Simplex<T,K>::vertex_t Simplex<T,K>::toLocal(const vertex_t& global) const
-// {
-// 	NS_ASSERT(mPrepared);
-// }
+template<typename T, Dimension K>
+typename Simplex<T,K>::vertex_t Simplex<T,K>::center() const
+{
+	vertex_t v;
+	for(Index i = 0; i < K+1; ++i)
+		v += mVertices[i];
+	
+	return v / (T)(K+1);
+}
+
+template<typename T, Dimension K>
+T Simplex<T,K>::outerRadius() const
+{
+	return (center()-mVertices[0]).mag();
+}
 
 template<typename T, Dimension K>
 typename Simplex<T,K>::matrix_t Simplex<T,K>::gradient() const

@@ -17,7 +17,7 @@ DenseMatrix<T>::DenseMatrix(Dimension d1, Dimension d2) :
 	NS_ASSERT(d1 > 0);
 	NS_ASSERT(d2 > 0);
 
-	this->mValues.Container.resize(d1*d2);
+	this->mValues.Container.resize(d1*d2, (T)0);
 	this->mValues.RowCount = d1;
 	this->mValues.ColumnCount = d2;
 }

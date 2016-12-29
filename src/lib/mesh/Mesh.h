@@ -49,7 +49,12 @@ namespace Mesh
 		typedef std::vector<MeshElement<T,K>*> MeshElementList;
 
 		Mesh();
+		Mesh(const Mesh<T,K>& other);
+		Mesh(Mesh<T,K>&& other);
 		~Mesh();
+
+		Mesh<T,K>& operator =(const Mesh<T,K>& other);
+		Mesh<T,K>& operator =(Mesh<T,K>&& other);
 
 		void clear();
 
@@ -74,8 +79,12 @@ namespace Mesh
 
 		void validate() const throw(MeshException);
 	private:
-		MeshElementList mElements;
-		MeshVertexList mVertices;
+		struct PrivateData
+		{
+			MeshElementList Elements;
+			MeshVertexList Vertices;
+			size_t Refs;
+		}* mData;
 	};
 }
 

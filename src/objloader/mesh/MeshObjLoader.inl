@@ -4,8 +4,8 @@
 
 NS_BEGIN_NAMESPACE
 namespace Mesh {
-	template<typename T>
-	Mesh<T,2> MeshObjLoader<T>::loadFile(const std::string& file)
+	template<typename T, Index yI, Index xI>
+	Mesh<T,2> MeshObjLoader<T,yI,xI>::loadFile(const std::string& file)
 	{		
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;// We ignore materials
@@ -17,8 +17,8 @@ namespace Mesh {
 		return load(shapes);
 	}
 
-	template<typename T>
-	Mesh<T,2> MeshObjLoader<T>::loadString(const std::string& str)
+	template<typename T, Index yI, Index xI>
+	Mesh<T,2> MeshObjLoader<T,yI,xI>::loadString(const std::string& str)
 	{		
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;// We ignore materials
@@ -33,8 +33,8 @@ namespace Mesh {
 		return load(shapes);
 	}
 
-	template<typename T>
-	Mesh<T,2> MeshObjLoader<T>::load(const std::vector<tinyobj::shape_t>& shapes)
+	template<typename T, Index yI, Index xI>
+	Mesh<T,2> MeshObjLoader<T,yI,xI>::load(const std::vector<tinyobj::shape_t>& shapes)
 	{
 		typedef MeshVertex<T,2> MV;
 		typedef MeshElement<T,2> ME;
@@ -43,23 +43,29 @@ namespace Mesh {
 
 		for (tinyobj::shape_t shape : shapes)
 		{
-			mesh.reserveVertices(shape.mesh.positions.size() / 3);
-			mesh.reserveElements(shape.mesh.indices.size() / 3);
+			const size_t vertexCount = shape.mesh.positions.size() / 3;
+			const size_t elementCount = shape.mesh.indices.size() / 3;
 
-			for (size_t i = 0; i < shape.mesh.positions.size() / 3; ++i)
+			mesh.reserveVertices(vertexCount);
+			mesh.reserveElements(elementCount);
+
+			for (size_t i = 0; i < vertexCount; ++i)
 			{
-				MV* v = new MV;
-				for(Dimension j = 0; j < 2; ++j)
-					v->Vertex[j] = (T)shape.mesh.positions[3*i + j];
+				MV* v = new MV();
+				v->Vertex[0] = (T)shape.mesh.positions[3*i + xI];
+				v->Vertex[1] = (T)shape.mesh.positions[3*i + yI];
 				mesh.addVertex(v);
 			}
 
-			for (size_t i = 0; i < shape.mesh.indices.size() / 3; ++i)
+			for (size_t i = 0; i < elementCount; ++i)
 			{
-				ME* s = new ME;
+				ME* s = new ME();
 				for (Dimension j = 0; j < 3; ++j)
 				{
 					Index idx = shape.mesh.indices[3 * i + j];
+					if(idx >= vertexCount)
+						throw LoadObjErrorException();
+					
 					s->Vertices[j] = mesh.vertex(idx);
 				}
 

@@ -13,7 +13,7 @@ NS_DECLARE_EXCEPTION(LoadObjError, ObjLoader, "Error while loading the obj file.
 
 namespace Mesh
 {
-	template<typename T>
+	template<typename T, Index yI = 1, Index xI = 0>
 	class MeshObjLoader
 	{
 	public:
