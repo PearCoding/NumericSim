@@ -9,13 +9,21 @@ NS_BEGIN_NAMESPACE
 
 namespace Export
 {
+	enum VTKOutputOptions
+	{
+		VOO_ElementDeterminant = 0x1,
+		VOO_ElementMatrix = 0x2,
+		VOO_ElementGradient = 0x4
+	};
+
 	template<typename T, Dimension K>
 	class VTKExporter
 	{
 	public:
 	    template<typename V>
         static void write(const std::string& path,
-            const Mesh::Mesh<T,K>& mesh, const V& result, V* error = nullptr);
+            const Mesh::Mesh<T,K>& mesh, const V& result,
+			V* error = nullptr, int outputOptions = 0);
 	};
 }
 

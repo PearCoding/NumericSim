@@ -323,7 +323,10 @@ int main(int argc, char** argv)
 		data.close();
 	}
 
-	Export::VTKExporter<Number,2>::write("poisson_fem.vtu", mesh, X);
+	Export::VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, nullptr,
+		Export::VOO_ElementDeterminant |
+		Export::VOO_ElementMatrix |
+		Export::VOO_ElementGradient );
 
 	return 0;
 }

@@ -10,7 +10,7 @@ namespace Export
 	template<typename T, Dimension K>
 	template<typename V>
 	void VTKExporter<T,K>::write(const std::string& path,
-		const Mesh::Mesh<T,K>& mesh, const V& result, V* error)
+		const Mesh::Mesh<T,K>& mesh, const V& result, V* error, int outputOptions)
 	{
 		static_assert(K >= 1 && K <= 3, "Only 1d, 2d and 3d data can be exported.");
 
@@ -83,7 +83,44 @@ namespace Export
 		stream << "</PointData>" << std::endl;
 
 		// Cell data
-		stream << "<CellData />" << std::endl;
+		stream << "<CellData>" << std::endl;
+		if(outputOptions & VOO_ElementDeterminant)
+		{
+			stream << "<DataArray Name=\"ElementDeterminant\" type=\"Float32\" format=\"ascii\">" << std::endl;
+			for (Mesh::MeshElement<T,K>* elem : mesh.elements())
+				stream << elem->Element.determinant() << " ";
+			stream << std::endl;
+			stream << "</DataArray>" << std::endl;
+		}
+
+		if(outputOptions & VOO_ElementMatrix)
+		{
+			stream << "<DataArray Name=\"ElementMatrix\" type=\"Float32\" NumberOfComponents=\"" 
+				<< (K*K) << "\" format=\"ascii\">" << std::endl;
+			for (Mesh::MeshElement<T,K>* elem : mesh.elements())
+			{
+				const auto M = elem->Element.matrix();
+				for(const auto& v : M)
+					stream << v << " ";
+				stream << std::endl;
+			}
+			stream << "</DataArray>" << std::endl;
+		}
+
+		if(outputOptions & VOO_ElementGradient)
+		{
+			stream << "<DataArray Name=\"ElementGradient\" type=\"Float32\" NumberOfComponents=\"" 
+				<< (K*K) << "\" format=\"ascii\">" << std::endl;
+			for (Mesh::MeshElement<T,K>* elem : mesh.elements())
+			{
+				const auto M = elem->Element.gradient();
+				for(const auto& v : M)
+					stream << v << " ";
+				stream << std::endl;
+			}
+			stream << "</DataArray>" << std::endl;
+		}
+		stream << "</CellData>" << std::endl;
 
 		// End
 		stream << "</Piece>" << std::endl;
