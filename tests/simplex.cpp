@@ -27,5 +27,5 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(Triangle, float);
 NST_TESTCASE_T1(Triangle, double);
-NST_TESTCASE_T1(Triangle, ComplexNumber<double>);
+NST_TESTCASE_T1(Triangle, std::complex<double>);
 NST_END_MAIN

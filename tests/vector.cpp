@@ -149,6 +149,7 @@ NS_TEST("swap")
 		NS_CHECK_EQ(v2.at(i), (T)8);
 }
 NS_END_TESTCASE()
+
 template<typename T>
 NS_BEGIN_TESTCASE_T1(DynamicVector)
 NS_TEST("Initializer List")
@@ -228,8 +229,8 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(Vector, float);
 NST_TESTCASE_T1(Vector, double);
-NST_TESTCASE_T1(Vector, NS::ComplexNumber<double>);
+NST_TESTCASE_T1(Vector, std::complex<double>);
 NST_TESTCASE_T1(DynamicVector, float);
 NST_TESTCASE_T1(DynamicVector, double);
-NST_TESTCASE_T1(DynamicVector, NS::ComplexNumber<double>);
+NST_TESTCASE_T1(DynamicVector, std::complex<double>);
 NST_END_MAIN

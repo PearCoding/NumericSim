@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Matrix.h"
 #include "Utils.h"
 #include "LU.h"
 

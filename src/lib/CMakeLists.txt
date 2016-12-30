@@ -2,8 +2,6 @@ SET(SRC_MAIN
  CG.h
  CG.inl
  Config.h
- ComplexNumber.h
- ComplexNumber.inl
  CountableSet.h
  CountableSet.inl
  Exceptions.h

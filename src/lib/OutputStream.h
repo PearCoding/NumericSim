@@ -1,17 +1,12 @@
 #pragma once
 
 #include "Types.h"
+#include "Vector.h"
+#include "matrix/Matrix.h"
 
 #include <ostream>
 
 NS_BEGIN_NAMESPACE
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const NS::ComplexNumber<T>& f)
-{
-	out << "[ " << f.real() << " " << f.imag() << "i ]";
-	return out;
-}
 
 template<typename T, class DC>
 std::ostream& operator<<(std::ostream& out, const NS::Vector<T,DC>& f)

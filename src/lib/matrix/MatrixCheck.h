@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Types.h"
-#include "Utils.h"
 #include "MatrixConstructor.h"
 
 NS_BEGIN_NAMESPACE

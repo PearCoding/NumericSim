@@ -54,8 +54,8 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T2(LU, DenseMatrix, float);
 NST_TESTCASE_T2(LU, DenseMatrix, double);
-NST_TESTCASE_T2(LU, DenseMatrix, ComplexNumber<double>);
+NST_TESTCASE_T2(LU, DenseMatrix, std::complex<double>);
 NST_TESTCASE_T2(LU, SparseMatrix, float);
 NST_TESTCASE_T2(LU, SparseMatrix, double);
-NST_TESTCASE_T2(LU, SparseMatrix, ComplexNumber<double>);
+NST_TESTCASE_T2(LU, SparseMatrix, std::complex<double>);
 NST_END_MAIN

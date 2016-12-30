@@ -1,8 +1,7 @@
 #pragma once
 
-#include "ComplexNumber.h"
+#include "Types.h"
 
-#include <type_traits>
 #include <vector>
 #include <array>
 #include <limits>

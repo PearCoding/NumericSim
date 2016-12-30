@@ -7,7 +7,7 @@ NS_BEGIN_NAMESPACE
 template<typename T, class DC>
 CountableSet<T, DC>::CountableSet()
 {
-	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_arithmetic.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are std::complex and the types allowed by std::is_arithmetic.");
 
 	this->fill((T)0);
 }
@@ -79,7 +79,7 @@ T CountableSet<T, DC>::max() const
 	_t s = std::numeric_limits<_t>::min();
 	for (Index i = 0; i < size(); ++i)
 	{
-		_t d = mag_by_complex_vt(mData[i]);
+		_t d = complex_abs(mData[i]);
 		if (d > s)
 			s = d;
 	}
@@ -95,7 +95,7 @@ T CountableSet<T, DC>::min() const
 	_t s = std::numeric_limits<_t>::max();
 	for (Index i = 0; i < size(); ++i)
 	{
-		_t d = mag_by_complex_vt(mData[i]);
+		_t d = complex_abs(mData[i]);
 		if (d < s)
 			s = d;
 	}
@@ -123,7 +123,7 @@ bool CountableSet<T, DC>::hasNaN() const
 {
 	for (Index i = 0; i < size(); ++i)
 	{
-		if (std::isnan(mData[i]))
+		if (complex_isnan(mData[i]))
 			return true;
 	}
 
@@ -135,7 +135,7 @@ bool CountableSet<T, DC>::hasInf() const
 {
 	for (Index i = 0; i < size(); ++i)
 	{
-		if (std::isinf(mData[i]))
+		if (complex_isinf(mData[i]))
 			return true;
 	}
 

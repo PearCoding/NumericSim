@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComplexNumber.h"
+#include "Types.h"
 #include "Vector.h"
 #include "Utils.h"
 #include "Exceptions.h"

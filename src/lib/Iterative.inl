@@ -42,7 +42,7 @@ namespace Iterative
 					xm.set(i, (b.at(i) - t) / mid);
 				}
 
-				auto conv = magSqr_vt((xm - x).magSqr());
+				auto conv = std::abs((xm - x).magSqr());
 				if (std::isnan(conv))
 					throw MatrixHasZeroInDiagException();
 
@@ -104,7 +104,7 @@ namespace Iterative
 					xm.set(i, rweight*xm.at(i) + weight*t);
 				}
 
-				auto conv = magSqr_vt((xm - x).magSqr());
+				auto conv = std::abs((xm - x).magSqr());
 				if (std::isnan(conv))
 					throw MatrixHasZeroInDiagException();
 

@@ -52,5 +52,5 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(Iterative, float);
 NST_TESTCASE_T1(Iterative, double);
-NST_TESTCASE_T1(Iterative, ComplexNumber<double>);
+NST_TESTCASE_T1(Iterative, std::complex<double>);
 NST_END_MAIN

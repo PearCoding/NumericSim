@@ -35,5 +35,5 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(CG, float);
 NST_TESTCASE_T1(CG, double);
-//NST_TESTCASE_T1(CG, ComplexNumber<double>);
+//NST_TESTCASE_T1(CG, std::complex<double>);
 NST_END_MAIN

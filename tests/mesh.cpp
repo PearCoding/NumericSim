@@ -35,5 +35,5 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(Mesh2D, float);
 NST_TESTCASE_T1(Mesh2D, double);
-NST_TESTCASE_T1(Mesh2D, ComplexNumber<double>);
+NST_TESTCASE_T1(Mesh2D, std::complex<double>);
 NST_END_MAIN

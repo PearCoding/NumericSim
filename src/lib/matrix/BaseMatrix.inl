@@ -136,7 +136,7 @@ template<typename T, class DC>
 BaseMatrix<T,DC>::BaseMatrix() :
 	mValues(), mEmpty((T)0)
 {
-	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are std::complex and the types allowed by std::is_floating_point.");
 }
 
 template<typename T, class DC>

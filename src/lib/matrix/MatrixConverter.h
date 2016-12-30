@@ -1,7 +1,6 @@
 #pragma once
 
-#include "matrix/DynamicMatrix.h"
-#include "matrix/SparseMatrix.h"
+#include "Matrix.h"
 
 NS_BEGIN_NAMESPACE
 

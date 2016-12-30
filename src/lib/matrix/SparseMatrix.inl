@@ -186,7 +186,7 @@ template<typename T>
 SparseMatrix<T>::SparseMatrix() :
 	mValues(), mColumnPtr(), mRowPtr(0), mColumnCount(0), mEmpty((T)0)
 {
-	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are std::complex and the types allowed by std::is_floating_point.");
 }
 
 template<typename T>
@@ -195,7 +195,7 @@ SparseMatrix<T>::SparseMatrix(Dimension d1, Dimension d2, size_t expected) :
 {
 	NS_ASSERT(d1 > 0);
 	NS_ASSERT(d2 > 0);
-	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_floating_point.");
+	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are std::complex and the types allowed by std::is_floating_point.");
 
 	if (expected > 0)
 	{
@@ -833,7 +833,7 @@ SparseMatrix<T> SparseMatrix<T>::conjugate() const
 	SparseMatrix<T> tmp(rows(), columns());
 
 	for (auto it = begin(); it != end(); ++it)
-		tmp.set(it.row(), it.column(), conjugate_vt(*it));
+		tmp.set(it.row(), it.column(), complex_conj(*it));
 
 	return tmp;
 }
@@ -844,7 +844,7 @@ SparseMatrix<T> SparseMatrix<T>::adjugate() const
 	SparseMatrix<T> tmp(columns(), rows());
 
 	for (auto it = begin(); it != end(); ++it)// O(D1*D2)
-		tmp.set(it.column(), it.row(), conjugate_vt(*it));// O(D1*D2)
+		tmp.set(it.column(), it.row(), complex_conj(*it));// O(D1*D2)
 
 	return tmp;
 }
@@ -873,9 +873,7 @@ SparseMatrix<T> SparseMatrix<T>::mul(const SparseMatrix<T>& m) const
 		{
 			T v = 0;
 			for (auto rit = row_begin(i); rit != row_end(i); ++rit)// O(D2)
-			{
 				v += (*rit) * m.at(rit.column(), k);// O(D2) + O(D3)
-			}
 			tmp.set(i, k, v);// O(D1*D3)
 		}
 	}

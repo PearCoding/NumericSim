@@ -31,7 +31,7 @@ namespace LU {
 				}
 
 				s = m.at(j, j) - s;
-				if (mag_by_complex_vt(s) <= 0)
+				if (!sqrt_allowed(s))
 					throw NotPositiveDefiniteException();
 
 				L.set(j, j, std::sqrt(s));

@@ -134,7 +134,7 @@ DenseMatrix<T> DenseMatrix<T>::conjugate() const
 	{
 		for (Index j = 0; j < this->columns(); ++j)
 		{
-			tmp.set(i, j, conjugate_vt(this->at(i, j)));
+			tmp.set(i, j, complex_conj(this->at(i, j)));
 		}
 	}
 
@@ -149,7 +149,7 @@ DenseMatrix<T> DenseMatrix<T>::adjugate() const
 	{
 		for (Index j = 0; j < this->rows(); ++j)
 		{
-			tmp.set(i, j, conjugate_vt(this->at(j, i)));
+			tmp.set(i, j, complex_conj(this->at(j, i)));
 		}
 	}
 

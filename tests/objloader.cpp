@@ -32,5 +32,5 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(ObjLoader, float);
 NST_TESTCASE_T1(ObjLoader, double);
-NST_TESTCASE_T1(ObjLoader, ComplexNumber<double>);
+NST_TESTCASE_T1(ObjLoader, std::complex<double>);
 NST_END_MAIN

@@ -71,9 +71,9 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(GaussLegendreQuadrature1D, float);
 NST_TESTCASE_T1(GaussLegendreQuadrature1D, double);
-NST_TESTCASE_T1(GaussLegendreQuadrature1D, ComplexNumber<double>);
+NST_TESTCASE_T1(GaussLegendreQuadrature1D, std::complex<double>);
 
 NST_TESTCASE_T1(GaussLegendreQuadrature2D, float);
 NST_TESTCASE_T1(GaussLegendreQuadrature2D, double);
-NST_TESTCASE_T1(GaussLegendreQuadrature2D, ComplexNumber<double>);
+NST_TESTCASE_T1(GaussLegendreQuadrature2D, std::complex<double>);
 NST_END_MAIN

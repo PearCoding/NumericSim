@@ -1,7 +1,5 @@
 #include "Test.h"
-#include "matrix/DenseMatrix.h"
-#include "matrix/FixedMatrix.h"
-#include "matrix/SparseMatrix.h"
+#include "matrix/Matrix.h"
 #include "OutputStream.h"
 
 #include "matrix/MatrixConstructor.h"
@@ -296,8 +294,8 @@ NS_END_TESTCASE()
 NST_BEGIN_MAIN
 NST_TESTCASE_T2(Matrix, DenseMatrix, float);
 NST_TESTCASE_T2(Matrix, DenseMatrix, double);
-NST_TESTCASE_T2(Matrix, DenseMatrix, ComplexNumber<double>);
+NST_TESTCASE_T2(Matrix, DenseMatrix, std::complex<double>);
 NST_TESTCASE_T2(Matrix, SparseMatrix, float);
 NST_TESTCASE_T2(Matrix, SparseMatrix, double);
-NST_TESTCASE_T2(Matrix, SparseMatrix, ComplexNumber<double>);
+NST_TESTCASE_T2(Matrix, SparseMatrix, std::complex<double>);
 NST_END_MAIN
