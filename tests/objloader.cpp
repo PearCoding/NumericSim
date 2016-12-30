@@ -18,7 +18,7 @@ NS_TEST("load")
 {
 	try
 	{
-		auto mesh = Mesh::MeshObjLoader<T>::loadString(OBJ);
+		auto mesh = MeshObjLoader<T>::loadString(OBJ);
 		mesh.prepare();
 		mesh.validate();
 	}

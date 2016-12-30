@@ -83,6 +83,25 @@ T Simplex<T,K>::outerRadius() const
 }
 
 template<typename T, Dimension K>
+typename Simplex<T,K>::vertex_t Simplex<T,K>::faceCenter(Index i) const
+{
+	vertex_t v;
+	for(Index j = 0; j < K+1; ++j)
+	{
+		if(j != i)
+			v += mVertices[j];
+	}
+	
+	return v / (T)(K);
+}
+
+template<typename T, Dimension K>
+typename Simplex<T,K>::vertex_t Simplex<T,K>::faceNormal(Index i) const
+{
+	return (faceCenter(i) - mVertices[i]).normalized();
+}
+
+template<typename T, Dimension K>
 typename Simplex<T,K>::matrix_t Simplex<T,K>::gradient() const
 {
 	NS_ASSERT(mPrepared);

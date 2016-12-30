@@ -85,6 +85,12 @@ T Vector<T,DC>::magSqr() const
 	return dot(*this);
 }
 
+template<typename T, class DC>
+Vector<T,DC> Vector<T,DC>::normalized() const
+{
+	return (*this) / mag();
+}
+
 // Boolean set operations
 // NOT WORKING
 template<typename T, class DC>

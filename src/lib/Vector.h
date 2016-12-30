@@ -44,6 +44,8 @@ public:
 	T dot(const Vector& v) const;
 	T mag() const;
 	T magSqr() const;
+	
+	Vector normalized() const;
 
 	// Boolean Set
 	Vector left(Index i) const;

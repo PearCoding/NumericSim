@@ -36,6 +36,9 @@ public:
 
 	matrix_t gradient() const;
 
+	vertex_t faceCenter(Index i) const;
+	vertex_t faceNormal(Index i) const;// Jump Vector
+
 	const matrix_t& matrix() const;
 	//const matrix_t& inverseMatrix() const;
 	T determinant() const;

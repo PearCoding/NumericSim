@@ -14,7 +14,6 @@ SET(CMAKE_DEBUG_POSTFIX  "_d")
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin/)
 
 option(VERBOSE "Show debug information." OFF)
-option(NS_WITH_OBJLOADER "Build with obj loader." ON)
 option(NS_BUILD_TESTS "Build tests." ON)
 option(NS_BUILD_EXAMPLES "Build examples." ON)
 

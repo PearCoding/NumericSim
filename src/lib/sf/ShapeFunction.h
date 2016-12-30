@@ -4,15 +4,12 @@
 
 NS_BEGIN_NAMESPACE
 
-namespace SF
+template<class ShapeFunctionPolicy>
+class ShapeFunction : public ShapeFunctionPolicy
 {
-	template<class ShapeFunctionPolicy>
-	class ShapeFunction : public ShapeFunctionPolicy
-	{
-	public:
+public:
 
-	};
-}
+};
 
 NS_END_NAMESPACE
 

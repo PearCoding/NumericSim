@@ -16,6 +16,8 @@
 
 #include "sf/PolyShapeFunction.h"
 
+#include "quadrature/Quadrature.h"
+
 #include "export/VTKExporter.h"
 
 NS_USE_NAMESPACE;
@@ -112,12 +114,12 @@ int main(int argc, char** argv)
 
 	// --------------------------------
 	// Calculating basic constants
-	Mesh::Mesh<Number,2> mesh;
+	Mesh<Number,2> mesh;
 	
 	if(M == 0)
 	{
 		std::cout << "Generating mesh with " << N << "x" << N << " rectangles..." << std::endl;
-		mesh = Mesh::HyperCube<Number,2>::generate(
+		mesh = HyperCube<Number,2>::generate(
 			Vector2D<Dimension>{(Dimension)N,(Dimension)N},
 			Vector2D<Number>{DomainDistance[0], DomainDistance[1]},
 			Vector2D<Number>{DomainStart[0],DomainStart[1]}
@@ -126,17 +128,17 @@ int main(int argc, char** argv)
 	else if(M == 1)
 	{
 		std::cout << "Loading mesh 1..." << std::endl;
-		mesh = Mesh::MeshObjLoader<Number,2>::loadString(MESH_1);
+		mesh = MeshObjLoader<Number,2>::loadString(MESH_1);
 	}
 	else if(M == 2)
 	{
 		std::cout << "Loading mesh 2..." << std::endl;
-		mesh = Mesh::MeshObjLoader<Number,2>::loadString(MESH_2);
+		mesh = MeshObjLoader<Number,2>::loadString(MESH_2);
 	}
 	else if(M == 3)
 	{
 		std::cout << "Loading mesh 3..." << std::endl;
-		mesh = Mesh::MeshObjLoader<Number,2>::loadString(MESH_3);
+		mesh = MeshObjLoader<Number,2>::loadString(MESH_3);
 	}
 
 	std::cout << "  Preparing elements..." << std::endl;
@@ -174,7 +176,7 @@ int main(int argc, char** argv)
 	const auto p1_start = std::chrono::high_resolution_clock::now();
 
 	//Here each element has the same shape function (linear or second order)
-	SF::PolyShapeFunction<Number,2,1> sf;
+	PolyShapeFunction<Number,2,1> sf;
 	const auto d0 = sf.gradient(0,FixedVector<Number,2>{0,0});
 	const auto d1 = sf.gradient(1,FixedVector<Number,2>{0,0});
 	const auto d2 = sf.gradient(2,FixedVector<Number,2>{0,0});
@@ -186,7 +188,7 @@ int main(int argc, char** argv)
 #endif
 	
 	// Cell based assembling (Not optimized due to better understanding)
-	for(Mesh::MeshElement<Number,2>* element : mesh.elements())
+	for(MeshElement<Number,2>* element : mesh.elements())
 	{
 		const Number integral = Simplex<Number,2>::unitVolume() * std::abs(element->Element.determinant());
 		const auto mat = element->Element.gradient();
@@ -237,21 +239,21 @@ int main(int argc, char** argv)
 
 	//constexpr Number unit_int = 140737488355328/(Number)2778046668940015;//2/(NS_PI_F*NS_PI_F);
 	// Vertex based simple quadrature for linear shape function
-	for(Mesh::MeshVertex<Number,2>* v : mesh.vertices())
+	for(MeshVertex<Number,2>* v : mesh.vertices())
 	{
 		Number val = boundary_function(v->Vertex)/3;
 		if(std::abs(val) <= EPS)
 			continue;
 		Number f = 0;
 
-		for(Mesh::MeshElement<Number,2>* e : v->Elements)
-			f += e->Element.volume();//std::abs(e->Element.determinant());
+		for(MeshElement<Number,2>* e : v->Elements)
+			f += std::abs(e->Element.determinant());
 
 		B.set(v->GlobalIndex, val*f);
 	}
 
 	const auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
-	std::cout << "Assembling took " 
+	std::cout << "Full assembling took " 
 		<< std::chrono::duration_cast<std::chrono::seconds>(p1_diff).count()
 		<< " s" << std::endl;
 
@@ -280,10 +282,31 @@ int main(int argc, char** argv)
 		<< " s]" << std::endl;
 
 	// --------------------------------
+	std::cout << "Estimating Error..." << std::endl;
+	DynamicVector<Number> Error(VertexSize);
+
+	if(M == 0)// We know the analytical solution!
+	{
+		const auto solution = [](const FixedVector<Number,2>& v) {
+			return std::sin(NS_PI_F * v[0]) * std::sin(NS_PI_F * v[1]) / (2*NS_PI_F*NS_PI_F); };
+
+		for(MeshVertex<Number,2>* v : mesh.vertices())
+		{
+			Number u = solution(v->Vertex);
+			Number uh = X.at(v->GlobalIndex);
+			Error.set(v->GlobalIndex, std::abs(u-uh));
+		}
+	}
+	else// Post error estimation
+	{
+
+	}
+
+	// --------------------------------
 	// Writing output
 	{
 		std::ofstream data("poisson_fem_data.dat");
-		for (Mesh::MeshVertex<Number,2>* vertex : mesh.vertices())
+		for (MeshVertex<Number,2>* vertex : mesh.vertices())
 		{
 			data << vertex->Vertex[0] << " " 
 				<< vertex->Vertex[1] << " " 
@@ -294,7 +317,7 @@ int main(int argc, char** argv)
 
 	{
 		std::ofstream data("poisson_fem_mesh.dat");
-		for (Mesh::MeshElement<Number,2>* elem : mesh.elements())
+		for (MeshElement<Number,2>* elem : mesh.elements())
 		{
 			data << (elem->Vertices[0]->GlobalIndex+1) << " " 
 				<< (elem->Vertices[1]->GlobalIndex+1) << " " 
@@ -323,10 +346,10 @@ int main(int argc, char** argv)
 		data.close();
 	}
 
-	Export::VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, nullptr,
-		Export::VOO_ElementDeterminant |
-		Export::VOO_ElementMatrix |
-		Export::VOO_ElementGradient );
+	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &Error,
+		VOO_ElementDeterminant |
+		VOO_ElementMatrix |
+		VOO_ElementGradient );
 
 	return 0;
 }

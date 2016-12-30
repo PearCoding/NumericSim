@@ -14,7 +14,7 @@ NS_TEST("generator")
 	constexpr Dimension S = 10;
 	try
 	{
-		Mesh::Mesh<T,2> mesh = Mesh::HyperCube<T,2>::generate(
+		Mesh<T,2> mesh = HyperCube<T,2>::generate(
 			Vector2D<Dimension>{S,S},
 			Vector2D<T>{1,1},
 			Vector2D<T>{0,0});

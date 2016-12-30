@@ -6,27 +6,25 @@
 #include "Vector.h"
 
 NS_BEGIN_NAMESPACE
-namespace SF
+
+template<typename T, Dimension K, Dimension Order>
+class PolyShapePolicy
 {
-	template<typename T, Dimension K, Dimension Order>
-	class PolyShapePolicy
-	{
-	public:
-		// For the standard k-simplex
-    	template<class V>
-		V value(const V& local) const;
+public:
+	// For the standard k-simplex
+	template<class V>
+	V value(const V& local) const;
 
-		// For the standard k-simplex
-    	template<class V>
-		V gradient(Index localComponent, const V& local) const;
+	// For the standard k-simplex
+	template<class V>
+	V gradient(Index localComponent, const V& local) const;
 
-	private:
+private:
 
-	};
+};
 
-	template<typename T, Dimension K, Dimension Order>
-	using PolyShapeFunction = ShapeFunction<PolyShapePolicy<T,K,Order> >;
-}
+template<typename T, Dimension K, Dimension Order>
+using PolyShapeFunction = ShapeFunction<PolyShapePolicy<T,K,Order> >;
 
 NS_END_NAMESPACE
 

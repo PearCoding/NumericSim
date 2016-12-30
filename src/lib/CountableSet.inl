@@ -8,6 +8,8 @@ template<typename T, class DC>
 CountableSet<T, DC>::CountableSet()
 {
 	static_assert(is_number<T>::value, "Type T has to be a number.\nAllowed are ComplexNumber and the types allowed by std::is_arithmetic.");
+
+	this->fill((T)0);
 }
 
 template<typename T, class DC>
@@ -16,6 +18,7 @@ CountableSet<T, DC>::CountableSet(size_t size, typename std::enable_if<std::is_s
 	CountableSet()
 {
 	this->mData.resize(size);
+	this->fill((T)0);
 }
 
 template<typename T, class DC>

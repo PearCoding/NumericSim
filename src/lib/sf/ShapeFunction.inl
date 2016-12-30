@@ -3,6 +3,5 @@
 #endif
 
 NS_BEGIN_NAMESPACE
-namespace SF {
-}
+
 NS_END_NAMESPACE
