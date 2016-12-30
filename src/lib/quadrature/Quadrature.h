@@ -13,7 +13,7 @@ class Quadrature : Factory<T,K,Order>
 public:
 	Quadrature() : Factory<T,K,Order>() {}
 
-	template<class F, typename RT = typename std::result_of<F(FixedVector<T,K>)>::type>
+	template<class F, typename RT = typename std::remove_cv<typename std::result_of<F(FixedVector<T,K>)>::type>::type>
 	RT eval(const F& func, const RT& start = (RT)0) const;
 };
 
