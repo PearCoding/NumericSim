@@ -5,39 +5,39 @@
 NS_BEGIN_NAMESPACE
 
 template<typename T, Dimension K, Dimension Order>
-template<class V>
-V PolyShapePolicy<T,K,Order>::value(const V& v) const
+T PolyShapePolicy<T,K,Order>::value(Index localComponent, const FixedVector<T,K>& v) const
 {
     static_assert(K==2, "Currently only two dimensional values implemented.");
+    static_assert(Order==1, "Currently only first order is implemented.");
 
     // Not a complete solution!
-    V ret = v;
-    V pv = v;
-    for(Index p = 1; p < Order; ++p)
+    switch(localComponent)
     {
-        pv *= v;
-        ret += pv;
+    default:
+    case 0:
+        return 1-v[0]-v[1];
+    case 1:
+        return v[0];
+    case 2:
+        return v[1];
     }
-
-    return ret;
 }
 
 template<typename T, Dimension K, Dimension Order>
-template<class V>
-V PolyShapePolicy<T,K,Order>::gradient(Index localComponent, const V& v) const
+FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient(Index localComponent, const FixedVector<T,K>& local) const
 {
     static_assert(K==2, "Currently only two dimensional values implemented.");
     static_assert(Order==1, "Currently only first order is implemented.");
 
     if(localComponent == 0)
     {
-        V pv = v;
+        FixedVector<T,K> pv;
         pv.fill(-1);
         return pv;
     }
     else
     {
-        V pv = v;
+        FixedVector<T,K> pv;
         pv.fill(0);
         pv[localComponent-1] = 1;
         return pv;

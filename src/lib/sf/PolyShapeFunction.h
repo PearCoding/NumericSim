@@ -7,17 +7,20 @@
 
 NS_BEGIN_NAMESPACE
 
+/**
+ * Implementing continious Lagrange elements
+ */
 template<typename T, Dimension K, Dimension Order>
 class PolyShapePolicy
 {
 public:
-	// For the standard k-simplex
-	template<class V>
-	V value(const V& local) const;
+	static constexpr Dimension DOF = (K+1)*Order;
 
 	// For the standard k-simplex
-	template<class V>
-	V gradient(Index localComponent, const V& local) const;
+	T value(Index localComponent, const FixedVector<T,K>& local) const;
+
+	// For the standard k-simplex
+	FixedVector<T,K> gradient(Index localComponent, const FixedVector<T,K>& local) const;
 
 private:
 

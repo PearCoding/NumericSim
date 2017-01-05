@@ -113,7 +113,7 @@
 #include <cmath>
 #include <cstring>
 
-#define NS_PI_F (3.141592f)
+#define NS_PI (3.141592653589793238462643383279502884L)
 
 NS_BEGIN_NAMESPACE
 

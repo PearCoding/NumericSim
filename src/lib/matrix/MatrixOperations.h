@@ -18,6 +18,15 @@ namespace Operations
 	
 	template<typename T, Dimension K1, Dimension K2>
 	T determinant(const FixedMatrix<T, K1, K2>& m);
+
+	template<class M>
+	typename M::value_type max_norm2(const M& m);
+
+	template<class M>
+	typename M::value_type min_norm2(const M& m);
+
+	template<class M>
+	typename M::value_type cond(const M& m);
 }
 
 NS_END_NAMESPACE

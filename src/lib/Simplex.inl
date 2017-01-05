@@ -9,6 +9,7 @@ Simplex<T,K>::Simplex() :
 	mVertices(), mPrepared(false), mDeterminant(0)
 {
 	static_assert(K > 0, "Simplex of k-order should be bigger than 0");
+	static_assert(K==2, "Simplex currently only implemented for 2D!");
 }
 
 template<typename T, Dimension K>
@@ -38,6 +39,12 @@ void Simplex<T,K>::prepare()
 
 	mDeterminant = Operations::determinant(mMatrix);
 
+	mInverseMatrix.set(0,0, mMatrix.at(1,1));
+	mInverseMatrix.set(0,1, -mMatrix.at(0,1));
+	mInverseMatrix.set(1,1, mMatrix.at(0,0));
+	mInverseMatrix.set(1,0, -mMatrix.at(1,0));
+	mInverseMatrix *= (T)1/mDeterminant;
+
 	mPrepared = true;
 }
 
@@ -54,7 +61,7 @@ typename Simplex<T,K>::vertex_t& Simplex<T,K>::operator[](Index i)
 }
 
 template<typename T, Dimension K>
-T Simplex<T,K>::unitVolume()
+constexpr T Simplex<T,K>::unitVolume()
 {
 	return 1.0/Math::factorial(K);
 }
@@ -98,29 +105,45 @@ typename Simplex<T,K>::vertex_t Simplex<T,K>::faceCenter(Index i) const
 template<typename T, Dimension K>
 typename Simplex<T,K>::vertex_t Simplex<T,K>::faceNormal(Index i) const
 {
-	return (faceCenter(i) - mVertices[i]).normalized();
+	return (center() - mVertices[i]).normalized();
 }
 
 template<typename T, Dimension K>
-typename Simplex<T,K>::matrix_t Simplex<T,K>::gradient() const
+typename Simplex<T,K>::vertex_t Simplex<T,K>::gradient(Index component) const
 {
 	NS_ASSERT(mPrepared);
+	NS_ASSERT(component < K+1);
 
 	// We have to solve a linear equation to find the transformation vectors.
 	// But it is easy to find for the case of 2d:
 
 	static_assert(K==2, "Gradient currently only implemented for 2D!");
 
-	const vertex_t d1 = mVertices[1] - mVertices[0];
-	const vertex_t d2 = mVertices[2] - mVertices[0];
-
-	matrix_t m;
-	m.set(0,0, d2[1]);
-	m.set(0,1, -d2[0]);
-	m.set(1,0, -d1[1]);
-	m.set(1,1, d1[0]);
+	vertex_t d;
+	switch(component)
+	{
+	case 0:
+		d[0] = mVertices[1][1] - mVertices[2][1];
+		d[1] = mVertices[2][0] - mVertices[1][0];
+		break;
+	case 1:
+		d[0] = mVertices[2][1] - mVertices[0][1];
+		d[1] = mVertices[0][0] - mVertices[2][0];
+		break;
+	case 2:
+		d[0] = mVertices[0][1] - mVertices[1][1];
+		d[1] = mVertices[1][0] - mVertices[0][0];
+		break;
+	}
 	
-	return m * (1/mDeterminant);
+	return d * (1/mDeterminant);
+}
+
+template<typename T, Dimension K>
+typename Simplex<T,K>::vertex_t Simplex<T,K>::toLocal(const vertex_t& global) const
+{
+	NS_ASSERT(mPrepared);
+	return mInverseMatrix.mul(global-mVertices[0]);
 }
 
 template<typename T, Dimension K>
@@ -137,12 +160,12 @@ const typename Simplex<T,K>::matrix_t& Simplex<T,K>::matrix() const
 	return mMatrix;
 }
 
-// template<typename T, Dimension K>
-// const typename Simplex<T,K>::matrix_t& Simplex<T,K>::inverseMatrix() const
-// {
-// 	NS_ASSERT(mPrepared);
-// 	return mInverseMatrix;
-// }
+template<typename T, Dimension K>
+const typename Simplex<T,K>::matrix_t& Simplex<T,K>::inverseMatrix() const
+{
+	NS_ASSERT(mPrepared);
+	return mInverseMatrix;
+}
 
 template<typename T, Dimension K>
 T Simplex<T,K>::determinant() const

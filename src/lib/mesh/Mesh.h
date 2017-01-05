@@ -27,10 +27,16 @@ public:
 	MeshElement();
 };
 
+enum MeshVertexFlags
+{
+	MVF_StrongBoundary = 0x1
+};
+
 template<typename T, Dimension K>
 class MeshVertex
 {
 public:
+	uint32 Flags;
 	Index GlobalIndex;
 	FixedVector<T,K> Vertex;
 	std::vector<MeshElement<T,K>*> Elements;

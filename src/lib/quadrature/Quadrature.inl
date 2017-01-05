@@ -21,4 +21,20 @@ RT Quadrature<Factory, T, K, Order>::eval(const F& func, const RT& start) const
 	return v;
 }
 
+template<template<typename,Dimension,Dimension> class Factory, typename T, Dimension K, Dimension Order>
+template<class F, typename RT>
+RT Quadrature<Factory, T, K, Order>::eval_index(const F& func, const RT& start) const
+{
+	const std::vector<FixedVector<T,K> >& points = this->getQuadraturePoints();
+	const std::vector<T>& weights = this->getQuadratureWeights();
+
+	NS_ASSERT(points.size() == weights.size());
+
+	RT v = start;
+	for(Index i = 0; i < points.size(); ++i)
+		v += weights[i] * func(i, points[i]);
+
+	return v;
+}
+
 NS_END_NAMESPACE

@@ -24,36 +24,42 @@ public:
 	const vertex_t& operator[](Index i) const;
 	vertex_t& operator[](Index i);
 
-	static T unitVolume();
+	static constexpr T unitVolume();
 	T volume() const;
 
 	vertex_t center() const;
 	// Radius of the circumscribed hypersphere
 	T outerRadius() const;
 
-	//vertex_t toLocal(const vertex_t& global) const;
+	vertex_t toLocal(const vertex_t& global) const;
 	vertex_t toGlobal(const vertex_t& local) const;
 
-	matrix_t gradient() const;
+	vertex_t gradient(Index component) const;
 
 	vertex_t faceCenter(Index i) const;
 	vertex_t faceNormal(Index i) const;// Jump Vector
 
 	const matrix_t& matrix() const;
-	//const matrix_t& inverseMatrix() const;
+	const matrix_t& inverseMatrix() const;
 	T determinant() const;
 
 private:
 	vertex_t mVertices[K+1];
 	bool mPrepared;
 	matrix_t mMatrix;
-	//matrix_t mInverseMatrix;
+	matrix_t mInverseMatrix;
 	T mDeterminant;
 };
 
 // Typedefs
 template<typename T>
+using Line = Simplex<T, 1>;
+
+template<typename T>
 using Triangle = Simplex<T, 2>;
+
+template<typename T>
+using Tetrahedron = Simplex<T, 3>;
 
 NS_END_NAMESPACE
 

@@ -15,6 +15,9 @@ public:
 
 	template<class F, typename RT = typename std::remove_cv<typename std::result_of<F(FixedVector<T,K>)>::type>::type>
 	RT eval(const F& func, const RT& start = (RT)0) const;
+
+	template<class F, typename RT = typename std::remove_cv<typename std::result_of<F(FixedVector<T,K>)>::type>::type>
+	RT eval_index(const F& func, const RT& start = (RT)0) const;
 };
 
 template<typename T, Dimension K, Dimension Order>

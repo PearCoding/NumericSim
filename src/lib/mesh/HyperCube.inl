@@ -46,6 +46,7 @@ Mesh<T,2> HyperCube<T,2>::generate(const FixedVector<Dimension,2>& elements,
 	for(Index j = 0; j <= elements[1]; ++j)
 	{
 		MV* v = new MV(offset + ex*(T)j);
+		v->Flags |= MVF_StrongBoundary;
 		mesh.addVertex(v);
 		lastRowVertices[j] = v;
 	}
@@ -55,6 +56,8 @@ Mesh<T,2> HyperCube<T,2>::generate(const FixedVector<Dimension,2>& elements,
 	{
 		const auto py = ey*(T)i;
 		MV* lastVertex = new MV(offset + py);
+		lastVertex->Flags |= MVF_StrongBoundary;// Set first column as boundary
+
 		mesh.addVertex(lastVertex);
 
 		for(Index j = 1; j <= elements[1]; ++j)
@@ -78,8 +81,15 @@ Mesh<T,2> HyperCube<T,2>::generate(const FixedVector<Dimension,2>& elements,
 			lastVertex = v;
 		}
 
+		lastVertex->Flags |= MVF_StrongBoundary;// Set last column as boundary
+
 		lastRowVertices[elements[1]] = lastVertex;
 	}
+
+	// Set last row as boundary
+	for(Index j = 0; j <= elements[1]; ++j)
+		lastRowVertices[j]->Flags |= MVF_StrongBoundary;
+
 
 	// Cleanup
 	delete[] lastRowVertices;

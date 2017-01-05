@@ -47,6 +47,54 @@ namespace Operations
 			return (T)0;
 		}
 	}
+
+	template<class M>
+	typename M::value_type max_norm2(const M& m)
+	{
+		typedef typename M::value_type T;
+
+		T v = (T)0;
+		for(Index i = 0; i < m.rows(); ++i)
+		{
+			T s = (T)0;
+			for(auto rIt = m.row_begin(i); rIt != m.row_end(i); ++rIt)
+			{
+				if(std::abs(*rIt)>s)
+					s = std::abs(*rIt);
+			}
+
+			v += s*s;
+		}
+
+		return std::sqrt(v);
+	}
+
+	template<class M>
+	typename M::value_type min_norm2(const M& m)
+	{
+		typedef typename M::value_type T;
+
+		T v = (T)0;
+		for(Index i = 0; i < m.rows(); ++i)
+		{
+			T s = (T)std::numeric_limits<T>::max();
+			for(auto rIt = m.row_begin(i); rIt != m.row_end(i); ++rIt)
+			{
+				if(std::abs(*rIt)<s)
+					s = std::abs(*rIt);
+			}
+
+			v += s*s;
+		}
+
+		return std::sqrt(v);
+	}
+
+	template<class M>
+	typename M::value_type cond(const M& m)
+	{
+		return max_norm2(m)/min_norm2(m);
+	}
 }
 
 NS_END_NAMESPACE

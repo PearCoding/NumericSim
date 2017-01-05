@@ -18,12 +18,12 @@ MeshElement<T,K>::MeshElement() :
 //------------------------------------------------
 template<typename T, Dimension K>
 MeshVertex<T,K>::MeshVertex() :
-	GlobalIndex(0), Vertex()
+	Flags(0), GlobalIndex(0), Vertex()
 {}
 
 template<typename T, Dimension K>
 MeshVertex<T,K>::MeshVertex(const FixedVector<T,K>& vertex) :
-	GlobalIndex(0), Vertex(vertex)
+	Flags(0), GlobalIndex(0), Vertex(vertex)
 {}
 
 //------------------------------------------------

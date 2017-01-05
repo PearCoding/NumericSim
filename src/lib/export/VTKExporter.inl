@@ -111,7 +111,7 @@ void VTKExporter<T,K>::write(const std::string& path,
 			<< (K*K) << "\" format=\"ascii\">" << std::endl;
 		for (MeshElement<T,K>* elem : mesh.elements())
 		{
-			const auto M = elem->Element.gradient();
+			const auto M = elem->Element.gradient(0);
 			for(const auto& v : M)
 				stream << v << " ";
 			stream << std::endl;

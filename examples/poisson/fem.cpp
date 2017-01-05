@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "matrix/SparseMatrix.h"
+#include "matrix/MatrixOperations.h"
 #include "Iterative.h"
 #include "CG.h"
 #include "Vector.h"
@@ -38,6 +39,12 @@ NS_USE_NAMESPACE;
  */
 //#define VERBOSE_LOG
 
+/*
+ * Uncomment to enable experimental matrix condition improvement.
+ * Still merges to the right solution.
+ */
+#define AVG_MID_STRONG_BOUNDARY
+
 /**
  * Program to solve the poisson equation in 2d with
  * f = sin(pi*x)sin(pi*y)
@@ -60,7 +67,11 @@ constexpr double RELAX_PAR = 1.2;// SOR weight parameter (0,2]
 
 constexpr Number EPS = 1e-8;
 
-constexpr Number C = 1;// Constant number to add diagonally to sparse matrix A to achieve better conditions
+constexpr Number C = 0;// Constant number to add diagonally to sparse matrix A to achieve better conditions
+constexpr Number PostErrorFactor = 1;// Propotional factor, often written as C in equations
+
+constexpr Dimension ShapeFunctionOrder = 1;// Currently only first order implemented
+constexpr Dimension QuadratureOrder = ShapeFunctionOrder + 1;
 
 //const char* MESH_0 = -> Grid
 const char* MESH_1 = 
@@ -75,6 +86,16 @@ const char* MESH_3 =
 	#include "half_circle.obj.inl"
 	;
 
+// Definition
+
+const auto source_function = [](const FixedVector<Number,2>& v) -> Number {
+	return std::sin(NS_PI * v[0])*std::sin(NS_PI * v[1]);
+};
+
+const auto boundary_function = [](const FixedVector<Number,2>& v) -> Number {
+	return 0;
+};
+
 /**
  * Main entry
  */
@@ -86,8 +107,8 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	int32 M = 0;
-	int32 N = 0;
+	int32 M = 0;// M == 0 -> Generic mesh; Everything else are precomputed meshes
+	int32 N = 0;// Mesh size in M == 0
 	try
 	{
 		M = std::stol(argv[1]);
@@ -116,6 +137,7 @@ int main(int argc, char** argv)
 	// Calculating basic constants
 	Mesh<Number,2> mesh;
 	
+	const auto p0_start = std::chrono::high_resolution_clock::now();
 	if(M == 0)
 	{
 		std::cout << "Generating mesh with " << N << "x" << N << " rectangles..." << std::endl;
@@ -141,7 +163,13 @@ int main(int argc, char** argv)
 		mesh = MeshObjLoader<Number,2>::loadString(MESH_3);
 	}
 
-	std::cout << "  Preparing elements..." << std::endl;
+	const auto p0_diff = std::chrono::high_resolution_clock::now() - p0_start;
+	std::cout << "Full generation took " 
+		<< std::chrono::duration_cast<std::chrono::seconds>(p0_diff).count()
+		<< " s" << std::endl;
+
+	// --------------------------------
+	std::cout << "Preparing elements..." << std::endl;
 	mesh.prepare();
 
 	try
@@ -166,8 +194,9 @@ int main(int argc, char** argv)
 	// Assembly matrix
 	const uint32 ExpectedEntries = 6*(N-1)*(N-1) + 4*2*(N-1) + 4*2*(N-1) + 2*2 + 3*2;
 	SparseMatrix<Number> A(VertexSize, VertexSize, M == 0 ? ExpectedEntries : 0);
+	DynamicVector<Number> B(VertexSize);
 
-	std::cout << "Assembling matrix...";
+	std::cout << "Assembling matrix and righthand side...";
 	if(M == 0)
 		std::cout << " (" << ExpectedEntries << " entries expected)";
 	
@@ -176,81 +205,109 @@ int main(int argc, char** argv)
 	const auto p1_start = std::chrono::high_resolution_clock::now();
 
 	//Here each element has the same shape function (linear or second order)
-	PolyShapeFunction<Number,2,1> sf;
-	const auto d0 = sf.gradient(0,FixedVector<Number,2>{0,0});
-	const auto d1 = sf.gradient(1,FixedVector<Number,2>{0,0});
-	const auto d2 = sf.gradient(2,FixedVector<Number,2>{0,0});
+	typedef PolyShapeFunction<Number,2,ShapeFunctionOrder> SF;
+	SF sf;
+	GaussLegendreQuadrature<Number,2,QuadratureOrder> quadrature;
 
-#ifdef VERBOSE_LOG
-	std::cout << d0 << std::endl;
-	std::cout << d1 << std::endl;
-	std::cout << d2 << std::endl;
-#endif
-	
-	// Cell based assembling (Not optimized due to better understanding)
+	// Cell based assembling
+	/*
+	 * Potential optimization would be to calculate the shape function gradient value once
+	 * for the reference simplex and multiply it only with the element dependent inverse jacobian.
+	 */
 	for(MeshElement<Number,2>* element : mesh.elements())
 	{
-		const Number integral = Simplex<Number,2>::unitVolume() * std::abs(element->Element.determinant());
-		const auto mat = element->Element.gradient();
-		const FixedVector<Number,2> delta[3] = {mat.mul(d0), mat.mul(d1), mat.mul(d2)};
+		const Number det = std::abs(element->Element.determinant());
+		
+		FixedMatrix<Number,SF::DOF,SF::DOF> elemMat;
+		FixedVector<Number,SF::DOF> elemVec;
 
-		FixedMatrix<Number,3,3> elemMat;
+		const auto invJacob = element->Element.inverseMatrix();
 
 #ifdef VERBOSE_LOG
-		std::cout << mat << std::endl;
+		std::cout << invJacob << std::endl;
 #endif
 
-		for(Index i = 0; i < 3; ++i)
+		for(Index i = 0; i < SF::DOF; ++i)
 		{
-			for(Index j = 0; j < 3; ++j)
+			for(Index j = 0; j < SF::DOF; ++j)
 			{
-				const auto val = integral * delta[i].dot(delta[j]);
+				const Number val = det * quadrature.eval(
+					[&](const FixedVector<Number,2>& local) -> Number
+					{
+						return (invJacob.mul(sf.gradient(i,local))).
+							dot(invJacob.mul(sf.gradient(j,local)));
+					});
+
 				if(std::abs(val) > EPS)
 					elemMat.set(i,j, val);
 			}
+
+			const Number f = det * quadrature.eval(
+				[&](const FixedVector<Number,2>& local) -> Number
+				{
+#ifdef VERBOSE_LOG
+					std::cout << local << " " << element->Element.toGlobal(local) << "; ";
+#endif
+					return sf.value(i, local) * source_function(element->Element.toGlobal(local));
+				});
+#ifdef VERBOSE_LOG
+			std::cout << std::endl;
+#endif
+			if(std::abs(f) > EPS)
+				elemVec.set(i, f);
 		}
 
 #ifdef VERBOSE_LOG
 		std::cout << elemMat << std::endl;
 #endif
-		for(Index i = 0; i < 3; ++i)
+
+		// TODO: DOF/shape function based mapping
+		for(Index i = 0; i < SF::DOF; ++i)
 		{
 			const Index globalI = element->Vertices[i]->GlobalIndex;
 
-			for(Index j = 0; j < 3; ++j)
+			for(Index j = 0; j < SF::DOF; ++j)
 			{
 				const Index globalJ = element->Vertices[j]->GlobalIndex;
-				const Number prev = A.at(globalI, globalJ);
-				A.set(globalI, globalJ,
-					prev + elemMat.at(i,j));
+				A.set(globalI, globalJ, A.at(globalI, globalJ) + elemMat.at(i,j));
 			}
+
+			B.set(globalI, B.at(globalI) + elemVec.at(i));
 		}
+	}
+
+	// Mid number for better matrix condition
+#ifdef AVG_MID_STRONG_BOUNDARY
+	Number avgMid = 0;
+	for(MeshVertex<Number,2>* vertex : mesh.vertices())
+		avgMid += std::abs(A.at(vertex->GlobalIndex, vertex->GlobalIndex));
+	avgMid /= mesh.vertices().size();
+#else
+	constexpr Number avgMid = 1;
+#endif
+
+	// Setup boundary constraints
+	for(MeshVertex<Number,2>* vertex : mesh.vertices())
+	{
+		if(!(vertex->Flags & MVF_StrongBoundary))
+			continue;
+
+		const Number g = boundary_function(vertex->Vertex);
+
+		for(Index i = 0; i < VertexSize; ++i)
+		{
+			B.set(i, B.at(i) - A.at(i, vertex->GlobalIndex)*g);
+
+			A.set(vertex->GlobalIndex, i, 0);
+			A.set(i, vertex->GlobalIndex, 0);
+		}
+
+		A.set(vertex->GlobalIndex, vertex->GlobalIndex, avgMid);
+		B.set(vertex->GlobalIndex, avgMid*g);
 	}
 
 	std::cout << "  Entries: " << A.filledCount() 
 				<< " (Efficiency: " << 100*(1-A.filledCount()/(float)A.size()) << "%)" << std::endl;
-
-	// --------------------------------
-	std::cout << "Assembling right-hand side..." << std::endl;
-	DynamicVector<Number> B(VertexSize);
-	
-	const auto boundary_function = [](const FixedVector<Number,2>& v) {
-		return std::sin(NS_PI_F * v[0])*std::sin(NS_PI_F * v[1]); };
-
-	//constexpr Number unit_int = 140737488355328/(Number)2778046668940015;//2/(NS_PI_F*NS_PI_F);
-	// Vertex based simple quadrature for linear shape function
-	for(MeshVertex<Number,2>* v : mesh.vertices())
-	{
-		Number val = boundary_function(v->Vertex)/3;
-		if(std::abs(val) <= EPS)
-			continue;
-		Number f = 0;
-
-		for(MeshElement<Number,2>* e : v->Elements)
-			f += std::abs(e->Element.determinant());
-
-		B.set(v->GlobalIndex, val*f);
-	}
 
 	const auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
 	std::cout << "Full assembling took " 
@@ -260,11 +317,13 @@ int main(int argc, char** argv)
 	// --------------------------------
 	std::cout << "Calculating..." << std::endl;
 
-	if(C > 0)
+	if(std::abs(C) > 0)
 	{
 		for(Index i = 0; i < A.rows(); ++i)
 			A.set(i,i,A.at(i,i)+C);
 	}
+
+	std::cout << "  cond(A)=" << Operations::cond(A) << std::endl;
 
 	size_t iterations = 0;
 	DynamicVector<Number> X(VertexSize);
@@ -277,33 +336,66 @@ int main(int argc, char** argv)
 #endif
 	const auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
-	std::cout << "  " << iterations << " Iterations ["
+	std::cout << "  " << iterations << " Iterations" << std::endl;
+	std::cout << "Full calculation took " 
 		<< std::chrono::duration_cast<std::chrono::seconds>(p2_diff).count()
-		<< " s]" << std::endl;
+		<< " s" << std::endl;
 
 	// --------------------------------
 	std::cout << "Estimating Error..." << std::endl;
-	DynamicVector<Number> Error(VertexSize);
+	DynamicVector<Number> ExactError(VertexSize);
 
 	if(M == 0)// We know the analytical solution!
 	{
 		const auto solution = [](const FixedVector<Number,2>& v) {
-			return std::sin(NS_PI_F * v[0]) * std::sin(NS_PI_F * v[1]) / (2*NS_PI_F*NS_PI_F); };
+			return std::sin(NS_PI * v[0]) * std::sin(NS_PI * v[1]) / (2*NS_PI*NS_PI); };
 
 		for(MeshVertex<Number,2>* v : mesh.vertices())
 		{
 			Number u = solution(v->Vertex);
 			Number uh = X.at(v->GlobalIndex);
-			Error.set(v->GlobalIndex, std::abs(u-uh));
+			ExactError.set(v->GlobalIndex, std::abs(u-uh));
 		}
 	}
-	else// Post error estimation
-	{
 
+	DynamicVector<Number> PostError(mesh.elements().size());
+	Index k = 0;
+	for(MeshElement<Number,2>* elem : mesh.elements())
+	{
+		const Number det = std::abs(elem->Element.determinant());
+		const Number H = elem->Element.outerRadius();
+
+		const Number cellError = 0;/*det * quadrature.eval(
+			[&](const FixedVector<Number,2>& local) -> Number
+			{
+				return source_function(element->Element.toGlobal(local));
+			});*/
+		
+		Number faceError = 0;
+		for(Index i = 0; i < 3; ++i)
+		{
+			faceError += det* quadrature.eval(
+			[&](const FixedVector<Number,2>& local) -> Number
+			{
+				return elem->Element.faceNormal(i).dot(elem->Element.gradient(i));
+			});
+		}
+		const Number nk = H*cellError + 0.5*std::sqrt(H)*faceError;
+
+		PostError.set(k, PostErrorFactor * nk);
+		k++;
 	}
 
+	if(M == 0)
+		std::cout << "  Exact Error |u-u_h| = " << ExactError.max() << " (Maximum Norm)" << std::endl;
+
+	Number fullPostError = 0;
+	for (auto v : PostError)
+		fullPostError += v*v;
+	std::cout << "  Post Error |grad(e)| <= " << std::sqrt(fullPostError) << " (L2 Norm)" << std::endl;
+
 	// --------------------------------
-	// Writing output
+	std::cout << "Generating Output..." << std::endl;
 	{
 		std::ofstream data("poisson_fem_data.dat");
 		for (MeshVertex<Number,2>* vertex : mesh.vertices())
@@ -340,16 +432,28 @@ int main(int argc, char** argv)
 	{
 		std::ofstream data("poisson_fem_B.dat");
 		for (auto v : B)
-		{
 			data << v << std::endl;
-		}
 		data.close();
 	}
 
-	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &Error,
-		VOO_ElementDeterminant |
-		VOO_ElementMatrix |
-		VOO_ElementGradient );
+	{
+		std::ofstream data("poisson_fem_ExactError.dat");
+		for (auto v : ExactError)
+			data << v << std::endl;
+		data.close();
+	}
 
+	{
+		std::ofstream data("poisson_fem_PostError.dat");
+		for (auto v : PostError)
+			data << v << std::endl;
+		data.close();
+	}
+
+	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &PostError,
+		VOO_ElementDeterminant |
+		VOO_ElementMatrix);
+
+	std::cout << "Finished!" << std::endl;
 	return 0;
 }
