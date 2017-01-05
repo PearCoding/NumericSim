@@ -76,11 +76,14 @@ T Simplex<T,K>::volume() const
 template<typename T, Dimension K>
 typename Simplex<T,K>::vertex_t Simplex<T,K>::center() const
 {
-	vertex_t v;
-	for(Index i = 0; i < K+1; ++i)
-		v += mVertices[i];
+	static_assert(K==2, "Center currently only implemented for 2D!");
+	vertex_t a = mVertices[1]-mVertices[0];
+	vertex_t b = mVertices[2]-mVertices[0];
 	
-	return v / (T)(K+1);
+	vertex_t v;
+	v[0] = b[1]*a.magSqr() - a[1]*b.magSqr();
+	v[1] = a[0]*b.magSqr() - b[0]*a.magSqr();
+	return v / (T)2 * mDeterminant;
 }
 
 template<typename T, Dimension K>

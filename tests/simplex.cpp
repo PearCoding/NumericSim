@@ -37,7 +37,7 @@ NS_TEST("local")
 NS_TEST("radius")
 {
 	Triangle<T> m = { { 0,0 }, { 1,0 }, { 0,1 }};// Standard simplex
-	FixedVector<T,2> c = {1/(double)3,1/(double)3};
+	FixedVector<T,2> c = {0.5,0.5};
 	m.prepare();
 	NS_CHECK_NEARLY_EQ_V(m.center(), c);
 	NS_CHECK_NEARLY_EQ((m[0]-m.center()).mag(), (T)1);
