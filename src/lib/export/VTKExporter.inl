@@ -77,7 +77,15 @@ void VTKExporter<T,K>::write(const std::string& path,
 		for(Index i = 0; i < error->size(); ++i)
 			stream << error->at(i) << std::endl;
 		stream << "</DataArray>" << std::endl;
-	}		
+	}
+
+	if(outputOptions & VOO_VertexBoundary)
+	{
+		stream << "<DataArray Name=\"Boundary\" type=\"UInt8\" format=\"ascii\">" << std::endl;
+		for (MeshVertex<T,K>* v : mesh.vertices())
+			stream << ((v->Flags & MVF_StrongBoundary) ? 1 : 0) << std::endl;
+		stream << "</DataArray>" << std::endl;
+	}
 	stream << "</PointData>" << std::endl;
 
 	// Cell data

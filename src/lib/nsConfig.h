@@ -59,22 +59,24 @@
 #define NS_USE_NAMESPACE using namespace NS_NAMESPACE
 
 #ifndef NS_NO_ASSERTS
+# ifdef NS_DEBUG
 # define NS_ASSERT(cond) \
-	do \
-	{ \
-		if(!(cond)) \
-		{ \
+	do { \
+		if(!(cond)) { \
 			NS_DEBUG_BREAK(); \
+			std::abort(); \
 		} \
 	} while(0)
+# else
+# define NS_ASSERT(cond) \
+	do { \
+		if(!(cond)) { \
+			std::abort(); \
+		} \
+	} while(0)
+# endif
 #else
-# define NS_ASSERT(cond)
-#endif
-
-#if defined(NS_DEBUG)
-# define NS_DEBUG_ASSERT(cond) NS_ASSERT(cond)
-#else
-# define NS_DEBUG_ASSERT(cond) NS_NAMESPACE::ns_Noop()
+# define NS_ASSERT(cond) NS_NAMESPACE::ns_Noop()
 #endif
 
 #define NS_CLASS_NON_MOVEABLE(C) \

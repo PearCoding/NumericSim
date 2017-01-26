@@ -2,6 +2,7 @@
 
 #include "Simplex.h"
 #include <unordered_set>
+#include <unordered_map>
 
 NS_BEGIN_NAMESPACE
 
@@ -78,6 +79,9 @@ public:
 
 	// Third: After build, setup the neighbors
 	void setupNeighbors();
+
+	// Fourth: (Optional) Automaticly setup boundaries
+	void setupBoundaries();
 
 	void prepare();
 

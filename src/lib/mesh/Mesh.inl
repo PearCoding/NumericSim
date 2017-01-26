@@ -359,4 +359,39 @@ void Mesh<T,K>::validate() const throw(MeshException)
 		}
 	}
 }
+
+// Not really optimized but works.
+template<typename T, Dimension K>
+void Mesh<T,K>::setupBoundaries()
+{
+	for(auto e : mData->Elements)// N
+	{
+		for(auto v : e->Vertices)// N * (K+1)
+		{
+			std::unordered_map<MeshElement<T,K>*, int> set;
+			for(auto ov : e->Vertices)// N * (K+1)*(K+1)
+			{
+				if(v == ov)
+					continue;
+
+				for(auto os : ov->Elements)
+					set[os] += 1;
+			}
+
+			int found = 0;
+			for(auto p : set)
+				found += p.second > 1 ? 1 : 0;
+			
+			if(found == 1)
+			{
+				for(auto& ov : e->Vertices)// N * (K+1)*(K+1)
+				{
+					if(v == ov)
+						continue;
+					ov->Flags |= MVF_StrongBoundary;
+				}
+			}
+		}
+	}
+}
 NS_END_NAMESPACE

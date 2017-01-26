@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "nsConfig.h"
 
 #include <iostream>
 #include <list>
@@ -293,7 +293,6 @@ namespace NST
 		_errors += NST_TESTCASE_F_T3(name, t1, t2, t3) ? 0 : 1
 
 #define NST_END_MAIN \
-		NS_DEBUG_ASSERT(_errors == 0); \
 		std::cout << "######################" << std::endl; \
 		if(_errors == 0) \
 			std::cout << "Status: Successful" << std::endl; \

@@ -11,7 +11,8 @@ enum VTKOutputOptions
 {
 	VOO_ElementDeterminant = 0x1,
 	VOO_ElementMatrix = 0x2,
-	VOO_ElementGradient = 0x4
+	VOO_ElementGradient = 0x4,
+	VOO_VertexBoundary = 0x8
 };
 
 template<typename T, Dimension K>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "nsConfig.h"
 
 NS_BEGIN_NAMESPACE
 
@@ -8,7 +8,6 @@ template<class ShapeFunctionPolicy>
 class ShapeFunction : public ShapeFunctionPolicy
 {
 public:
-
 };
 
 NS_END_NAMESPACE

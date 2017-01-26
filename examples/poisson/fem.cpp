@@ -151,16 +151,19 @@ int main(int argc, char** argv)
 	{
 		std::cout << "Loading mesh 1..." << std::endl;
 		mesh = MeshObjLoader<Number,2>::loadString(MESH_1);
+		mesh.setupBoundaries();
 	}
 	else if(M == 2)
 	{
 		std::cout << "Loading mesh 2..." << std::endl;
 		mesh = MeshObjLoader<Number,2>::loadString(MESH_2);
+		mesh.setupBoundaries();
 	}
 	else if(M == 3)
 	{
 		std::cout << "Loading mesh 3..." << std::endl;
 		mesh = MeshObjLoader<Number,2>::loadString(MESH_3);
+		mesh.setupBoundaries();
 	}
 
 	const auto p0_diff = std::chrono::high_resolution_clock::now() - p0_start;
@@ -452,7 +455,8 @@ int main(int argc, char** argv)
 
 	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &PostError,
 		VOO_ElementDeterminant |
-		VOO_ElementMatrix);
+		VOO_ElementMatrix |
+		VOO_VertexBoundary);
 
 	std::cout << "Finished!" << std::endl;
 	return 0;

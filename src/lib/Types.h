@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <complex>
 
-#include "Config.h"
+#include "nsConfig.h"
 
 NS_BEGIN_NAMESPACE
 

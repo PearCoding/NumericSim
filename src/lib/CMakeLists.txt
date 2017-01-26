@@ -1,7 +1,6 @@
 SET(SRC_MAIN
  CG.h
  CG.inl
- Config.h
  CountableSet.h
  CountableSet.inl
  Exceptions.h
@@ -10,6 +9,7 @@ SET(SRC_MAIN
  LU.h
  LU.inl
  OutputStream.h
+ nsConfig.h
  Simplex.h
  Simplex.inl
  Types.h

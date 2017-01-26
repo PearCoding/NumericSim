@@ -14,16 +14,13 @@ template<typename T, Dimension K, Dimension Order>
 class PolyShapePolicy
 {
 public:
-	static constexpr Dimension DOF = (K+1)*Order;
+	static constexpr Dimension DOF = (K+1)*Order;// Wrong
 
 	// For the standard k-simplex
 	T value(Index localComponent, const FixedVector<T,K>& local) const;
 
 	// For the standard k-simplex
 	FixedVector<T,K> gradient(Index localComponent, const FixedVector<T,K>& local) const;
-
-private:
-
 };
 
 template<typename T, Dimension K, Dimension Order>

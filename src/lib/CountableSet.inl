@@ -112,8 +112,6 @@ T CountableSet<T, DC>::avg() const
 template<typename T, class DC>
 void CountableSet<T, DC>::do_reciprocal()
 {
-	NS_DEBUG_ASSERT(!hasZero());
-
 	for (Index i = 0; i < size(); ++i)
 		mData[i] = (T)1 / mData[i];
 }
