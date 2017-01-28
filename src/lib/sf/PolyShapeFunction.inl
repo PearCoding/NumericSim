@@ -260,4 +260,76 @@ FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient(Index localComponent, cons
     return g;
 }
 
+template<typename T, Dimension K, Dimension Order>
+void PolyShapePolicy<T,K,Order>::prepareMesh(Mesh<T,K>& m)
+{
+    static_assert(Order == 1 || 
+        (K==1 && Order == 2) ||
+        (K==2 && Order == 2) , "Currently only some combinations are implemented.");
+
+    // In polynomial scheme all physical nodes are DOF nodes
+    for(auto* e : m.elements())
+    {
+        for(auto* v : e->Vertices)
+            e->DOFVertices.push_back(v);
+        
+        for(Index i = 0; i < K+1; ++i)
+        {
+            for(auto* v : e->Neighbors[i]->Vertices)
+                e->Neighbors[i]->DOFVertices.push_back(v);
+        }
+    }
+
+    if(Order == 2)
+    {
+        if(K == 1)// Line [x0 - x2 - x1]
+        {
+            for(auto* e : m.elements())
+            {
+                const auto x2 = (e->Vertices[0]->Vertex + e->Vertices[1]->Vertex)/(T)2;
+                MeshVertex<T,K>* v2 = new MeshVertex<T,K>(x2);
+
+                v2->Flags |= e->Vertices[0]->Flags | e->Vertices[1]->Flags;
+                v2->Flags |= MVF_Implicit;
+                m.addVertex(v2);
+
+                e->DOFVertices.push_back(v2);
+            }
+        }
+        else if(K == 2)
+        {
+            const auto handleEdge = [&](Index i, MeshElement<T,K>* element)
+            {
+                MeshEdge<T,K>* edge = element->Neighbors[i];
+                if(!edge->DOFVertices.size() == DOF)// Already set for this
+                {
+                    element->DOFVertices.push_back(edge->DOFVertices.back());
+                }
+                else
+                {
+                    const auto x2 = (edge->Vertices[0]->Vertex + edge->Vertices[1]->Vertex)/(T)2;
+                    MeshVertex<T,K>* v2 = new MeshVertex<T,K>(x2);
+
+                    v2->Flags |= MVF_Implicit;
+                    if(!edge->Elements[0] || !edge->Elements[1])
+                        v2->Flags |= MVF_StrongBoundary;
+
+                    m.addVertex(v2);
+
+                    element->DOFVertices.push_back(v2);
+                    edge->DOFVertices.push_back(v2);
+                }
+            };
+
+            for(auto* e : m.elements())
+            {
+                // To ensure right order
+                handleEdge(2,e);
+                handleEdge(0,e);
+                handleEdge(1,e);
+            }
+        }
+    }
+}
+
 NS_END_NAMESPACE

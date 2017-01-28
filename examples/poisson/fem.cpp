@@ -70,7 +70,7 @@ constexpr Number EPS = 1e-8;
 constexpr Number C = 0;// Constant number to add diagonally to sparse matrix A to achieve better conditions
 constexpr Number PostErrorFactor = 1;// Propotional factor, often written as C in equations
 
-constexpr Dimension ShapeFunctionOrder = 1;// Currently only first order implemented
+constexpr Dimension ShapeFunctionOrder = 2;
 constexpr Dimension QuadratureOrder = ShapeFunctionOrder + 1;
 
 //const char* MESH_0 = -> Grid
@@ -96,98 +96,15 @@ const auto boundary_function = [](const FixedVector<Number,2>& v) -> Number {
 	return 0;
 };
 
-/**
- * Main entry
- */
-int main(int argc, char** argv)
+template<int Order>
+void handleMesh(Mesh<Number, 2>& mesh, int M)
 {
-	if(argc != 2 && argc != 3)
-	{
-		std::cout << "Not enough arguments given! Use 'example_poisson_fem M N'" << std::endl;
-		return -1;
-	}
+	typedef PolyShapeFunction<Number,2,Order> SF;
+	SF::prepareMesh(mesh);
 
-	int32 M = 0;// M == 0 -> Generic mesh; Everything else are precomputed meshes
-	int32 N = 0;// Mesh size in M == 0
-	try
-	{
-		M = std::stol(argv[1]);
-		if(argc == 3)
-			N = std::stol(argv[2]);
-	}
-	catch(...)
-	{
-		std::cout << "Invalid arguments given. " << std::endl;
-		return -2;
-	}
-
-	if(M == 0 && N < 2)
-	{
-		std::cout << "Invalid N given. Should be greater than 2" << std::endl;
-		return -3;
-	}
-
-	if(M < 0 || M > 3)
-	{
-		std::cout << "Invalid M given. Should be one for generic grid mesh and 1, 2 or 3 for precomputed mesh 1, 2 or 3" << std::endl;
-		return -4;
-	}
-
-	// --------------------------------
-	// Calculating basic constants
-	Mesh<Number,2> mesh;
-	
-	const auto p0_start = std::chrono::high_resolution_clock::now();
-	if(M == 0)
-	{
-		std::cout << "Generating mesh with " << N << "x" << N << " rectangles..." << std::endl;
-		mesh = HyperCube<Number,2>::generate(
-			Vector2D<Dimension>{(Dimension)N,(Dimension)N},
-			Vector2D<Number>{DomainDistance[0], DomainDistance[1]},
-			Vector2D<Number>{DomainStart[0],DomainStart[1]}
-		);
-	}
-	else if(M == 1)
-	{
-		std::cout << "Loading mesh 1..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadString(MESH_1);
-		mesh.setupBoundaries();
-	}
-	else if(M == 2)
-	{
-		std::cout << "Loading mesh 2..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadString(MESH_2);
-		mesh.setupBoundaries();
-	}
-	else if(M == 3)
-	{
-		std::cout << "Loading mesh 3..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadString(MESH_3);
-		mesh.setupBoundaries();
-	}
-
-	const auto p0_diff = std::chrono::high_resolution_clock::now() - p0_start;
-	std::cout << "Full generation took " 
-		<< std::chrono::duration_cast<std::chrono::seconds>(p0_diff).count()
-		<< " s" << std::endl;
-
-	// --------------------------------
-	std::cout << "Preparing elements..." << std::endl;
-	mesh.prepare();
-
-	try
-	{
-		mesh.validate();
-	}
-	catch(const NSException& e)
-	{
-		std::cout << "  Couldn't generate mesh: " << e.what() << std::endl;
-		return -1;
-	}
-
-	const int32 VertexCount = N+1;
 	const size_t VertexSize = mesh.vertices().size();
-	std::cout << "  Vertices = " << VertexSize << std::endl;
+	std::cout << "  Order = " << Order << std::endl;
+	std::cout << "  DOFs = " << VertexSize << std::endl;
 	std::cout << "  Elements = " << mesh.elements().size() << std::endl;
 
 	const int32 MatrixSize = VertexSize*VertexSize;
@@ -195,20 +112,14 @@ int main(int argc, char** argv)
 
 	// --------------------------------
 	// Assembly matrix
-	const uint32 ExpectedEntries = 6*(N-1)*(N-1) + 4*2*(N-1) + 4*2*(N-1) + 2*2 + 3*2;
-	SparseMatrix<Number> A(VertexSize, VertexSize, M == 0 ? ExpectedEntries : 0);
+	SparseMatrix<Number> A(VertexSize, VertexSize);
 	DynamicVector<Number> B(VertexSize);
 
-	std::cout << "Assembling matrix and righthand side...";
-	if(M == 0)
-		std::cout << " (" << ExpectedEntries << " entries expected)";
-	
-	std::cout << std::endl;
+	std::cout << "Assembling matrix and righthand side..." << std::endl;
 
 	const auto p1_start = std::chrono::high_resolution_clock::now();
 
 	//Here each element has the same shape function (linear or second order)
-	typedef PolyShapeFunction<Number,2,ShapeFunctionOrder> SF;
 	SF sf;
 	GaussLegendreQuadrature<Number,2,QuadratureOrder> quadrature;
 
@@ -253,6 +164,7 @@ int main(int argc, char** argv)
 #endif
 					return sf.value(i, local) * source_function(element->Element.toGlobal(local));
 				});
+			
 #ifdef VERBOSE_LOG
 			std::cout << std::endl;
 #endif
@@ -267,11 +179,11 @@ int main(int argc, char** argv)
 		// TODO: DOF/shape function based mapping
 		for(Index i = 0; i < SF::DOF; ++i)
 		{
-			const Index globalI = element->Vertices[i]->GlobalIndex;
+			const Index globalI = element->DOFVertices[i]->GlobalIndex;
 
 			for(Index j = 0; j < SF::DOF; ++j)
 			{
-				const Index globalJ = element->Vertices[j]->GlobalIndex;
+				const Index globalJ = element->DOFVertices[j]->GlobalIndex;
 				A.set(globalI, globalJ, A.at(globalI, globalJ) + elemMat.at(i,j));
 			}
 
@@ -453,10 +365,108 @@ int main(int argc, char** argv)
 		data.close();
 	}
 
-	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &PostError,
+	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &ExactError,
 		VOO_ElementDeterminant |
 		VOO_ElementMatrix |
-		VOO_VertexBoundary);
+		VOO_VertexBoundaryLabel |
+		VOO_VertexImplicitLabel |
+		(ShapeFunctionOrder == 2 ? VOO_IsQuadratic : 0));
+}
+/**
+ * Main entry
+ */
+int main(int argc, char** argv)
+{
+	if(argc != 3 && argc != 4)
+	{
+		std::cout << "Not enough arguments given! Use 'example_poisson_fem O M N'" << std::endl;
+		return -1;
+	}
+
+	int Order = 1;// Order (1 or 2)
+	int32 M = 0;// M == 0 -> Generic mesh; Everything else are precomputed meshes
+	int32 N = 0;// Mesh size in M == 0
+	try
+	{
+		Order = std::stol(argv[1]);
+		M = std::stol(argv[2]);
+		if(argc == 4)
+			N = std::stol(argv[3]);
+	}
+	catch(...)
+	{
+		std::cout << "Invalid arguments given. " << std::endl;
+		return -2;
+	}
+
+	if(M == 0 && N < 2)
+	{
+		std::cout << "Invalid N given. Should be greater than 2" << std::endl;
+		return -3;
+	}
+
+	if(M < 0 || M > 3)
+	{
+		std::cout << "Invalid M given. Should be one for generic grid mesh and 1, 2 or 3 for precomputed mesh 1, 2 or 3" << std::endl;
+		return -4;
+	}
+
+	// --------------------------------
+	// Calculating basic constants
+	Mesh<Number,2> mesh;
+	
+	const auto p0_start = std::chrono::high_resolution_clock::now();
+	if(M == 0)
+	{
+		std::cout << "Generating mesh with " << N << "x" << N << " rectangles..." << std::endl;
+		mesh = HyperCube<Number,2>::generate(
+			Vector2D<Dimension>{(Dimension)N,(Dimension)N},
+			Vector2D<Number>{DomainDistance[0], DomainDistance[1]},
+			Vector2D<Number>{DomainStart[0],DomainStart[1]}
+		);
+	}
+	else if(M == 1)
+	{
+		std::cout << "Loading mesh 1..." << std::endl;
+		mesh = MeshObjLoader<Number,2>::loadString(MESH_1);
+		mesh.setupBoundaries();
+	}
+	else if(M == 2)
+	{
+		std::cout << "Loading mesh 2..." << std::endl;
+		mesh = MeshObjLoader<Number,2>::loadString(MESH_2);
+		mesh.setupBoundaries();
+	}
+	else if(M == 3)
+	{
+		std::cout << "Loading mesh 3..." << std::endl;
+		mesh = MeshObjLoader<Number,2>::loadString(MESH_3);
+		mesh.setupBoundaries();
+	}
+
+	const auto p0_diff = std::chrono::high_resolution_clock::now() - p0_start;
+	std::cout << "Full generation took " 
+		<< std::chrono::duration_cast<std::chrono::seconds>(p0_diff).count()
+		<< " s" << std::endl;
+
+	// --------------------------------
+	std::cout << "Preparing elements..." << std::endl;
+	mesh.prepare();
+
+	try
+	{
+		mesh.validate();
+	}
+	catch(const NSException& e)
+	{
+		std::cout << "  Couldn't generate mesh: " << e.what() << std::endl;
+		return -1;
+	}
+
+	if(Order == 2)
+		handleMesh<2>(mesh, M);
+	else
+		handleMesh<1>(mesh, M);
 
 	std::cout << "Finished!" << std::endl;
 	return 0;

@@ -11,7 +11,7 @@ MeshElement<T,K>::MeshElement() :
 	for(Index i = 0; i < K+1; ++i)
 	{
 		Vertices[i] = nullptr;
-		Neighbors[i].Pointer = nullptr;
+		Neighbors[i] = nullptr;
 	}
 }
 
@@ -25,6 +25,17 @@ template<typename T, Dimension K>
 MeshVertex<T,K>::MeshVertex(const FixedVector<T,K>& vertex) :
 	Flags(0), GlobalIndex(0), Vertex(vertex)
 {}
+
+//------------------------------------------------
+template<typename T, Dimension K>
+MeshEdge<T,K>::MeshEdge()
+{
+	for(Index i = 0; i < K-1; ++i)
+		Vertices[i] = nullptr;
+	
+	Elements[0] = nullptr;
+	Elements[1] = nullptr;
+}
 
 //------------------------------------------------
 template<typename T, Dimension K>
@@ -188,84 +199,109 @@ const typename Mesh<T,K>::MeshElementList& Mesh<T,K>::elements() const
 }
 
 template<typename T, Dimension K>
+MeshEdge<T,K>* Mesh<T,K>::edge(Index i) const
+{
+	return mData->Edges[i];
+}
+
+template<typename T, Dimension K>
+const typename Mesh<T,K>::MeshEdgeList& Mesh<T,K>::edges() const
+{
+	return mData->Edges;	
+}
+
+template<typename T, Dimension K>
 void Mesh<T,K>::setupNeighbors()
 {
 	for(const auto& S : mData->Elements)
 	{
 		size_t nextEntry = 0;
 
-		for(const auto& other : mData->Elements)
+		for(Index i = 0; i < K+1; ++i)
 		{
-			if(nextEntry >= K+1)// Already full
-				break;
-			
-			// If already neighbor (can happen due to symmetry), skip this entry
-			bool alreadyNeighbor = false;
-			for(Index i = 0; i < K+1; ++i)
-			{
-				if(S->Neighbors[i].Pointer == other)
-				{
-					alreadyNeighbor = true;
-					break;
-				}
-			}
-
-			if(alreadyNeighbor)
+			if(S->Neighbors[i])// Already set
 				continue;
 
-			// Check if they share some vertices
 			size_t sharedVertices = 0;
-			for(Index i = 0; i < K+1; ++i)
+			MeshVertex<T,K>* shared[K];
+			for(Index j = 0; j < K+1; ++j)
 			{
-				const auto& v = S->Vertices[i];
-				bool found = false;
-				for(Index j = 0; j < K+1; ++j)
-				{
-					if(v == other->Vertices[j])
-					{
-						found = true;
-						break;
-					}
-				}
+				if(i == j)
+					continue;
 
-				if(found)
-					sharedVertices++;
+				shared[sharedVertices] = S->Vertices[j];
+				sharedVertices++;
 			}
 
-			// K+1 would be the simplex itself, and everything less than K is not sharing
-			if(sharedVertices == K)
+			if(sharedVertices != K)
+				throw MalformedElementNeighborConnectionException();
+
+			// Create edge
+			MeshEdge<T,K>* edge = new MeshEdge<T,K>();
+			edge->Elements[0] = S;
+
+			for(Index j = 0; j < K; ++j)
+				edge->Vertices[j] = shared[j];
+			
+			S->Neighbors[i] = edge;
+
+			mData->Edges.push_back(edge);
+
+			// Find corresponding other element if exists
+			for(Index j = 0; j < K; ++j)
 			{
-				size_t otherEntry = K+1;
-				for(otherEntry = 0; otherEntry < K+1; ++otherEntry)
+				// Iterate through all vertices of other element
+				for(auto oe : shared[j]->Elements)
 				{
-					if(!other->Neighbors[otherEntry].Pointer)
-						break;
-				}
-
-				if(otherEntry >= K+1)// Something in the mesh generation failed
-					throw TooManySharedFacesException();
-
-				S->Neighbors[nextEntry].Pointer = other;
-				other->Neighbors[otherEntry].Pointer = S;
-
-				size_t vertexEntry = 0;
-				for(Index i = 0; i < K+1; ++i)
-				{
-					NS_ASSERT(vertexEntry < K+1);
-
-					const auto& v = S->Vertices[i];
-					for(Index j = 0; j < K+1; ++j)
+					if(oe == S)
+						continue;
+						
+					size_t matches = 0;
+					for(auto ov : oe->Vertices)
 					{
-						if(v == other->Vertices[j])
+						for(Index k = 0; k < K; ++k)
 						{
-							S->Neighbors[nextEntry].SharedVertices[vertexEntry] = v;
-							other->Neighbors[otherEntry].SharedVertices[vertexEntry] = v;
-							vertexEntry++;
+							if(shared[k] == ov)
+							{
+								matches++;
+								break;
+							}
 						}
 					}
-				}
 
-				nextEntry++;
+					if(matches == K)
+					{
+						if(edge->Elements[1] && edge->Elements[1] != oe)
+							throw TooManySharedFacesException();
+						
+						edge->Elements[1] = oe;
+					}
+				}
+			}
+
+			// For symmetric reasons set found element neighbor too
+			if(edge->Elements[1])
+			{
+				// First find the corresponding vertex not in the edge
+				for(Index j = 0; j < K+1; ++j)
+				{
+					bool found = false;
+					for(Index k = 0; k < K; ++k)
+					{
+						if(shared[k] == edge->Elements[1]->Vertices[j])
+						{
+							found = true;
+							break;
+						}
+					}
+
+					// Add if found
+					if(!found)
+					{
+						edge->Elements[1]->Neighbors[j] = edge;
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -331,65 +367,23 @@ void Mesh<T,K>::validate() const throw(MeshException)
 
 		for(Index i = 0; i < K+1; ++i)
 		{
-			const auto& neighbor = s->Neighbors[i];
-
-			if(!neighbor.Pointer)
-				continue;
-
-			for(Index j = 0; j < K; ++j)
-			{
-				auto v = neighbor.SharedVertices[j];
-
-				if(!v)
-					throw ElementNeighborVertexException();
-
-				bool found = false;
-				for(Index k = 0; k < K+1; ++k)
-				{
-					if(s->Vertices[k] == v)
-					{
-						found = true;
-						break;
-					}
-				}
-
-				if(!found)
-					throw MalformedElementNeighborConnectionException();
-			}
+			if(!s->Neighbors[i])
+				throw MalformedElementNeighborConnectionException();
 		}
 	}
 }
 
-// Not really optimized but works.
 template<typename T, Dimension K>
 void Mesh<T,K>::setupBoundaries()
 {
-	for(auto e : mData->Elements)// N
+	for(auto e : mData->Edges)// N
 	{
-		for(auto v : e->Vertices)// N * (K+1)
+		if(!e->Elements[0] || !e->Elements[1])
 		{
-			std::unordered_map<MeshElement<T,K>*, int> set;
-			for(auto ov : e->Vertices)// N * (K+1)*(K+1)
+			for(Index i = 0; i < K; ++i)
 			{
-				if(v == ov)
-					continue;
-
-				for(auto os : ov->Elements)
-					set[os] += 1;
-			}
-
-			int found = 0;
-			for(auto p : set)
-				found += p.second > 1 ? 1 : 0;
-			
-			if(found == 1)
-			{
-				for(auto& ov : e->Vertices)// N * (K+1)*(K+1)
-				{
-					if(v == ov)
-						continue;
-					ov->Flags |= MVF_StrongBoundary;
-				}
+				NS_ASSERT(e->Vertices[i]);
+				e->Vertices[i]->Flags |= MVF_StrongBoundary;
 			}
 		}
 	}

@@ -21,6 +21,8 @@ public:
 
 	// For the standard k-simplex
 	FixedVector<T,K> gradient(Index localComponent, const FixedVector<T,K>& local) const;
+
+	static void prepareMesh(Mesh<T,K>& m);
 };
 
 template<typename T, Dimension K, Dimension Order>

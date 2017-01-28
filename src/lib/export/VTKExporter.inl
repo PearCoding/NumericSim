@@ -39,26 +39,50 @@ void VTKExporter<T,K>::write(const std::string& path,
 	stream << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
 	for (MeshElement<T,K>* elem : mesh.elements())
 	{
-		for(Index i = 0; i < K+1; ++i)
-			stream << elem->Vertices[i]->GlobalIndex << " ";
+		for(auto v : elem->DOFVertices)
+			stream << v->GlobalIndex << " ";
 		stream << std::endl;
 	}
 	stream << "</DataArray>" << std::endl;
 
+	size_t elemOff = (outputOptions & VOO_IsQuadratic) ? 3 : 2;
+	int elemType = (outputOptions & VOO_IsQuadratic) ? 21 : 3;// Line
+	if(K == 2)// Triangle
+	{
+		if(outputOptions & VOO_IsQuadratic)
+		{
+			elemOff = 6;
+			elemType = 22;
+		}
+		else
+		{
+			elemOff = 3;
+			elemType = 5;
+		}
+	}
+	else if(K == 3)// Tetraeder
+	{
+		if(outputOptions & VOO_IsQuadratic)
+		{
+			elemOff = 10;
+			elemType = 24;
+		}
+		else
+		{
+			elemOff = 4;
+			elemType = 10;
+		}
+	}
+
 	stream << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
 	for(Index i = 1; i <= mesh.elements().size(); ++i)
-		stream << i*(K+1) << " " << std::endl;
+		stream << i*elemOff << " " << std::endl;
 	stream << std::endl;
 	stream << "</DataArray>" << std::endl;
 
 	stream << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">" << std::endl;
-	int type = 3;// Line
-	if(K == 2)
-		type = 5;// Triangle
-	else if(K == 3)
-		type = 10;// Tetraeder
 	for(Index i = 0; i < mesh.elements().size(); ++i)
-		stream << type << " ";
+		stream << elemType << " ";
 	stream << std::endl;
 	
 	stream << "</DataArray>" << std::endl;
@@ -68,23 +92,31 @@ void VTKExporter<T,K>::write(const std::string& path,
 	stream << "<PointData Scalars=\"Result\">" << std::endl;
 	stream << "<DataArray Name=\"Result\" type=\"Float32\" format=\"ascii\">" << std::endl;
 	for(Index i = 0; i < result.size(); ++i)
-		stream << result.at(i) << std::endl;
-	stream << "</DataArray>" << std::endl;
+		stream << result.at(i) << " ";
+	stream << std::endl << "</DataArray>" << std::endl;
 	
 	if(error)
 	{
 		stream << "<DataArray Name=\"Error\" type=\"Float32\" format=\"ascii\">" << std::endl;
 		for(Index i = 0; i < error->size(); ++i)
-			stream << error->at(i) << std::endl;
-		stream << "</DataArray>" << std::endl;
+			stream << error->at(i) << " ";
+		stream << std::endl << "</DataArray>" << std::endl;
 	}
 
-	if(outputOptions & VOO_VertexBoundary)
+	if(outputOptions & VOO_VertexBoundaryLabel)
 	{
-		stream << "<DataArray Name=\"Boundary\" type=\"UInt8\" format=\"ascii\">" << std::endl;
+		stream << "<DataArray Name=\"BoundaryLabel\" type=\"UInt8\" format=\"ascii\">" << std::endl;
 		for (MeshVertex<T,K>* v : mesh.vertices())
-			stream << ((v->Flags & MVF_StrongBoundary) ? 1 : 0) << std::endl;
-		stream << "</DataArray>" << std::endl;
+			stream << ((v->Flags & MVF_StrongBoundary) ? 1 : 0) << " ";
+		stream << std::endl << "</DataArray>" << std::endl;
+	}
+
+	if(outputOptions & VOO_VertexImplicitLabel)
+	{
+		stream << "<DataArray Name=\"ImplicitLabel\" type=\"UInt8\" format=\"ascii\">" << std::endl;
+		for (MeshVertex<T,K>* v : mesh.vertices())
+			stream << ((v->Flags & MVF_Implicit) ? 1 : 0) << " ";
+		stream << std::endl << "</DataArray>" << std::endl;
 	}
 	stream << "</PointData>" << std::endl;
 

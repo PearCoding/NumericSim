@@ -12,25 +12,25 @@ template<typename T, Dimension K>
 class MeshVertex;
 
 template<typename T, Dimension K>
+class MeshEdge;
+
+template<typename T, Dimension K>
 class MeshElement
 {
 public:
-	struct Neighbor
-	{
-		MeshElement* Pointer;
-		MeshVertex<T,K>* SharedVertices[K];
-	};
-
 	Simplex<T,K> Element;
 	MeshVertex<T,K>* Vertices[K+1];
-	Neighbor Neighbors[K+1];
+	MeshEdge<T,K>* Neighbors[K+1];// Neighboring faces are set by the vertex not in the face
+
+	std::vector<MeshVertex<T,K>*> DOFVertices;
 
 	MeshElement();
 };
 
 enum MeshVertexFlags
 {
-	MVF_StrongBoundary = 0x1
+	MVF_StrongBoundary = 0x1,
+	MVF_Implicit = 0x2// Node only for shape function, but not with a physical meaning
 };
 
 template<typename T, Dimension K>
@@ -47,11 +47,24 @@ public:
 };
 
 template<typename T, Dimension K>
+class MeshEdge
+{
+public:
+	MeshVertex<T,K>* Vertices[K];
+	MeshElement<T,K>* Elements[2];
+
+	std::vector<MeshVertex<T,K>*> DOFVertices;
+
+	MeshEdge();
+};
+
+template<typename T, Dimension K>
 class Mesh
 {
 public:
 	typedef std::vector<MeshVertex<T,K>*> MeshVertexList;
 	typedef std::vector<MeshElement<T,K>*> MeshElementList;
+	typedef std::vector<MeshEdge<T,K>*> MeshEdgeList;
 
 	Mesh();
 	Mesh(const Mesh<T,K>& other);
@@ -80,17 +93,21 @@ public:
 	// Third: After build, setup the neighbors
 	void setupNeighbors();
 
+	// (Automaticly added after setupNeighbors)
+	MeshEdge<T,K>* edge(Index i) const;
+	const MeshEdgeList& edges() const;
+
 	// Fourth: (Optional) Automaticly setup boundaries
 	void setupBoundaries();
 
 	void prepare();
-
 	void validate() const throw(MeshException);
 private:
 	struct PrivateData
 	{
 		MeshElementList Elements;
 		MeshVertexList Vertices;
+		MeshEdgeList Edges;
 		size_t Refs;
 	}* mData;
 };
