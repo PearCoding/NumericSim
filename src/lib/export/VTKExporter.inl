@@ -8,7 +8,10 @@ NS_BEGIN_NAMESPACE
 template<typename T, Dimension K>
 template<typename V>
 void VTKExporter<T,K>::write(const std::string& path,
-	const Mesh<T,K>& mesh, const V& result, V* error, int outputOptions)
+	const Mesh<T,K>& mesh,
+	const std::map<std::string, V*>& pointData,
+	const std::map<std::string, V*>& cellData,
+	int outputOptions)
 {
 	static_assert(K >= 1 && K <= 3, "Only 1d, 2d and 3d data can be exported.");
 
@@ -89,17 +92,12 @@ void VTKExporter<T,K>::write(const std::string& path,
 	stream << "</Cells>" << std::endl;
 
 	// Point data
-	stream << "<PointData Scalars=\"Result\">" << std::endl;
-	stream << "<DataArray Name=\"Result\" type=\"Float32\" format=\"ascii\">" << std::endl;
-	for(Index i = 0; i < result.size(); ++i)
-		stream << result.at(i) << " ";
-	stream << std::endl << "</DataArray>" << std::endl;
-	
-	if(error)
+	stream << "<PointData Scalars=\"" << pointData.begin()->first << "\">" << std::endl;
+	for(auto res : pointData)
 	{
-		stream << "<DataArray Name=\"Error\" type=\"Float32\" format=\"ascii\">" << std::endl;
-		for(Index i = 0; i < error->size(); ++i)
-			stream << error->at(i) << " ";
+		stream << "<DataArray Name=\"" << res.first << "\" type=\"Float32\" format=\"ascii\">" << std::endl;
+		for(Index i = 0; i < res.second->size(); ++i)
+			stream << res.second->at(i) << " ";
 		stream << std::endl << "</DataArray>" << std::endl;
 	}
 
@@ -122,6 +120,14 @@ void VTKExporter<T,K>::write(const std::string& path,
 
 	// Cell data
 	stream << "<CellData>" << std::endl;
+	for(auto res : cellData)
+	{
+		stream << "<DataArray Name=\"" << res.first << "\" type=\"Float32\" format=\"ascii\">" << std::endl;
+		for(Index i = 0; i < res.second->size(); ++i)
+			stream << res.second->at(i) << " ";
+		stream << std::endl << "</DataArray>" << std::endl;
+	}
+
 	if(outputOptions & VOO_ElementDeterminant)
 	{
 		stream << "<DataArray Name=\"ElementDeterminant\" type=\"Float32\" format=\"ascii\">" << std::endl;

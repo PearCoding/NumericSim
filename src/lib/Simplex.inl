@@ -93,6 +93,24 @@ T Simplex<T,K>::outerRadius() const
 }
 
 template<typename T, Dimension K>
+T Simplex<T,K>::diameter() const
+{
+	T r = 0;
+	for(Index i = 0; i < K+1; ++i)
+	{
+		for(Index j = 0; j < K+1; ++j)
+		{
+			if(i == j)
+				continue;
+			
+			r = std::max(r, (mVertices[i]-mVertices[j]).magSqr());
+		}
+	}
+
+	return std::sqrt(r);
+}
+
+template<typename T, Dimension K>
 typename Simplex<T,K>::vertex_t Simplex<T,K>::faceCenter(Index i) const
 {
 	vertex_t v;
@@ -108,7 +126,27 @@ typename Simplex<T,K>::vertex_t Simplex<T,K>::faceCenter(Index i) const
 template<typename T, Dimension K>
 typename Simplex<T,K>::vertex_t Simplex<T,K>::faceNormal(Index i) const
 {
-	return (center() - mVertices[i]).normalized();
+	std::array<FixedVector<T,K>, K> face;
+	std::array<FixedVector<T,K>, K-1> arr;
+
+	Index p = 0;
+	for(Index j = 0; j < K+1; ++j)
+	{
+		if(j == i)
+			continue;
+
+		face[p] = mVertices[j];
+		++p;
+	}
+
+	for(Index j = 0; j < K-1; ++j)
+		arr[j] = face[j+1]-face[0];
+
+	FixedVector<T,K> res = Math::normal(arr);
+	if(complex_abs((faceCenter(i)-mVertices[i]).dot(res)) < 0)
+		return -res;
+	else
+		return res;
 }
 
 template<typename T, Dimension K>

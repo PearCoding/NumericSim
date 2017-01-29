@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "Vector.h"
 #include "matrix/MatrixOperations.h"
+#include "Normal.h"
 
 NS_BEGIN_NAMESPACE
 
@@ -30,6 +31,7 @@ public:
 	vertex_t center() const;
 	// Radius of the circumscribed hypersphere
 	T outerRadius() const;
+	T diameter() const;
 
 	vertex_t toLocal(const vertex_t& global) const;
 	vertex_t toGlobal(const vertex_t& local) const;

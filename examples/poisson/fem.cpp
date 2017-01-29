@@ -70,9 +70,6 @@ constexpr Number EPS = 1e-8;
 constexpr Number C = 0;// Constant number to add diagonally to sparse matrix A to achieve better conditions
 constexpr Number PostErrorFactor = 1;// Propotional factor, often written as C in equations
 
-constexpr Dimension ShapeFunctionOrder = 2;
-constexpr Dimension QuadratureOrder = ShapeFunctionOrder + 1;
-
 //const char* MESH_0 = -> Grid
 const char* MESH_1 = 
 	#include "circle.obj.inl"
@@ -121,7 +118,7 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 
 	//Here each element has the same shape function (linear or second order)
 	SF sf;
-	GaussLegendreQuadrature<Number,2,QuadratureOrder> quadrature;
+	GaussLegendreQuadrature<Number,2,Order+1> quadrature;
 
 	// Cell based assembling
 	/*
@@ -278,7 +275,7 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 	for(MeshElement<Number,2>* elem : mesh.elements())
 	{
 		const Number det = std::abs(elem->Element.determinant());
-		const Number H = elem->Element.outerRadius();
+		const Number H = elem->Element.diameter();
 
 		const Number cellError = 0;/*det * quadrature.eval(
 			[&](const FixedVector<Number,2>& local) -> Number
@@ -289,13 +286,15 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 		Number faceError = 0;
 		for(Index i = 0; i < 3; ++i)
 		{
-			faceError += det* quadrature.eval(
-			[&](const FixedVector<Number,2>& local) -> Number
+			if(elem->Neighbors[i]->Elements[1])// Not boundary
 			{
-				return elem->Element.faceNormal(i).dot(elem->Element.gradient(i));
-			});
+				faceError += std::pow(det *
+					(elem->Neighbors[i]->Elements[0]->Element.faceNormal(i).dot(elem->Neighbors[i]->Elements[0]->Element.gradient(i)) 
+						+ elem->Neighbors[i]->Elements[1]->Element.faceNormal(i).dot(elem->Neighbors[i]->Elements[1]->Element.gradient(i))),
+					2);
+			}
 		}
-		const Number nk = H*cellError + 0.5*std::sqrt(H)*faceError;
+		const Number nk = H*H*cellError + 0.5*H*faceError;
 
 		PostError.set(k, PostErrorFactor * nk);
 		k++;
@@ -304,10 +303,7 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 	if(M == 0)
 		std::cout << "  Exact Error |u-u_h| = " << ExactError.max() << " (Maximum Norm)" << std::endl;
 
-	Number fullPostError = 0;
-	for (auto v : PostError)
-		fullPostError += v*v;
-	std::cout << "  Post Error |grad(e)| <= " << std::sqrt(fullPostError) << " (L2 Norm)" << std::endl;
+	std::cout << "  Post Error |grad(e)| <= " << PostError.max() << " (Maximum Norm)" << std::endl;
 
 	// --------------------------------
 	std::cout << "Generating Output..." << std::endl;
@@ -365,13 +361,22 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 		data.close();
 	}
 
-	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, X, &ExactError,
+	std::map<std::string, DynamicVector<Number>*> pointData;
+	pointData["Results"] = &X;
+	if(M == 0)
+		pointData["ExactError"] = &ExactError;
+
+	std::map<std::string, DynamicVector<Number>*> cellData;
+	cellData["PostError"] = &PostError;
+
+	VTKExporter<Number,2>::write<DynamicVector<Number> >("poisson_fem.vtu", mesh, pointData, cellData,
 		VOO_ElementDeterminant |
 		VOO_ElementMatrix |
 		VOO_VertexBoundaryLabel |
 		VOO_VertexImplicitLabel |
-		(ShapeFunctionOrder == 2 ? VOO_IsQuadratic : 0));
+		(Order == 2 ? VOO_IsQuadratic : 0));
 }
+
 /**
  * Main entry
  */

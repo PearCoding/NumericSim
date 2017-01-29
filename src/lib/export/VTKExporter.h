@@ -4,6 +4,7 @@
 
 #include <string>
 #include <fstream>
+#include <map>
 
 NS_BEGIN_NAMESPACE
 
@@ -24,8 +25,10 @@ class VTKExporter
 public:
 	template<typename V>
 	static void write(const std::string& path,
-		const Mesh<T,K>& mesh, const V& result,
-		V* error = nullptr, int outputOptions = 0);
+		const Mesh<T,K>& mesh,
+		const std::map<std::string, V*>& pointData,
+		const std::map<std::string, V*>& cellData,
+		int outputOptions = 0);
 };
 
 NS_END_NAMESPACE

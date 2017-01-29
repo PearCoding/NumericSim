@@ -45,10 +45,58 @@ NS_TEST("radius")
 	NS_CHECK_NEARLY_EQ((m[2]-m.center()).mag(), (T)1);
 	NS_CHECK_NEARLY_EQ(m.outerRadius(), (T)1);
 }
+NS_TEST("diameter")
+{
+	Triangle<T> m = { { 0,0 }, { 1,0 }, { 0,1 }};// Standard simplex
+	m.prepare();
+
+	NS_CHECK_NEARLY_EQ(m.diameter(), std::sqrt((T)2));
+}
+NS_TEST("faceCenter")
+{
+	Triangle<T> m = { { 0,0 }, { 1,0 }, { 0,1 }};
+	m.prepare();
+
+	FixedVector<T,2> r1 = {0,0.5};
+	FixedVector<T,2> r2 = {0.5,0};
+	FixedVector<T,2> r3 = {0.5,0.5};
+
+	NS_CHECK_NEARLY_EQ_V(m.faceCenter(1), r1);
+	NS_CHECK_NEARLY_EQ_V(m.faceCenter(2), r2);
+	NS_CHECK_NEARLY_EQ_V(m.faceCenter(0), r3);
+}
+NS_TEST("faceNormal")
+{
+	{
+		Triangle<T> m = { { 0,0 }, { 1,0 }, { 0,1 }};
+		m.prepare();
+
+		FixedVector<T,2> r1 = {-1,0};
+		FixedVector<T,2> r2 = {0,-1};
+		FixedVector<T,2> r3 = (FixedVector<T,2>{1,1}).normalized();
+
+		NS_CHECK_NEARLY_EQ_V(m.faceNormal(1), r1);
+		NS_CHECK_NEARLY_EQ_V(m.faceNormal(2), r2);
+		NS_CHECK_NEARLY_EQ_V(m.faceNormal(0), r3);
+	}
+
+	{
+		Triangle<T> m = { { 0,0 }, { -1,0 }, { 0,-1 }};
+		m.prepare();
+
+		FixedVector<T,2> r1 = {1,0};
+		FixedVector<T,2> r2 = {0,1};
+		FixedVector<T,2> r3 = (FixedVector<T,2>{-1,-1}).normalized();
+
+		NS_CHECK_NEARLY_EQ_V(m.faceNormal(1), r1);
+		NS_CHECK_NEARLY_EQ_V(m.faceNormal(2), r2);
+		NS_CHECK_NEARLY_EQ_V(m.faceNormal(0), r3);
+	}
+}
 NS_END_TESTCASE()
 
 NST_BEGIN_MAIN
 NST_TESTCASE_T1(Triangle, float);
 NST_TESTCASE_T1(Triangle, double);
-NST_TESTCASE_T1(Triangle, std::complex<double>);
+//NST_TESTCASE_T1(Triangle, std::complex<double>);
 NST_END_MAIN
