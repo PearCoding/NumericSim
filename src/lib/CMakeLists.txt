@@ -55,7 +55,12 @@ SET(SRC_EXPORT
  export/VTKExporter.inl)
 SOURCE_GROUP("Header Files\\Export" FILES ${SRC_EXPORT})
 
-SET(SRC ${SRC_MAIN} ${SRC_MATRIX} ${SRC_MESH} ${SRC_SF} ${SRC_EXPORT})
+SET(SRC_LOADER
+ loader/MeshTriangleLoader.h
+ loader/MeshTriangleLoader.inl)
+SOURCE_GROUP("Header Files\\Loader" FILES ${SRC_LOADER})
+
+SET(SRC ${SRC_MAIN} ${SRC_MATRIX} ${SRC_MESH} ${SRC_SF} ${SRC_EXPORT} ${SRC_LOADER})
  
 add_library(ns_lib STATIC ${SRC})
 set_target_properties(ns_lib PROPERTIES LINKER_LANGUAGE CXX)

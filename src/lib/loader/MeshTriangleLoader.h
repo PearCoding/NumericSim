@@ -20,6 +20,13 @@ public:
 	static Mesh<T,2> loadString(const std::string& nodeStr, const std::string& eleStr);
 
 private:
+	static void skipWS(std::string::const_iterator& it,
+		std::string::const_iterator end);
+	
+	template<typename T2>
+	static T2 extractFirstNumber(std::string::const_iterator& it,
+		std::string::const_iterator end);
+
 	static void setupNode(Mesh<T,2>& mesh, const std::string& nodeStr);
 	static void setupElement(Mesh<T,2>& mesh, const std::string& eleStr);
 };

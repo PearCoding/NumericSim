@@ -79,7 +79,7 @@ void VTKExporter<T,K>::write(const std::string& path,
 
 	stream << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
 	for(Index i = 1; i <= mesh.elements().size(); ++i)
-		stream << i*elemOff << " " << std::endl;
+		stream << i*elemOff << " ";
 	stream << std::endl;
 	stream << "</DataArray>" << std::endl;
 

@@ -20,7 +20,10 @@ NS_TEST("1. Order")
 NS_TEST("2. Order")
 {
 	GaussLegendreQuadrature<T,1,2> quad;
-	T val = quad.eval([](const FixedVector<T,1>& x) { return x[0]; });
+	T val = quad.eval([](const FixedVector<T,1>& x) { return (T)1; });
+	NS_CHECK_NEARLY_EQ(val, (T)1);
+
+	val = quad.eval([](const FixedVector<T,1>& x) { return x[0]; });
 	NS_CHECK_NEARLY_EQ(val, (T)0.5);
 
 	val = quad.eval([](const FixedVector<T,1>& x) { return x[0]*x[0]; });
@@ -29,7 +32,13 @@ NS_TEST("2. Order")
 NS_TEST("3. Order")
 {
 	GaussLegendreQuadrature<T,1,3> quad;
-	T val = quad.eval([](const FixedVector<T,1>& x) -> T { return x[0]*x[0]; });
+	T val = quad.eval([](const FixedVector<T,1>& x) { return (T)1; });
+	NS_CHECK_NEARLY_EQ(val, (T)1);
+
+	val = quad.eval([](const FixedVector<T,1>& x) { return x[0]; });
+	NS_CHECK_NEARLY_EQ(val, (T)0.5);
+
+	val = quad.eval([](const FixedVector<T,1>& x) -> T { return x[0]*x[0]; });
 	NS_CHECK_NEARLY_EQ(val, (T)0.3333333333333333333);
 
 	val = quad.eval([](const FixedVector<T,1>& x) -> T { return x[0]*x[0]*x[0]; });
@@ -51,7 +60,10 @@ NS_TEST("1. Order")
 NS_TEST("2. Order")
 {
 	GaussLegendreQuadrature<T,2,2> quad;
-	T val = quad.eval([](const FixedVector<T,2>& x) { return (T)x.sum(); });
+	T val = quad.eval([](const FixedVector<T,2>& x) { return (T)1; });
+	NS_CHECK_NEARLY_EQ(val, (T)0.5);
+
+	val = quad.eval([](const FixedVector<T,2>& x) { return (T)x.sum(); });
 	NS_CHECK_NEARLY_EQ(val, (T)0.3333333333333333333);
 
 	val = quad.eval([](const FixedVector<T,2>& x) { return (T)x.magSqr(); });
@@ -60,7 +72,13 @@ NS_TEST("2. Order")
 NS_TEST("3. Order")
 {
 	GaussLegendreQuadrature<T,2,3> quad;
-	T val = quad.eval([](const FixedVector<T,2>& x) { return (T)x.magSqr(); });
+	T val = quad.eval([](const FixedVector<T,2>& x) { return (T)1; });
+	NS_CHECK_NEARLY_EQ(val, (T)0.5);
+
+	val = quad.eval([](const FixedVector<T,2>& x) { return (T)x.sum(); });
+	NS_CHECK_NEARLY_EQ(val, (T)0.3333333333333333333);
+
+	val = quad.eval([](const FixedVector<T,2>& x) { return (T)x.magSqr(); });
 	NS_CHECK_NEARLY_EQ(val, (T)0.1666666666666666666);
 
 	val = quad.eval([](const FixedVector<T,2>& x) { return (T) (x*x*x).sum(); });

@@ -348,7 +348,7 @@ Dimension BaseMatrix<T,DC>::size() const
 }
 
 template<typename T, class DC>
-bool BaseMatrix<T,DC>::isEmpty() const
+bool BaseMatrix<T,DC>::empty() const
 {
 	for (auto l : mValues.Container)
 	{
@@ -402,7 +402,7 @@ T BaseMatrix<T,DC>::avg() const
 }
 
 template<typename T, class DC>
-bool BaseMatrix<T,DC>::hasNaN() const
+bool BaseMatrix<T,DC>::has_nan() const
 {
 	for (auto l : mValues.Container)
 	{
@@ -414,7 +414,7 @@ bool BaseMatrix<T,DC>::hasNaN() const
 }
 
 template<typename T, class DC>
-bool BaseMatrix<T,DC>::hasInf() const
+bool BaseMatrix<T,DC>::has_inf() const
 {
 	for (auto l : mValues.Container)
 	{
@@ -426,7 +426,7 @@ bool BaseMatrix<T,DC>::hasInf() const
 }
 
 template<typename T, class DC>
-bool BaseMatrix<T,DC>::hasZero() const
+bool BaseMatrix<T,DC>::has_zero() const
 {
 	for (auto l : mValues.Container)
 	{

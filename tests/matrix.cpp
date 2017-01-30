@@ -5,6 +5,7 @@
 #include "matrix/MatrixConstructor.h"
 #include "matrix/MatrixCheck.h"
 #include "matrix/MatrixOperations.h"
+#include "matrix/MatrixOrder.h"
 
 NS_USE_NAMESPACE;
 
@@ -15,7 +16,7 @@ NS_TEST("default")
 	M<T> t(4, 4);
 	for (Index i = 0; i < 16; ++i)
 		NS_CHECK_EQ(t.linear_at(i), (T)0);
-	NS_CHECK_TRUE(t.isEmpty());
+	NS_CHECK_TRUE(t.empty());
 }
 NS_TEST("set/at")
 {
@@ -39,7 +40,7 @@ NS_TEST("set/at")
 	NS_CHECK_EQ(t.at(3, 3), (T)4);
 	//NS_CHECK_EQ(t.filledCount(), 2);
 
-	NS_CHECK_FALSE(t.isEmpty());
+	NS_CHECK_FALSE(t.empty());
 }
 NS_TEST("+")
 {
@@ -291,6 +292,43 @@ NS_TEST("determinant")
 }
 NS_END_TESTCASE()
 
+template<typename T>
+NS_BEGIN_TESTCASE_T1(SparseMatrixOnly)
+NS_TEST("CutHill-McKee")
+{
+	SparseMatrix<T> A({
+		{1,0,0,0,1,0,0,0},
+		{0,1,1,0,0,1,0,1},
+		{0,1,1,0,1,0,0,0},
+		{0,0,0,1,0,0,1,0},
+		{1,0,1,0,1,0,0,0},
+		{0,1,0,0,0,1,0,1},
+		{0,0,0,1,0,0,1,0},
+		{0,1,0,0,0,1,0,1}
+	});
+
+	DynamicVector<Index> ret = r_cuthill_mckee(A);
+	DynamicVector<Index> res = {6,3,7,5,1,2,4,0};
+	NS_CHECK_EQ(ret, res);
+
+	SparseMatrix<T> P = permutation_matrix<T>(ret);
+
+	SparseMatrix<T> B({
+		{1,1,0,0,0,0,0,0},
+		{1,1,0,0,0,0,0,0},
+		{0,0,1,1,1,0,0,0},
+		{0,0,1,1,1,0,0,0},
+		{0,0,1,1,1,1,0,0},
+		{0,0,0,0,1,1,1,0},
+		{0,0,0,0,0,1,1,1},
+		{0,0,0,0,0,0,1,1}
+	});
+
+	SparseMatrix<T> rB = B.mul(P);
+	NS_CHECK_EQ(rB,B);
+}
+NS_END_TESTCASE()
+
 NST_BEGIN_MAIN
 NST_TESTCASE_T2(Matrix, DenseMatrix, float);
 NST_TESTCASE_T2(Matrix, DenseMatrix, double);
@@ -298,4 +336,8 @@ NST_TESTCASE_T2(Matrix, DenseMatrix, std::complex<double>);
 NST_TESTCASE_T2(Matrix, SparseMatrix, float);
 NST_TESTCASE_T2(Matrix, SparseMatrix, double);
 NST_TESTCASE_T2(Matrix, SparseMatrix, std::complex<double>);
+
+NST_TESTCASE_T1(SparseMatrixOnly, float);
+//NST_TESTCASE_T1(SparseMatrixOnly, double);
+//NST_TESTCASE_T1(SparseMatrixOnly, std::complex<double>);
 NST_END_MAIN

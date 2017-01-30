@@ -621,7 +621,23 @@ public:
 	* Always: \f$ O(1) \f$
 	* @return A value between 0 and D1*D2.
 	*/
-	Dimension filledCount() const;
+	Dimension filled_count() const;
+
+	/**
+	* @brief The amount of entries currently filled (v != 0) at the given row
+	* @par Complexity
+	* Worst case: \f$ O(D2) \f$
+	* @return A value between 0 and D2.
+	*/
+	Dimension row_filled_count(Index r) const;
+
+	/**
+	* @brief The amount of entries currently filled (v != 0) at the given column
+	* @par Complexity
+	* Worst case: \f$ O(D1) \f$
+	* @return A value between 0 and D1.
+	*/
+	Dimension column_filled_count(Index c) const;
 
 	/**
 	 * @brief The sum of all entries.
@@ -669,7 +685,7 @@ public:
 	* Worst case: \f$ O(D1*D2) \f$
 	* @return True if matrix has a NaN entry, false otherwise.
 	*/
-	bool hasNaN() const;
+	bool has_nan() const;
 
 	/**
 	* @brief Returns true if matrix has infinite entries
@@ -677,25 +693,25 @@ public:
 	* Worst case: \f$ O(D1*D2) \f$
 	* @return True if matrix has a infinite entry, false otherwise.
 	*/
-	bool hasInf() const;
+	bool has_inf() const;
 
 	/**
 	* @brief Returns true if matrix has a entry with 0.
 	* @par Complexity
 	* Always: \f$ O(1) \f$
 	* @return True if matrix has an 0 entry, false otherwise.
-	* @sa isEmpty()
+	* @sa empty()
 	*/
-	bool hasZero() const;
+	bool has_zero() const;
 
 	/**
 	* @brief Returns true if matrix has no entries.
 	* @par Complexity
 	* Always: \f$ O(1) \f$
 	* @return True if the matrix is empty, false otherwise.
-	* @sa hasZero()
+	* @sa has_zero()
 	*/
-	bool isEmpty() const;// everything is zero!
+	bool empty() const;// everything is zero!
 
 	/**
 	* @brief Transpose matrix.

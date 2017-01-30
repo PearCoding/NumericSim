@@ -275,6 +275,9 @@ void PolyShapePolicy<T,K,Order>::prepareMesh(Mesh<T,K>& m)
         
         for(Index i = 0; i < K+1; ++i)
         {
+            if(!e->Neighbors[i]->DOFVertices.empty())
+                continue;
+                
             for(auto* v : e->Neighbors[i]->Vertices)
                 e->Neighbors[i]->DOFVertices.push_back(v);
         }
@@ -293,6 +296,7 @@ void PolyShapePolicy<T,K,Order>::prepareMesh(Mesh<T,K>& m)
                 v2->Flags |= MVF_Implicit;
                 m.addVertex(v2);
 
+                v2->Elements.push_back(e);
                 e->DOFVertices.push_back(v2);
             }
         }
@@ -301,8 +305,9 @@ void PolyShapePolicy<T,K,Order>::prepareMesh(Mesh<T,K>& m)
             const auto handleEdge = [&](Index i, MeshElement<T,K>* element)
             {
                 MeshEdge<T,K>* edge = element->Neighbors[i];
-                if(!edge->DOFVertices.size() == DOF)// Already set for this
+                if(edge->DOFVertices.size() == K+1)// Already set for this
                 {
+                    edge->DOFVertices.back()->Elements.push_back(element);
                     element->DOFVertices.push_back(edge->DOFVertices.back());
                 }
                 else
@@ -316,6 +321,7 @@ void PolyShapePolicy<T,K,Order>::prepareMesh(Mesh<T,K>& m)
 
                     m.addVertex(v2);
 
+                    v2->Elements.push_back(element);
                     element->DOFVertices.push_back(v2);
                     edge->DOFVertices.push_back(v2);
                 }

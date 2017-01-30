@@ -131,6 +131,18 @@ Vector<T,DC> Vector<T,DC>::mid(Index start, Index end) const
 	return tmp;
 }
 
+template<typename T, class DC>
+bool Vector<T,DC>::has(Index start, Index end, const T& v) const
+{
+	for (Index i = start; i < end && i < this->size(); ++i)
+	{
+		if(this->at(i) == v)
+			return true;
+	}
+
+	return false;
+}
+
 // Elementwise operations
 template<typename T, class DC>
 Vector<T,DC>& Vector<T,DC>::operator +=(const Vector<T,DC>& v)

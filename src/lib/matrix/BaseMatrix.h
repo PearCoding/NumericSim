@@ -590,7 +590,7 @@ public:
 	* Worst case: \f$ O(D1*D2) \f$
 	* @return True if matrix has a NaN entry, false otherwise.
 	*/
-	bool hasNaN() const;
+	bool has_nan() const;
 
 	/**
 	* @brief Returns true if matrix has infinite entries
@@ -598,25 +598,25 @@ public:
 	* Worst case: \f$ O(D1*D2) \f$
 	* @return True if matrix has a infinite entry, false otherwise.
 	*/
-	bool hasInf() const;
+	bool has_inf() const;
 
 	/**
 	* @brief Returns true if matrix has an entry with 0.
 	* @par Complexity
 	* Worst case: \f$ O(D1*D2) \f$
 	* @return True if matrix has a 0 entry, false otherwise.
-	* @sa isEmpty()
+	* @sa empty()
 	*/
-	bool hasZero() const;
+	bool has_zero() const;
 
 	/**
 	* @brief Returns true if matrix has only zeros.
 	* @par Complexity
 	* Always: \f$ O(1) \f$
 	* @return True if the matrix is empty, false otherwise.
-	* @sa hasZero()
+	* @sa has_zero()
 	*/
-	bool isEmpty() const;
+	bool empty() const;
 
 	/**
 	* @brief Returns the trace of the matrix.

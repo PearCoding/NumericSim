@@ -13,7 +13,8 @@
 
 #include "mesh/HyperCube.h"
 #include "mesh/Mesh.h"
-#include "mesh/MeshObjLoader.h"
+#include "loader/MeshObjLoader.h"
+#include "loader/MeshTriangleLoader.h"
 
 #include "sf/PolyShapeFunction.h"
 
@@ -31,7 +32,7 @@ NS_USE_NAMESPACE;
 /*
  * Undef if you want to use the iterative SOR algorithm
  */
-#define USE_CG
+//#define USE_CG
 
 /*
  * Uncomment to produce many verbose debug information.
@@ -49,11 +50,6 @@ NS_USE_NAMESPACE;
  * Program to solve the poisson equation in 2d with
  * f = sin(pi*x)sin(pi*y)
  * and dirichlet boundary u = 0
- *
- * Should be called with a commandline argument N.
- * N is the rectangle count for each dimension
- *
- * Internally a triangle representation is used.
  */
 
 typedef double Number;
@@ -69,19 +65,6 @@ constexpr Number EPS = 1e-8;
 
 constexpr Number C = 0;// Constant number to add diagonally to sparse matrix A to achieve better conditions
 constexpr Number PostErrorFactor = 1;// Propotional factor, often written as C in equations
-
-//const char* MESH_0 = -> Grid
-const char* MESH_1 = 
-	#include "circle.obj.inl"
-	;
-
-const char* MESH_2 = 
-	#include "triangles.obj.inl"
-	;
-
-const char* MESH_3 = 
-	#include "half_circle.obj.inl"
-	;
 
 // Definition
 
@@ -173,7 +156,6 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 		std::cout << elemMat << std::endl;
 #endif
 
-		// TODO: DOF/shape function based mapping
 		for(Index i = 0; i < SF::DOF; ++i)
 		{
 			const Index globalI = element->DOFVertices[i]->GlobalIndex;
@@ -218,8 +200,8 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 		B.set(vertex->GlobalIndex, avgMid*g);
 	}
 
-	std::cout << "  Entries: " << A.filledCount() 
-				<< " (Efficiency: " << 100*(1-A.filledCount()/(float)A.size()) << "%)" << std::endl;
+	std::cout << "  Entries: " << A.filled_count() 
+				<< " (Efficiency: " << 100*(1-A.filled_count()/(float)A.size()) << "%)" << std::endl;
 
 	const auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
 	std::cout << "Full assembling took " 
@@ -274,7 +256,7 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 	Index k = 0;
 	for(MeshElement<Number,2>* elem : mesh.elements())
 	{
-		const Number det = std::abs(elem->Element.determinant());
+		//const Number det = std::abs(elem->Element.determinant());
 		const Number H = elem->Element.diameter();
 
 		const Number cellError = 0;/*det * quadrature.eval(
@@ -286,15 +268,18 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 		Number faceError = 0;
 		for(Index i = 0; i < 3; ++i)
 		{
-			if(elem->Neighbors[i]->Elements[1])// Not boundary
-			{
-				faceError += std::pow(det *
-					(elem->Neighbors[i]->Elements[0]->Element.faceNormal(i).dot(elem->Neighbors[i]->Elements[0]->Element.gradient(i)) 
-						+ elem->Neighbors[i]->Elements[1]->Element.faceNormal(i).dot(elem->Neighbors[i]->Elements[1]->Element.gradient(i))),
-					2);
-			}
+			// Directional finite difference
+			FixedVector<Number, 2> u1;
+			u1[0] = (X.at(elem->Neighbors[i]->Vertices[0]->GlobalIndex) - X.at(elem->Vertices[i]->GlobalIndex)) /
+				(elem->Neighbors[i]->Vertices[0]->Vertex-elem->Vertices[i]->Vertex).mag();
+			u1[1] = (X.at(elem->Neighbors[i]->Vertices[1]->GlobalIndex) - X.at(elem->Vertices[i]->GlobalIndex)) /
+				(elem->Neighbors[i]->Vertices[1]->Vertex-elem->Vertices[i]->Vertex).mag();
+			faceError += (elem->Neighbors[i]->Vertices[0]->Vertex-elem->Neighbors[i]->Vertices[1]->Vertex).mag() *
+				//std::pow(elem->Neighbors[i]->Elements[0]->Element.faceNormal(i).dot(u1), 2);
+				u1.magSqr();
+
 		}
-		const Number nk = H*H*cellError + 0.5*H*faceError;
+		const Number nk = H*H*cellError + 0.5*faceError;
 
 		PostError.set(k, PostErrorFactor * nk);
 		k++;
@@ -382,21 +367,18 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
  */
 int main(int argc, char** argv)
 {
-	if(argc != 3 && argc != 4)
+	if(argc < 3)
 	{
-		std::cout << "Not enough arguments given! Use 'example_poisson_fem O M N'" << std::endl;
+		std::cout << "Not enough arguments given! Use 'example_poisson_fem O M <DEPENDS ON M>'" << std::endl;
 		return -1;
 	}
 
 	int Order = 1;// Order (1 or 2)
 	int32 M = 0;// M == 0 -> Generic mesh; Everything else are precomputed meshes
-	int32 N = 0;// Mesh size in M == 0
 	try
 	{
 		Order = std::stol(argv[1]);
 		M = std::stol(argv[2]);
-		if(argc == 4)
-			N = std::stol(argv[3]);
 	}
 	catch(...)
 	{
@@ -404,15 +386,9 @@ int main(int argc, char** argv)
 		return -2;
 	}
 
-	if(M == 0 && N < 2)
+	if(M < 0 || M > 2)
 	{
-		std::cout << "Invalid N given. Should be greater than 2" << std::endl;
-		return -3;
-	}
-
-	if(M < 0 || M > 3)
-	{
-		std::cout << "Invalid M given. Should be one for generic grid mesh and 1, 2 or 3 for precomputed mesh 1, 2 or 3" << std::endl;
+		std::cout << "Invalid M given. Should be zero for generic grid mesh, one for obj mesh and two for triangle .node and .ele mesh" << std::endl;
 		return -4;
 	}
 
@@ -423,6 +399,19 @@ int main(int argc, char** argv)
 	const auto p0_start = std::chrono::high_resolution_clock::now();
 	if(M == 0)
 	{
+		if(argc != 4)
+		{
+			std::cout << "Need additional N!" << std::endl;
+			return -3;
+		}
+
+		int32 N = std::stol(argv[3]);
+		if(N < 1)
+		{
+			std::cout << "Invalid N given. Should be greater than 1" << std::endl;
+			return -3;
+		}
+
 		std::cout << "Generating mesh with " << N << "x" << N << " rectangles..." << std::endl;
 		mesh = HyperCube<Number,2>::generate(
 			Vector2D<Dimension>{(Dimension)N,(Dimension)N},
@@ -432,25 +421,29 @@ int main(int argc, char** argv)
 	}
 	else if(M == 1)
 	{
-		std::cout << "Loading mesh 1..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadString(MESH_1);
+		if(argc != 4)
+		{
+			std::cout << "Need additional filename!" << std::endl;
+			return -3;
+		}
+		std::cout << "Loading mesh " << argv[3] << "..." << std::endl;
+		mesh = MeshObjLoader<Number,2>::loadFile(argv[3]);
 		mesh.setupBoundaries();
 	}
 	else if(M == 2)
 	{
-		std::cout << "Loading mesh 2..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadString(MESH_2);
-		mesh.setupBoundaries();
-	}
-	else if(M == 3)
-	{
-		std::cout << "Loading mesh 3..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadString(MESH_3);
+		if(argc != 5)
+		{
+			std::cout << "Need additional paths to .node and .ele files! (First .node, than .ele)" << std::endl;
+			return -3;
+		}
+		std::cout << "Loading mesh " << argv[3] << " and " << argv[4] << " ..." << std::endl;
+		mesh = MeshTriangleLoader<Number>::loadFile(argv[3], argv[4]);
 		mesh.setupBoundaries();
 	}
 
 	const auto p0_diff = std::chrono::high_resolution_clock::now() - p0_start;
-	std::cout << "Full generation took " 
+	std::cout << "Mesh setup took " 
 		<< std::chrono::duration_cast<std::chrono::seconds>(p0_diff).count()
 		<< " s" << std::endl;
 

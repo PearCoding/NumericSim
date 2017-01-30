@@ -332,12 +332,26 @@ void Mesh<T,K>::validate() const throw(MeshException)
 		for(auto s : v->Elements)
 		{
 			bool found = false;
-			for(Index i = 0; i < K+1; ++i)
+			if(s->DOFVertices.empty())// Not done
 			{
-				if(s->Vertices[i] == v)
+				for(Index i = 0; i < K+1; ++i)
 				{
-					found = true;
-					break;
+					if(s->Vertices[i] == v)
+					{
+						found = true;
+						break;
+					}
+				}
+			}
+			else
+			{
+				for(auto ov : s->DOFVertices)
+				{
+					if(ov == v)
+					{
+						found = true;
+						break;
+					}
 				}
 			}
 

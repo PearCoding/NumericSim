@@ -4,7 +4,7 @@
 #include "mesh/Mesh.h"
 #include "OutputStream.h"
 
-#include "mesh/MeshObjLoader.h"
+#include "loader/MeshObjLoader.h"
 
 NS_USE_NAMESPACE;
 

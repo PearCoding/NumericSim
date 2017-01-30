@@ -51,6 +51,8 @@ public:
 	Vector left(Index i) const;
 	Vector right(Index i) const;
 	Vector mid(Index start, Index end) const;
+
+	bool has(Index start, Index end, const T& v) const;
 };
 
 // Element wise operations

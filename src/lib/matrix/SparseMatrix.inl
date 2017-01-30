@@ -249,7 +249,7 @@ const T& SparseMatrix<T>::internal_at(Index i1, Index i2, Index& columnPtrIndex,
 	found = false;
 	columnPtrIndex = 0;
 
-	if (!isEmpty())
+	if (!empty())
 	{
 		Index rowPtr;
 		size_t s = row_entry_count(tmp_i1, rowPtr);// O(1)
@@ -406,7 +406,7 @@ bool SparseMatrix<T>::has(Index i1, Index i2, T& val) const
 template<typename T>
 const SparseMatrixIterator<T> SparseMatrix<T>::begin() const
 {
-	if (isEmpty())
+	if (empty())
 		return end();
 	else
 	{
@@ -431,7 +431,7 @@ const SparseMatrixIterator<T> SparseMatrix<T>::end() const
 template<typename T>
 SparseMatrixIterator<T> SparseMatrix<T>::begin()
 {
-	if (isEmpty())
+	if (empty())
 		return end();
 	else
 	{
@@ -469,7 +469,7 @@ template<typename T>
 const SparseMatrixRowIterator<T> SparseMatrix<T>::row_begin(Index i) const
 {
 	Index tmp;
-	if (isEmpty() || row_entry_count(i, tmp) == 0)
+	if (empty() || row_entry_count(i, tmp) == 0)
 		return row_end(i);
 	else
 		return row_iterator(*this, i, mColumnPtr[tmp]);
@@ -485,7 +485,7 @@ template<typename T>
 SparseMatrixRowIterator<T> SparseMatrix<T>::row_begin(Index i)
 {
 	Index tmp;
-	if (isEmpty() || row_entry_count(i, tmp) == 0)
+	if (empty() || row_entry_count(i, tmp) == 0)
 		return row_end(i);
 	else
 		return row_iterator(*this, i, mColumnPtr[tmp]);
@@ -513,7 +513,7 @@ const SparseMatrixRowIterator<T> SparseMatrix<T>::row_cend(Index i) const
 template<typename T>
 const SparseMatrixColumnIterator<T> SparseMatrix<T>::column_begin(Index i) const
 {
-	if (isEmpty())
+	if (empty())
 		return column_end(i);
 	else
 	{
@@ -537,7 +537,7 @@ const SparseMatrixColumnIterator<T> SparseMatrix<T>::column_end(Index) const
 template<typename T>
 SparseMatrixColumnIterator<T> SparseMatrix<T>::column_begin(Index i)
 {
-	if (isEmpty())
+	if (empty())
 		return column_end(i);
 	else
 	{
@@ -719,13 +719,31 @@ constexpr Dimension SparseMatrix<T>::size() const
 }
 
 template<typename T>
-Dimension SparseMatrix<T>::filledCount() const
+Dimension SparseMatrix<T>::filled_count() const
 {
 	return mValues.size();
 }
+	
+template<typename T>
+Dimension SparseMatrix<T>::row_filled_count(Index r) const
+{
+	Index i = 0;
+	for(auto it = row_cbegin(r); it != row_cend(r); ++it)
+		++i;
+	return i;
+}
 
 template<typename T>
-bool SparseMatrix<T>::isEmpty() const
+Dimension SparseMatrix<T>::column_filled_count(Index c) const
+{
+	Index i = 0;
+	for(auto it = column_cbegin(c); it != column_cend(c); ++it)
+		++i;
+	return i;
+}
+
+template<typename T>
+bool SparseMatrix<T>::empty() const
 {
 	return mValues.empty();
 }
@@ -779,7 +797,7 @@ T SparseMatrix<T>::avg() const
 }
 
 template<typename T>
-bool SparseMatrix<T>::hasNaN() const
+bool SparseMatrix<T>::has_nan() const
 {
 	for (auto l : mValues)
 	{
@@ -791,7 +809,7 @@ bool SparseMatrix<T>::hasNaN() const
 }
 
 template<typename T>
-bool SparseMatrix<T>::hasInf() const
+bool SparseMatrix<T>::has_inf() const
 {
 	for (auto l : mValues)
 	{
@@ -803,7 +821,7 @@ bool SparseMatrix<T>::hasInf() const
 }
 
 template<typename T>
-bool SparseMatrix<T>::hasZero() const
+bool SparseMatrix<T>::has_zero() const
 {
 	return mValues.size() != size();
 }
@@ -957,7 +975,7 @@ SparseMatrix<T> operator *(T f, const SparseMatrix<T>& v1)
 template<typename T>
 bool operator ==(const SparseMatrix<T>& v1, const SparseMatrix<T>& v2)
 {
-	if(v1.rows() != v2.rows() || v1.columns() != v2.columns() || v1.filledCount() != v2.filledCount())
+	if(v1.rows() != v2.rows() || v1.columns() != v2.columns() || v1.filled_count() != v2.filled_count())
 		return false;
 
 	auto v1it = v1.begin();

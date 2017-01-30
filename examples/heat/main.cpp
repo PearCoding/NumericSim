@@ -118,8 +118,8 @@ int main(int argc, char** argv)
 
 	auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
 
-	std::cout << "Sparse Matrix: Entries " << A.filledCount()
-		<< " [" << 100 * (A.filledCount() / (double)A.size()) << "%] ["
+	std::cout << "Sparse Matrix: Entries " << A.filled_count()
+		<< " [" << 100 * (A.filled_count() / (double)A.size()) << "%] ["
 		<< std::chrono::duration_cast<std::chrono::milliseconds>(p1_diff).count()
 		<< " ms]" << std::endl;
 
