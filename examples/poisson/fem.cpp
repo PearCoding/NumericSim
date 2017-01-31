@@ -5,8 +5,10 @@
 
 #include "matrix/SparseMatrix.h"
 #include "matrix/MatrixOperations.h"
+#include "matrix/MatrixOrder.h"
 #include "Iterative.h"
 #include "CG.h"
+#include "LU.h"
 #include "Vector.h"
 #include "Simplex.h"
 #include "OutputStream.h"
@@ -30,9 +32,12 @@ NS_USE_NAMESPACE;
  */
  
 /*
- * Undef if you want to use the iterative SOR algorithm
+ * Set solver mode:
+ *  0 - SOR
+ *  1 - CG
+ *  2 - PCG with ILU0
  */
-//#define USE_CG
+#define SOLVER 2
 
 /*
  * Uncomment to produce many verbose debug information.
@@ -45,6 +50,11 @@ NS_USE_NAMESPACE;
  * Still merges to the right solution.
  */
 #define AVG_MID_STRONG_BOUNDARY
+
+/*
+ * Uncomment to enable CutHill-McKee ordering prior computing solution.
+ */
+#define REORDER
 
 /**
  * Program to solve the poisson equation in 2d with
@@ -63,11 +73,10 @@ constexpr double RELAX_PAR = 1.2;// SOR weight parameter (0,2]
 
 constexpr Number EPS = 1e-8;
 
-constexpr Number C = 0;// Constant number to add diagonally to sparse matrix A to achieve better conditions
+constexpr Number ShiftFactor = 0;// Constant number to add diagonally to sparse matrix A to achieve better conditions
 constexpr Number PostErrorFactor = 1;// Propotional factor, often written as C in equations
 
 // Definition
-
 const auto source_function = [](const FixedVector<Number,2>& v) -> Number {
 	return std::sin(NS_PI * v[0])*std::sin(NS_PI * v[1]);
 };
@@ -201,7 +210,7 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 	}
 
 	std::cout << "  Entries: " << A.filled_count() 
-				<< " (Efficiency: " << 100*(1-A.filled_count()/(float)A.size()) << "%)" << std::endl;
+				<< " (Sparse Efficiency: " << 100*(1-A.filled_count()/(float)A.size()) << "%)" << std::endl;
 
 	const auto p1_diff = std::chrono::high_resolution_clock::now() - p1_start;
 	std::cout << "Full assembling took " 
@@ -209,12 +218,25 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 		<< " s" << std::endl;
 
 	// --------------------------------
-	std::cout << "Calculating..." << std::endl;
+	std::cout << "Starting solver..." << std::endl;
 
-	if(std::abs(C) > 0)
+	const auto p2_start = std::chrono::high_resolution_clock::now();
+
+#if SOLVER == 2
+	std::cout << "  Calculating preconditioner..." << std::endl;
+	SparseMatrix<Number> L(A.rows(), A.columns());
+	SparseMatrix<Number> U(A.rows(), A.columns());
+	std::cout << "    [ILU0]..." << std::endl;
+	LU::serial::ilu0(A, L, U);
+	std::cout << "    [INV]..." << std::endl;
+	SparseMatrix<Number> C = Operations::inverse(L, U);
+#endif
+
+	std::cout << "  Solving..." << std::endl;
+	if(std::abs(ShiftFactor) > 0)
 	{
 		for(Index i = 0; i < A.rows(); ++i)
-			A.set(i,i,A.at(i,i)+C);
+			A.set(i,i,A.at(i,i)+ShiftFactor);
 	}
 
 	std::cout << "  cond(A)=" << Operations::cond(A) << std::endl;
@@ -222,12 +244,16 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 	size_t iterations = 0;
 	DynamicVector<Number> X(VertexSize);
 
-	const auto p2_start = std::chrono::high_resolution_clock::now();
-#ifdef USE_CG
-	X = CG::serial::cg(A, B, X, 1024, 1e-4, &iterations);
-#else
+#if SOLVER == 0
 	X = Iterative::serial::sor(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
+#elif SOLVER == 1
+	X = CG::serial::cg(A, B, X, 1024, 1e-4, &iterations);
+#elif SOLVER == 2
+	X = CG::serial::pcg(A, B, C, X, 1024, 1e-4, &iterations);
+#else
+# error Invalid solver selected!
 #endif
+
 	const auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
 	std::cout << "  " << iterations << " Iterations" << std::endl;

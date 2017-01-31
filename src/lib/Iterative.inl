@@ -17,7 +17,7 @@ namespace Iterative
 			if (a.rows() != a.columns())
 				throw NotSquareException();
 			if (a.rows() != b.size() || a.rows() != x0.size())
-				throw IterativeMatrixVectorMismatchException();
+				throw MatrixVectorMismatchException();
 
 			const double eps2 = eps*eps;
 
@@ -75,7 +75,7 @@ namespace Iterative
 			if (a.rows() != a.columns())
 				throw NotSquareException();
 			if (a.rows() != b.size() || a.rows() != x0.size())
-				throw IterativeMatrixVectorMismatchException();
+				throw MatrixVectorMismatchException();
 
 			const double eps2 = eps*eps;
 			const T rweight = (T)1 - weight;

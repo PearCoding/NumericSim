@@ -49,6 +49,88 @@ namespace Operations
 	}
 
 	template<class M>
+	M inverse(const M& m)
+	{
+		M L = m;
+		M U = m;
+		M P = m;
+		size_t pivotCount;
+		LU::serial::doolittle(m, L, U, P, &pivotCount);
+		
+		return inverse(L, U, P);
+	}
+
+	template<class M>
+	M inverse(const M& L, const M& U)
+	{
+		typedef typename M::value_type T;
+
+		if (L.rows() != L.columns())
+			throw NotSquareException();
+
+		if (U.rows() != U.columns())
+			throw NotSquareException();
+			
+		if (L.rows() != U.rows())
+			throw MatrixSizeMismatchException();
+
+		DynamicVector<T> b(L.rows());
+		DynamicVector<T> x(L.rows());
+
+		M Inv = L;
+		for(Index i = 0; i < L.columns(); ++i)
+		{
+			b[i] = 1;
+			x = LU::serial::solve_lu(L,U,b);
+
+			for(Index j = 0; j < L.rows(); ++j)
+				Inv.set(j,i,x[j]);
+
+			b[i] = 0;
+		}
+		
+		return Inv;
+	}
+
+	template<class M>
+	M inverse(const M& L, const M& U, const M& P)
+	{
+		typedef typename M::value_type T;
+
+		if (L.rows() != L.columns())
+			throw NotSquareException();
+
+		if (U.rows() != U.columns())
+			throw NotSquareException();
+
+		if (P.rows() != P.columns())
+			throw NotSquareException();
+			
+		if (L.rows() != U.rows())
+			throw MatrixSizeMismatchException();
+			
+		if (P.rows() != U.rows())
+			throw MatrixSizeMismatchException();
+
+		DynamicVector<T> b(L.rows());
+		DynamicVector<T> x(L.rows());
+
+		M Inv = L;
+		for(Index i = 0; i < L.columns(); ++i)
+		{
+			b[i] = 1;
+			x = LU::serial::solve_lu(L,U,P.mul(b));
+
+			for(Index j = 0; j < L.rows(); ++j)
+				Inv.set(j,i,x[j]);
+
+			b[i] = 0;
+		}
+		
+		return Inv;
+	}
+
+	template<class M>
 	typename M::value_type max_norm2(const M& m)
 	{
 		typedef typename M::value_type T;

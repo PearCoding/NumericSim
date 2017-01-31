@@ -214,6 +214,103 @@ namespace LU {
 			
 			delete[] rowTable;
 		}
+
+		template<typename T>
+		void ilu0(const SparseMatrix<T>& A, SparseMatrix<T>& L, SparseMatrix<T>& U)
+		{
+			if (A.rows() != A.columns())
+				throw NotSquareException();
+
+			SparseMatrix<T> M = A;
+			// Calculate
+			for(Index i = 1; i < M.rows(); ++i)
+			{
+				for(auto it = M.row_begin(i); it != M.row_end(i) && it.column() < i; ++it)//a_ik
+				{
+					const auto mid = M.at(it.column(), it.column());
+					if(std::abs(mid) <= std::numeric_limits<typename get_complex_internal<T>::type>::epsilon())
+						throw SingularException();
+
+					const auto d = *it/mid;
+					*it = d;
+					
+					auto it2 = it;
+					it2++;
+					for(; it2 != M.row_end(i); ++it2)//a_ij				
+						*it2 -= d * M.at(it.column(), it2.column());
+				}
+			}
+
+			// Seperate M into L and U
+			for(auto it = M.begin(); it != M.end(); ++it)
+			{
+				if(it.column() == it.row())
+				{
+					L.set(it.row(), it.column(), 1);
+					U.set(it.row(), it.column(), *it);
+				}
+				else if(it.column() < it.row())
+				{
+					L.set(it.row(), it.column(), *it);
+				}
+				else
+				{
+					U.set(it.row(), it.column(), *it);
+				}
+			}
+		}
+
+		template<class M, class V>
+		V solve_lu(const M& L, const M& U, const V& b)
+		{
+			if (L.rows() != L.columns())
+				throw NotSquareException();
+
+			if (U.rows() != U.columns())
+				throw NotSquareException();
+				
+			if (L.rows() != U.rows())
+				throw MatrixSizeMismatchException();
+				
+			if (L.rows() != b.size())
+				throw MatrixVectorMismatchException();
+
+			// Forward
+			V y = b;
+			for(Index i = 0; i < L.rows(); ++i)
+			{
+				for(auto it = L.row_begin(i); it != L.row_end(i) && it.column() < i; ++it)
+					y[i] -= (*it) * y[it.column()];
+				
+				const auto mid = L.at(i,i);
+				if(std::abs(mid) <= std::numeric_limits<typename get_complex_internal<typename V::value_type>::type>::epsilon())
+					throw SingularException();
+				y[i] /= mid;
+			}
+
+			// Backward
+			V x = y;
+			for(Index i = U.rows()-1; ; --i)
+			{
+				for(auto it = U.row_begin(i); it != U.row_end(i); ++it)
+				{
+					if(it.column() < i+1)
+						continue;
+
+					x[i] -= (*it) * x[it.column()];
+				}
+				
+				const auto mid = U.at(i,i);
+				if(std::abs(mid) <= std::numeric_limits<typename get_complex_internal<typename V::value_type>::type>::epsilon())
+					throw SingularException();
+				x[i] /= mid;
+
+				if(i == 0)
+					break;
+			}
+
+			return x;
+		}
 	}
 }
 NS_END_NAMESPACE

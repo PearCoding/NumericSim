@@ -46,12 +46,12 @@ NS_DECLARE_EXCEPTION(NotSquare, Math, "Matrix is not square.");
 NS_DECLARE_EXCEPTION(Singular, Math, "Matrix is singular.");
 NS_DECLARE_EXCEPTION(NotPositiveDefinite, Math, "Matrix is not positive definite.");
 NS_DECLARE_EXCEPTION(NotHermitian, Math, "Matrix is not hermitian.");
-NS_DECLARE_EXCEPTION(IterativeMatrixVectorMismatch, Math, "Matrix and vectors for iterative methods do not match in dimensions.");
 NS_DECLARE_EXCEPTION(InvalidOutputMatrix, Math, "Given Matrix does not match output specifications.");
 
 NS_DECLARE_EXCEPTION_GROUP(Dimension, NS);
 NS_DECLARE_EXCEPTION(VectorSizeMismatch, Dimension, "Size of vectors do not match.");
 NS_DECLARE_EXCEPTION(MatrixSizeMismatch, Dimension, "Size of matrix do not match.");
+NS_DECLARE_EXCEPTION(MatrixVectorMismatch, Math, "Matrix and vectors do not match in dimensions.");
 NS_DECLARE_EXCEPTION(MatrixMulMismatch, Dimension, "Dimensional requirement for multiplication not fulfilled.");
 
 NS_DECLARE_EXCEPTION_GROUP(Mesh, NS);

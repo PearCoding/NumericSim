@@ -28,11 +28,13 @@ DynamicVector<Index> r_cuthill_mckee(const SparseMatrix<T>& m);
 template<typename T>
 SparseMatrix<T> permutation_matrix(const DynamicVector<Index>& permutation);
 
+DynamicVector<Index> inverse_permutation(const DynamicVector<Index>& permutation);
+
 /**
 * @brief Reorders the given matrix based on the permuation
 * @param m Should be a square sparse matrix
 * @return Returns new matrix
-* @todo Need an inplace algorithm!
+* @todo Need an inplace algorithm and faster algorithm.
 */
 template<typename T>
 SparseMatrix<T> permutate(const SparseMatrix<T>& m, const DynamicVector<Index>& permutation);

@@ -105,7 +105,7 @@ public:
 	 * First all the columns from the current row are traversed and then the next row.
 	 * @return Reference to `this` iterator.
 	 */
-	virtual SparseMatrixIterator& operator++ ();
+	SparseMatrixIterator& operator++ ();
 
 	/**
 	* @brief Moves the iterator forward.

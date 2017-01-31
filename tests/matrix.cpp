@@ -285,6 +285,12 @@ NS_TEST("skew-hermitian")
 	NS_CHECK_TRUE(Check::matrixIsSkewHermitian(m1));
 	NS_CHECK_FALSE(Check::matrixIsSkewHermitian(m2));
 }
+NS_TEST("inverse")
+{
+	M<T> m = { {1,1,1},{2,3,5},{4,6,8} };
+	M<T> rM = { {3,1,-1},{-2,-2,1.5},{0,1,-0.5} };
+	NS_CHECK_EQ(Operations::inverse(m), rM);
+}
 NS_TEST("determinant")
 {
 	M<T> m = { {1,1,1},{2,3,5},{4,6,8} };
@@ -324,8 +330,15 @@ NS_TEST("CutHill-McKee")
 		{0,0,0,0,0,0,1,1}
 	});
 
-	SparseMatrix<T> rB = B.mul(P);
+	SparseMatrix<T> rB = permutate(A,ret);
 	NS_CHECK_EQ(rB,B);
+
+	ret = inverse_permutation(res);
+	res = {7,4,5,1,6,3,0,2};
+	NS_CHECK_EQ(ret, res);
+
+	rB = permutate(rB,ret);
+	NS_CHECK_EQ(rB,A);
 }
 NS_END_TESTCASE()
 
@@ -338,6 +351,6 @@ NST_TESTCASE_T2(Matrix, SparseMatrix, double);
 NST_TESTCASE_T2(Matrix, SparseMatrix, std::complex<double>);
 
 NST_TESTCASE_T1(SparseMatrixOnly, float);
-//NST_TESTCASE_T1(SparseMatrixOnly, double);
-//NST_TESTCASE_T1(SparseMatrixOnly, std::complex<double>);
+NST_TESTCASE_T1(SparseMatrixOnly, double);
+NST_TESTCASE_T1(SparseMatrixOnly, std::complex<double>);
 NST_END_MAIN

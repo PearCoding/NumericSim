@@ -20,6 +20,12 @@ namespace LU
 		void doolittle(const BaseMatrix<T,DC>& m, BaseMatrix<T,DC>& L, BaseMatrix<T,DC>& U, BaseMatrix<T,DC>& P, size_t* pivotCount=nullptr);
 		template<typename T>
 		void doolittle(const SparseMatrix<T>& m, SparseMatrix<T>& L, SparseMatrix<T>& U, SparseMatrix<T>& P, size_t* pivotCount=nullptr);
+
+		template<typename T>
+		void ilu0(const SparseMatrix<T>& A, SparseMatrix<T>& L, SparseMatrix<T>& U);
+
+		template<class M, class V>
+		V solve_lu(const M& L, const M& U, const V& b);
 	}
 }
 

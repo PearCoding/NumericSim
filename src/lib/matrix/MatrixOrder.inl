@@ -114,6 +114,15 @@ SparseMatrix<T> permutation_matrix(const DynamicVector<Index>& permutation)
 	return nm;
 }
 
+DynamicVector<Index> inverse_permutation(const DynamicVector<Index>& permutation)
+{
+	DynamicVector<Index> np(permutation.size());
+	for(Index i = 0; i < permutation.size(); ++i)
+		np.set(permutation[i], i);
+	
+	return np;
+}
+
 template<typename T>
 SparseMatrix<T> permutate(const SparseMatrix<T>& m, const DynamicVector<Index>& permutation)
 {
@@ -123,11 +132,8 @@ SparseMatrix<T> permutate(const SparseMatrix<T>& m, const DynamicVector<Index>& 
 	if(m.rows() != permutation.size())
 		throw MatrixMulMismatchException();
 
-	SparseMatrix<T> nm(m.rows(), m.columns());
-	for(auto it = m.cbegin(); it != m.cend(); ++it)
-		nm.set(permutation[it.row()], permutation[it.column()], *it);
-
-	return nm;
+	const auto P = permutation_matrix<T>(permutation);
+	return P.mul(m.mul(P.transpose()));
 }
 
 template<typename T>

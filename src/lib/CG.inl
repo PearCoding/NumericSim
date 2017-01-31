@@ -31,19 +31,70 @@ namespace CG {
 			size_t k = 0;
 			for (; k < maxIter; ++k)
 			{
-				const typename M::value_type ak = rs / (a.mul(p).dot(p));
+				const auto t = a.mul(p);
+				const typename M::value_type ak = rs / (t.dot(p));
 				x += ak*p;
-				l = r - ak*a.mul(p);
+				l = r - ak*t;
 
-				if (l.magSqr() < eps2 || k == maxIter-1)
+				const auto ls = l.magSqr();
+				if (ls < eps2 || k == maxIter-1)
 					break;
 
-				const typename V2::value_type ls = l.magSqr();
 				const typename V2::value_type bk = ls / rs;
 
 				p = l + bk*r;
 				r = l;
 				rs = ls;
+			}
+
+			if (it_stat)
+				*it_stat = k + 1;
+
+			return x;
+		}
+
+		template<class M, class V1, class V2>
+		V1 pcg(const M& a, const V2& b, const M& c, const V1& x0,
+				size_t maxIter, double eps, size_t* it_stat)
+		{
+			if (a.rows() != a.columns())
+				throw NotSquareException();
+
+			if (c.rows() != c.columns())
+				throw NotSquareException();
+
+			if (a.rows() != c.rows())
+				throw MatrixSizeMismatchException();
+
+#ifdef NS_ALLOW_CHECKS
+			if (!Check::matrixIsHermitian(a))
+				throw NotHermitianException();
+#endif
+
+			const double eps2 = eps*eps;
+
+			V1 x = x0;
+			V2 r = b - a.mul(x0);
+			V2 z = c.mul(r);
+			V2 p = z;
+
+			auto l1 = r.dot(z);
+			auto l2 = l1;
+			size_t k = 0;
+			for (; k < maxIter; ++k)
+			{
+				const auto t = a.mul(p);
+				const typename M::value_type ak = l1 / (t.dot(p));
+				x += ak*p;
+				r -= ak*t;
+
+				if (r.magSqr() < eps2 || k == maxIter-1)
+					break;
+
+				z = c.mul(r);
+				l2 = r.dot(z);
+				p = z + (l2/l1)*p;
+				l1 = l2;
 			}
 
 			if (it_stat)

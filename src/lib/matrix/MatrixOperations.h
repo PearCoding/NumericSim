@@ -20,6 +20,15 @@ namespace Operations
 	T determinant(const FixedMatrix<T, K1, K2>& m);
 
 	template<class M>
+	M inverse(const M& m);
+
+	template<class M>
+	M inverse(const M& L, const M& U);
+
+	template<class M>
+	M inverse(const M& L, const M& U, const M& P);
+
+	template<class M>
 	typename M::value_type max_norm2(const M& m);
 
 	template<class M>
