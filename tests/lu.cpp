@@ -110,6 +110,46 @@ NS_TEST("ilu0")
 		NS_GOT_EXCEPTION(exception);
 	}
 }
+NS_TEST("ainv_lu")
+{
+	SparseMatrix<T> A = { 
+		{1,-1,-1,-1},
+		{-1,2,0,0},
+		{-1,0,3,1},
+		{-1,0,1,4}
+	};
+
+	SparseMatrix<T> invL = { 
+		{1, 0, 0, 0},
+		{1,1,0,0},
+		{1,0,1,0},
+		{1,0,0,1}
+	};
+
+	SparseMatrix<T> invU = { 
+		{1, 1, 0.5, 1/(T)3},
+		{0,1,0,0},
+		{0,0,0.5,0},
+		{0,0,0,1/(T)3}
+	};
+	
+	try
+	{
+		SparseMatrix<T> rL(4,4), rU(4,4);
+		SparseMatrix<T> rInvL(4,4), rInvU(4,4);
+
+		size_t pivotCount;
+		LU::serial::ilu0(A, rL, rU);
+		LU::serial::ainv_lu(rL, rU, rInvL, rInvU);
+
+		NS_CHECK_EQ(rInvL, invL);
+		NS_CHECK_EQ(rInvU, invU);
+	}
+	catch (const NSException& exception)
+	{
+		NS_GOT_EXCEPTION(exception);
+	}
+}
 NS_END_TESTCASE()
 
 NST_BEGIN_MAIN
@@ -121,4 +161,5 @@ NST_TESTCASE_T2(LU, SparseMatrix, double);
 NST_TESTCASE_T2(LU, SparseMatrix, std::complex<double>);
 
 NST_TESTCASE_T1(LU_SparseOnly, float);
+NST_TESTCASE_T1(LU_SparseOnly, double);
 NST_END_MAIN

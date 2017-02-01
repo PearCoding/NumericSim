@@ -26,6 +26,15 @@ namespace LU
 
 		template<class M, class V>
 		V solve_lu(const M& L, const M& U, const V& b);
+
+		/**
+		 * @brief Approximated inverse of L and U.
+		 * This algorithm is based on the L x_i = e_i and U y_i = e_i approach with
+		 * M = L^-1 U^-1
+		 * It is useful to be used as a preconditioner.
+		 */
+		template<class M>
+		void ainv_lu(const M& L, const M& U, M& invL, M& invU);
 	}
 }
 

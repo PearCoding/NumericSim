@@ -30,14 +30,6 @@ NS_USE_NAMESPACE;
  * Source Code is optimized for 2d calculation,
  * but has already support n-dimensional calculation, when possible to implement easily.
  */
- 
-/*
- * Set solver mode:
- *  0 - SOR
- *  1 - CG
- *  2 - PCG with ILU0
- */
-#define SOLVER 2
 
 /*
  * Uncomment to produce many verbose debug information.
@@ -50,11 +42,6 @@ NS_USE_NAMESPACE;
  * Still merges to the right solution.
  */
 #define AVG_MID_STRONG_BOUNDARY
-
-/*
- * Uncomment to enable CutHill-McKee ordering prior computing solution.
- */
-#define REORDER
 
 /**
  * Program to solve the poisson equation in 2d with
@@ -86,7 +73,7 @@ const auto boundary_function = [](const FixedVector<Number,2>& v) -> Number {
 };
 
 template<int Order>
-void handleMesh(Mesh<Number, 2>& mesh, int M)
+void handleMesh(Mesh<Number, 2>& mesh, int M, int Solver)
 {
 	typedef PolyShapeFunction<Number,2,Order> SF;
 	SF::prepareMesh(mesh);
@@ -222,15 +209,30 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 
 	const auto p2_start = std::chrono::high_resolution_clock::now();
 
-#if SOLVER == 2
-	std::cout << "  Calculating preconditioner..." << std::endl;
-	SparseMatrix<Number> L(A.rows(), A.columns());
-	SparseMatrix<Number> U(A.rows(), A.columns());
-	std::cout << "    [ILU0]..." << std::endl;
-	LU::serial::ilu0(A, L, U);
-	std::cout << "    [INV]..." << std::endl;
-	SparseMatrix<Number> C = Operations::inverse(L, U);
-#endif
+	SparseMatrix<Number> C;
+	if(Solver == 2)
+	{
+		std::cout << "  Calculating preconditioner..." << std::endl;
+		SparseMatrix<Number> L(A.rows(), A.columns());
+		SparseMatrix<Number> U(A.rows(), A.columns());
+		std::cout << "    [ILU0]..." << std::endl;
+		LU::serial::ilu0(A, L, U);
+
+		C = L.mul(U);
+		/*if(VertexSize < 1000)
+		{
+			std::cout << "    [INV]..." << std::endl;
+			C = Operations::inverse(L, U);
+		}
+		else
+		{
+			std::cout << "    [AINV_LU]..." << std::endl;
+			SparseMatrix<Number> invL(A.rows(), A.columns());
+			SparseMatrix<Number> invU(A.rows(), A.columns());
+			LU::serial::ainv_lu(L, U, invL, invU);
+			C = invL.mul(invU);
+		}*/
+	}
 
 	std::cout << "  Solving..." << std::endl;
 	if(std::abs(ShiftFactor) > 0)
@@ -244,15 +246,19 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
 	size_t iterations = 0;
 	DynamicVector<Number> X(VertexSize);
 
-#if SOLVER == 0
-	X = Iterative::serial::sor(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
-#elif SOLVER == 1
-	X = CG::serial::cg(A, B, X, 1024, 1e-4, &iterations);
-#elif SOLVER == 2
-	X = CG::serial::pcg(A, B, C, X, 1024, 1e-4, &iterations);
-#else
-# error Invalid solver selected!
-#endif
+	switch(Solver)
+	{
+	case 0:
+		X = Iterative::serial::sor(A, B, X, RELAX_PAR, 1024, 1e-4, &iterations);
+		break;
+	case 1:
+		X = CG::serial::cg(A, B, X, 1024, 1e-4, &iterations);
+		break;
+	default:
+	case 2:
+		X = CG::serial::pcg(A, B, C, X, 1024, 1e-4, &iterations);
+		break;
+	}
 
 	const auto p2_diff = std::chrono::high_resolution_clock::now() - p2_start;
 
@@ -393,18 +399,20 @@ void handleMesh(Mesh<Number, 2>& mesh, int M)
  */
 int main(int argc, char** argv)
 {
-	if(argc < 3)
+	if(argc < 4)
 	{
-		std::cout << "Not enough arguments given! Use 'example_poisson_fem O M <DEPENDS ON M>'" << std::endl;
+		std::cout << "Not enough arguments given! Use 'example_poisson_fem S O M <DEPENDS ON M>'" << std::endl;
 		return -1;
 	}
 
+	int Solver = 2;
 	int Order = 1;// Order (1 or 2)
 	int32 M = 0;// M == 0 -> Generic mesh; Everything else are precomputed meshes
 	try
 	{
-		Order = std::stol(argv[1]);
-		M = std::stol(argv[2]);
+		Solver = std::stol(argv[1]);
+		Order = std::stol(argv[2]);
+		M = std::stol(argv[3]);
 	}
 	catch(...)
 	{
@@ -412,9 +420,21 @@ int main(int argc, char** argv)
 		return -2;
 	}
 
+	if(Solver < 0 || Solver > 2)
+	{
+		std::cout << "Invalid S given. Should be zero for SOR solver, one for CG solver and two for PCG solver with ILU0 preconditioner." << std::endl;
+		return -4;
+	}
+
+	if(Order < 1 || Order > 2)
+	{
+		std::cout << "Invalid O given. Should be one for first order (linear) shape functions or two for second order (quadratic) shape functions." << std::endl;
+		return -4;
+	}
+
 	if(M < 0 || M > 2)
 	{
-		std::cout << "Invalid M given. Should be zero for generic grid mesh, one for obj mesh and two for triangle .node and .ele mesh" << std::endl;
+		std::cout << "Invalid M given. Should be zero for generic grid mesh, one for obj mesh and two for triangle .node and .ele mesh." << std::endl;
 		return -4;
 	}
 
@@ -425,13 +445,13 @@ int main(int argc, char** argv)
 	const auto p0_start = std::chrono::high_resolution_clock::now();
 	if(M == 0)
 	{
-		if(argc != 4)
+		if(argc != 5)
 		{
 			std::cout << "Need additional N!" << std::endl;
 			return -3;
 		}
 
-		int32 N = std::stol(argv[3]);
+		int32 N = std::stol(argv[4]);
 		if(N < 1)
 		{
 			std::cout << "Invalid N given. Should be greater than 1" << std::endl;
@@ -447,24 +467,24 @@ int main(int argc, char** argv)
 	}
 	else if(M == 1)
 	{
-		if(argc != 4)
+		if(argc != 5)
 		{
 			std::cout << "Need additional filename!" << std::endl;
 			return -3;
 		}
-		std::cout << "Loading mesh " << argv[3] << "..." << std::endl;
-		mesh = MeshObjLoader<Number,2>::loadFile(argv[3]);
+		std::cout << "Loading mesh " << argv[4] << "..." << std::endl;
+		mesh = MeshObjLoader<Number,2>::loadFile(argv[4]);
 		mesh.setupBoundaries();
 	}
 	else if(M == 2)
 	{
-		if(argc != 5)
+		if(argc != 6)
 		{
 			std::cout << "Need additional paths to .node and .ele files! (First .node, than .ele)" << std::endl;
 			return -3;
 		}
-		std::cout << "Loading mesh " << argv[3] << " and " << argv[4] << " ..." << std::endl;
-		mesh = MeshTriangleLoader<Number>::loadFile(argv[3], argv[4]);
+		std::cout << "Loading mesh " << argv[4] << " and " << argv[5] << " ..." << std::endl;
+		mesh = MeshTriangleLoader<Number>::loadFile(argv[4], argv[5]);
 		mesh.setupBoundaries();
 	}
 
@@ -488,9 +508,9 @@ int main(int argc, char** argv)
 	}
 
 	if(Order == 2)
-		handleMesh<2>(mesh, M);
+		handleMesh<2>(mesh, M, Solver);
 	else
-		handleMesh<1>(mesh, M);
+		handleMesh<1>(mesh, M, Solver);
 
 	std::cout << "Finished!" << std::endl;
 	return 0;

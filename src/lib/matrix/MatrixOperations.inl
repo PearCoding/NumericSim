@@ -60,11 +60,9 @@ namespace Operations
 		return inverse(L, U, P);
 	}
 
-	template<class M>
-	M inverse(const M& L, const M& U)
+	template<template<typename> class M, typename T>
+	M<T> inverse(const M<T>& L, const M<T>& U)
 	{
-		typedef typename M::value_type T;
-
 		if (L.rows() != L.columns())
 			throw NotSquareException();
 
@@ -74,19 +72,38 @@ namespace Operations
 		if (L.rows() != U.rows())
 			throw MatrixSizeMismatchException();
 
-		DynamicVector<T> b(L.rows());
-		DynamicVector<T> x(L.rows());
-
-		M Inv = L;
+		M<T> Inv(L.rows(), L.columns());
 		for(Index i = 0; i < L.columns(); ++i)
 		{
-			b[i] = 1;
-			x = LU::serial::solve_lu(L,U,b);
+			// Forward
+			Inv.set(i,i, 1);
 
-			for(Index j = 0; j < L.rows(); ++j)
-				Inv.set(j,i,x[j]);
+			for(Index j = i+1; j < L.rows(); ++j)
+			{
+				for(auto it = L.row_begin(j); it != L.row_end(j) && it.column() < j; ++it)
+					Inv.set(j,i, Inv.at(j,i) - (*it) * Inv.at(it.column(),i));
+			}
 
-			b[i] = 0;
+			// Backward
+			for(Index j = U.rows()-1; ; --j)
+			{
+				for(auto it = U.row_begin(j); it != U.row_end(j); ++it)
+				{
+					if(it.column() < j+1)
+						continue;
+
+					Inv.set(j,i, Inv.at(j,i) - (*it) * Inv.at(it.column(),i));
+				}
+				
+				const auto mid = U.at(j,j);
+				if(std::abs(mid) <= std::numeric_limits<typename get_complex_internal<T>::type>::epsilon())
+					throw SingularException();
+				
+				Inv.set(j,j, Inv.at(j,j) / mid);
+
+				if(j == 0)
+					break;
+			}
 		}
 		
 		return Inv;

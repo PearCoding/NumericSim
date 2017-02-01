@@ -22,8 +22,9 @@ namespace Operations
 	template<class M>
 	M inverse(const M& m);
 
-	template<class M>
-	M inverse(const M& L, const M& U);
+	// Optimized version
+	template<template<typename> class M, typename T>
+	M<T> inverse(const M<T>& L, const M<T>& U);
 
 	template<class M>
 	M inverse(const M& L, const M& U, const M& P);

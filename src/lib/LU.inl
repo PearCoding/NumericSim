@@ -311,6 +311,79 @@ namespace LU {
 
 			return x;
 		}
+
+		template<class M>
+		void ainv_lu(const M& L, const M& U, M& invL, M& invU)
+		{
+			typedef typename M::value_type T;
+
+			if (L.rows() != L.columns())
+				throw NotSquareException();
+
+			if (U.rows() != U.columns())
+				throw NotSquareException();
+
+			if (invL.rows() != invL.columns())
+				throw NotSquareException();
+
+			if (invU.rows() != invU.columns())
+				throw NotSquareException();
+				
+			if (L.rows() != U.rows())
+				throw MatrixSizeMismatchException();
+				
+			if (L.rows() != invL.rows())
+				throw MatrixSizeMismatchException();
+				
+			if (L.rows() != invU.rows())
+				throw MatrixSizeMismatchException();
+
+			const Dimension N = L.columns();
+
+			for(Index k = 0; k < N; ++k)
+			{
+				// L
+				invL.set(k,k, 1);// Assuming L has only ones as diagonal entries
+
+				for(Index i = k+1; i < N; ++i)
+				{
+					T m = invL.at(i,k);
+
+					auto it = L.row_begin(i);
+					while(it != L.row_end(i) && it.column() < k)// Skipping. Is zero
+						++it;
+
+					for(; it != L.row_end(i) && it.column() < i; ++it)
+						m -= (*it) * invL.at(it.column(),k);
+
+					invL.set(i,k,m);
+				}
+
+				// U
+				invU.set(k,k, 1/U.at(k,k));
+				
+				for(Index i = (N-1)-k; ; --i)
+				{
+					T m = invU.at(i,k);
+
+					auto it = U.row_begin(i);
+					while(it != U.row_end(i) && it.column() < i+1)// Skipping. Is zero
+						++it;
+
+					for(;it != U.row_end(i) && it.column() < k+1; ++it)
+						m -= (*it) * invU.at(it.column(),k);
+
+					const auto mid = U.at(i,i);
+					if(std::abs(mid) <= std::numeric_limits<typename get_complex_internal<T>::type>::epsilon())
+						throw SingularException();
+
+					invU.set(i,k, m/mid);
+
+					if(i == 0)
+						break;
+				}
+			}
+		}
 	}
 }
 NS_END_NAMESPACE
