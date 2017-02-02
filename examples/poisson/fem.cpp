@@ -76,6 +76,8 @@ template<int Order>
 void handleMesh(Mesh<Number, 2>& mesh, int M, int Solver)
 {
 	typedef PolyShapeFunction<Number,2,Order> SF;
+	typedef GaussLegendreQuadrature<Number,2,Order+1> Q;
+
 	SF::prepareMesh(mesh);
 
 	const size_t VertexSize = mesh.vertices().size();
@@ -97,7 +99,7 @@ void handleMesh(Mesh<Number, 2>& mesh, int M, int Solver)
 
 	//Here each element has the same shape function (linear or second order)
 	SF sf;
-	GaussLegendreQuadrature<Number,2,Order+1> quadrature;
+	Q quadrature;
 
 	// Cell based assembling
 	/*
@@ -271,14 +273,23 @@ void handleMesh(Mesh<Number, 2>& mesh, int M, int Solver)
 	Index k = 0;
 	for(MeshElement<Number,2>* elem : mesh.elements())
 	{
-		//const Number det = std::abs(elem->Element.determinant());
+		const auto invJacob = elem->Element.inverseMatrix();
+		const Number det = std::abs(elem->Element.determinant());
 		const Number H = elem->Element.diameter();
 
-		const Number cellError = 0;/*det * quadrature.eval(
-			[&](const FixedVector<Number,2>& local) -> Number
+		Number cellError = 0;
+		if(Order == 2)
+		{
+			FixedVector<Number, SF::DOF> nodeValues;
+			for(Index i = 0; i < SF::DOF; ++i)
+				nodeValues[i] = X.at(elem->DOFVertices[i]->GlobalIndex);
+
+			cellError = det * quadrature.eval_index(
+			[&](Index i, const FixedVector<Number,2>& local) -> Number
 			{
-				return source_function(element->Element.toGlobal(local));
-			});*/
+				return (invJacob.mul(sf.gradient2(i,local,nodeValues))).sum() + source_function(elem->Element.toGlobal(local));
+			});
+		}
 		
 		Number faceError = 0;
 		for(Index i = 0; i < 3; ++i)

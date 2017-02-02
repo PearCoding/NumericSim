@@ -14,13 +14,19 @@ template<typename T, Dimension K, Dimension Order>
 class PolyShapePolicy
 {
 public:
-	static constexpr Dimension DOF = (K+1)*Order;// Wrong
+	static constexpr Dimension DOF = (K+1)*Order;// Wrong, but works for Order < 3
 
 	// For the standard k-simplex
 	T value(Index localComponent, const FixedVector<T,K>& local) const;
+	T value(Index localComponent, const FixedVector<T,K>& local, const FixedVector<T,DOF>& nodeValues) const;
 
 	// For the standard k-simplex
 	FixedVector<T,K> gradient(Index localComponent, const FixedVector<T,K>& local) const;
+	FixedVector<T,K> gradient(Index localComponent, const FixedVector<T,K>& local, const FixedVector<T,DOF>& nodeValues) const;
+
+	// For the standard k-simplex
+	FixedVector<T,K> gradient2(Index localComponent, const FixedVector<T,K>& local) const;
+	FixedVector<T,K> gradient2(Index localComponent, const FixedVector<T,K>& local, const FixedVector<T,DOF>& nodeValues) const;
 
 	static void prepareMesh(Mesh<T,K>& m);
 };

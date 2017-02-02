@@ -85,18 +85,29 @@ constexpr float PSF_Coeff_3D_2[10][10] = {
 template<typename T, Dimension K, Dimension Order>
 T PolyShapePolicy<T,K,Order>::value(Index localComponent, const FixedVector<T,K>& v) const
 {
+    FixedVector<T,DOF> nodeValues;
+    for(Index i = 0; i < DOF; ++i)
+        nodeValues[i] = 1;
+    return this->value(localComponent, v, nodeValues);
+}
+
+template<typename T, Dimension K, Dimension Order>
+T PolyShapePolicy<T,K,Order>::value(Index localComponent, const FixedVector<T,K>& v, const FixedVector<T,DOF>& nodeValues) const
+{
     if(K == 1)
     {
         if(Order == 1)
         {
             NS_ASSERT(localComponent < 2);
-            return PSF_Coeff_1D_1[localComponent][0] + PSF_Coeff_1D_1[localComponent][1]*v[0];
+            return nodeValues[0]*PSF_Coeff_1D_1[localComponent][0] 
+            + nodeValues[1]*PSF_Coeff_1D_1[localComponent][1]*v[0];
         }
         else if(Order == 2)
         {
             NS_ASSERT(localComponent < 3);
-            return PSF_Coeff_1D_2[localComponent][0] + PSF_Coeff_1D_2[localComponent][1]*v[0] 
-                + PSF_Coeff_1D_2[localComponent][2]*v[0]*v[0];
+            return nodeValues[0]*PSF_Coeff_1D_2[localComponent][0] 
+                + nodeValues[1]*PSF_Coeff_1D_2[localComponent][1]*v[0] 
+                + nodeValues[2]*PSF_Coeff_1D_2[localComponent][2]*v[0]*v[0];
         }
     }
     else if(K == 2)
@@ -104,33 +115,33 @@ T PolyShapePolicy<T,K,Order>::value(Index localComponent, const FixedVector<T,K>
         if(Order == 1)
         {
             NS_ASSERT(localComponent < 3);
-            return PSF_Coeff_2D_1[localComponent][0] 
-                + PSF_Coeff_2D_1[localComponent][1]*v[0]
-                + PSF_Coeff_2D_1[localComponent][2]*v[1];
+            return nodeValues[0]*PSF_Coeff_2D_1[localComponent][0] 
+                + nodeValues[1]*PSF_Coeff_2D_1[localComponent][1]*v[0]
+                + nodeValues[2]*PSF_Coeff_2D_1[localComponent][2]*v[1];
         }
         else if(Order == 2)
         {
             NS_ASSERT(localComponent < 6);
-            return PSF_Coeff_2D_2[localComponent][0] 
-                + PSF_Coeff_2D_2[localComponent][1]*v[0]
-                + PSF_Coeff_2D_2[localComponent][2]*v[1]
-                + PSF_Coeff_2D_2[localComponent][3]*v[0]*v[1]
-                + PSF_Coeff_2D_2[localComponent][4]*v[0]*v[0]
-                + PSF_Coeff_2D_2[localComponent][5]*v[1]*v[1];
+            return nodeValues[0]*PSF_Coeff_2D_2[localComponent][0] 
+                + nodeValues[1]*PSF_Coeff_2D_2[localComponent][1]*v[0]
+                + nodeValues[2]*PSF_Coeff_2D_2[localComponent][2]*v[1]
+                + nodeValues[3]*PSF_Coeff_2D_2[localComponent][3]*v[0]*v[1]
+                + nodeValues[4]*PSF_Coeff_2D_2[localComponent][4]*v[0]*v[0]
+                + nodeValues[5]*PSF_Coeff_2D_2[localComponent][5]*v[1]*v[1];
         }
         else if(Order == 3)
         {
             NS_ASSERT(localComponent < 10);
-            return PSF_Coeff_2D_3[localComponent][0] 
-                + PSF_Coeff_2D_3[localComponent][1]*v[0]
-                + PSF_Coeff_2D_3[localComponent][2]*v[1]
-                + PSF_Coeff_2D_3[localComponent][3]*v[0]*v[1]
-                + PSF_Coeff_2D_3[localComponent][4]*v[0]*v[0]
-                + PSF_Coeff_2D_3[localComponent][5]*v[1]*v[1]
-                + PSF_Coeff_2D_3[localComponent][6]*v[0]*v[0]*v[1]
-                + PSF_Coeff_2D_3[localComponent][7]*v[0]*v[1]*v[1]
-                + PSF_Coeff_2D_3[localComponent][8]*v[0]*v[0]*v[0]
-                + PSF_Coeff_2D_3[localComponent][9]*v[1]*v[1]*v[1];
+            return nodeValues[0]*PSF_Coeff_2D_3[localComponent][0] 
+                + nodeValues[1]*PSF_Coeff_2D_3[localComponent][1]*v[0]
+                + nodeValues[2]*PSF_Coeff_2D_3[localComponent][2]*v[1]
+                + nodeValues[3]*PSF_Coeff_2D_3[localComponent][3]*v[0]*v[1]
+                + nodeValues[4]*PSF_Coeff_2D_3[localComponent][4]*v[0]*v[0]
+                + nodeValues[5]*PSF_Coeff_2D_3[localComponent][5]*v[1]*v[1]
+                + nodeValues[6]*PSF_Coeff_2D_3[localComponent][6]*v[0]*v[0]*v[1]
+                + nodeValues[7]*PSF_Coeff_2D_3[localComponent][7]*v[0]*v[1]*v[1]
+                + nodeValues[8]*PSF_Coeff_2D_3[localComponent][8]*v[0]*v[0]*v[0]
+                + nodeValues[9]*PSF_Coeff_2D_3[localComponent][9]*v[1]*v[1]*v[1];
         }
     }
     else if(K == 3)
@@ -138,24 +149,24 @@ T PolyShapePolicy<T,K,Order>::value(Index localComponent, const FixedVector<T,K>
         if(Order == 1)
         {
             NS_ASSERT(localComponent < 4);
-            return PSF_Coeff_3D_1[localComponent][0] 
-                + PSF_Coeff_3D_1[localComponent][1]*v[0]
-                + PSF_Coeff_3D_1[localComponent][2]*v[1]
-                + PSF_Coeff_3D_1[localComponent][3]*v[2];
+            return nodeValues[0]*PSF_Coeff_3D_1[localComponent][0] 
+                + nodeValues[1]*PSF_Coeff_3D_1[localComponent][1]*v[0]
+                + nodeValues[2]*PSF_Coeff_3D_1[localComponent][2]*v[1]
+                + nodeValues[3]*PSF_Coeff_3D_1[localComponent][3]*v[2];
         }
         else if(Order == 2)
         {
             NS_ASSERT(localComponent < 10);
-            return PSF_Coeff_3D_2[localComponent][0] 
-                + PSF_Coeff_3D_2[localComponent][1]*v[0]
-                + PSF_Coeff_3D_2[localComponent][2]*v[1]
-                + PSF_Coeff_3D_2[localComponent][3]*v[2]
-                + PSF_Coeff_3D_2[localComponent][4]*v[0]*v[1]
-                + PSF_Coeff_3D_2[localComponent][5]*v[0]*v[2]
-                + PSF_Coeff_3D_2[localComponent][6]*v[1]*v[2]
-                + PSF_Coeff_3D_2[localComponent][7]*v[0]*v[0]
-                + PSF_Coeff_3D_2[localComponent][8]*v[1]*v[1]
-                + PSF_Coeff_3D_2[localComponent][9]*v[2]*v[2];
+            return nodeValues[0]*PSF_Coeff_3D_2[localComponent][0] 
+                + nodeValues[1]*PSF_Coeff_3D_2[localComponent][1]*v[0]
+                + nodeValues[2]*PSF_Coeff_3D_2[localComponent][2]*v[1]
+                + nodeValues[3]*PSF_Coeff_3D_2[localComponent][3]*v[2]
+                + nodeValues[4]*PSF_Coeff_3D_2[localComponent][4]*v[0]*v[1]
+                + nodeValues[5]*PSF_Coeff_3D_2[localComponent][5]*v[0]*v[2]
+                + nodeValues[6]*PSF_Coeff_3D_2[localComponent][6]*v[1]*v[2]
+                + nodeValues[7]*PSF_Coeff_3D_2[localComponent][7]*v[0]*v[0]
+                + nodeValues[8]*PSF_Coeff_3D_2[localComponent][8]*v[1]*v[1]
+                + nodeValues[9]*PSF_Coeff_3D_2[localComponent][9]*v[2]*v[2];
         }
     }
 
@@ -171,18 +182,28 @@ T PolyShapePolicy<T,K,Order>::value(Index localComponent, const FixedVector<T,K>
 template<typename T, Dimension K, Dimension Order>
 FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient(Index localComponent, const FixedVector<T,K>& local) const
 {
+    FixedVector<T,DOF> nodeValues;
+    for(Index i = 0; i < DOF; ++i)
+        nodeValues[i] = 1;
+    return this->gradient(localComponent, local, nodeValues);
+}
+
+template<typename T, Dimension K, Dimension Order>
+FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient(Index localComponent, const FixedVector<T,K>& local, const FixedVector<T,DOF>& nodeValues) const
+{
     FixedVector<T,K> g;
     if(K == 1)
     {
         if(Order == 1)
         {
             NS_ASSERT(localComponent < 2);
-            g[0] = PSF_Coeff_1D_1[localComponent][1];
+            g[0] = nodeValues[1]*PSF_Coeff_1D_1[localComponent][1];
         }
         else if(Order == 2)
         {
             NS_ASSERT(localComponent < 3);
-            g[0] = PSF_Coeff_1D_2[localComponent][1] + 2*PSF_Coeff_1D_2[localComponent][2]*local[0];
+            g[0] = nodeValues[1]*PSF_Coeff_1D_2[localComponent][1] 
+                + nodeValues[2]*2*PSF_Coeff_1D_2[localComponent][2]*local[0];
         }
     }
     else if(K == 2)
@@ -190,34 +211,34 @@ FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient(Index localComponent, cons
         if(Order == 1)
         {
             NS_ASSERT(localComponent < 3);
-            g[0] = PSF_Coeff_2D_1[localComponent][1];
-            g[1] = PSF_Coeff_2D_1[localComponent][2];
+            g[0] = nodeValues[1]*nodeValues[0]*PSF_Coeff_2D_1[localComponent][1];
+            g[1] = nodeValues[2]*nodeValues[0]*PSF_Coeff_2D_1[localComponent][2];
         }
         else if(Order == 2)
         {
             NS_ASSERT(localComponent < 6);
-            g[0] = PSF_Coeff_2D_2[localComponent][1] 
-                + PSF_Coeff_2D_2[localComponent][3]*local[1] 
-                + 2*PSF_Coeff_2D_2[localComponent][4]*local[0];
-            g[1] = PSF_Coeff_2D_2[localComponent][2] 
-                + PSF_Coeff_2D_2[localComponent][3]*local[0] 
-                + 2*PSF_Coeff_2D_2[localComponent][5]*local[1];
+            g[0] = nodeValues[1]*PSF_Coeff_2D_2[localComponent][1] 
+                + nodeValues[3]*PSF_Coeff_2D_2[localComponent][3]*local[1] 
+                + nodeValues[4]*2*PSF_Coeff_2D_2[localComponent][4]*local[0];
+            g[1] = nodeValues[2]*PSF_Coeff_2D_2[localComponent][2] 
+                + nodeValues[3]*PSF_Coeff_2D_2[localComponent][3]*local[0] 
+                + nodeValues[5]*2*PSF_Coeff_2D_2[localComponent][5]*local[1];
         }
         else if(Order == 3)
         {
             NS_ASSERT(localComponent < 10);
-            g[0] = PSF_Coeff_2D_3[localComponent][1]
-                + PSF_Coeff_2D_3[localComponent][3]*local[1]
-                + 2*PSF_Coeff_2D_3[localComponent][4]*local[0]
-                + 2*PSF_Coeff_2D_3[localComponent][6]*local[0]*local[1]
-                + PSF_Coeff_2D_3[localComponent][7]*local[1]*local[1]
-                + 3*PSF_Coeff_2D_3[localComponent][8]*local[0]*local[0];
-            g[1] = PSF_Coeff_2D_3[localComponent][2]
-                + PSF_Coeff_2D_3[localComponent][3]*local[0]
-                + 2*PSF_Coeff_2D_3[localComponent][5]*local[1]
-                + PSF_Coeff_2D_3[localComponent][6]*local[0]*local[0]
-                + 2*PSF_Coeff_2D_3[localComponent][7]*local[0]*local[1]
-                + 3*PSF_Coeff_2D_3[localComponent][9]*local[1]*local[1];
+            g[0] = nodeValues[1]*PSF_Coeff_2D_3[localComponent][1]
+                + nodeValues[3]*PSF_Coeff_2D_3[localComponent][3]*local[1]
+                + nodeValues[4]*2*PSF_Coeff_2D_3[localComponent][4]*local[0]
+                + nodeValues[6]*2*PSF_Coeff_2D_3[localComponent][6]*local[0]*local[1]
+                + nodeValues[7]*PSF_Coeff_2D_3[localComponent][7]*local[1]*local[1]
+                + nodeValues[8]*3*PSF_Coeff_2D_3[localComponent][8]*local[0]*local[0];
+            g[1] = nodeValues[2]*PSF_Coeff_2D_3[localComponent][2]
+                + nodeValues[3]*PSF_Coeff_2D_3[localComponent][3]*local[0]
+                + nodeValues[5]*2*PSF_Coeff_2D_3[localComponent][5]*local[1]
+                + nodeValues[6]*PSF_Coeff_2D_3[localComponent][6]*local[0]*local[0]
+                + nodeValues[7]*2*PSF_Coeff_2D_3[localComponent][7]*local[0]*local[1]
+                + nodeValues[9]*3*PSF_Coeff_2D_3[localComponent][9]*local[1]*local[1];
         }
     }
     else if(K == 3)
@@ -225,27 +246,107 @@ FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient(Index localComponent, cons
         if(Order == 1)
         {
             NS_ASSERT(localComponent < 4);
-            g[0] = PSF_Coeff_3D_1[localComponent][1];
-            g[1] = PSF_Coeff_3D_1[localComponent][2];
-            g[2] = PSF_Coeff_3D_1[localComponent][3];
+            g[0] = nodeValues[1]*PSF_Coeff_3D_1[localComponent][1];
+            g[1] = nodeValues[2]*PSF_Coeff_3D_1[localComponent][2];
+            g[2] = nodeValues[3]*PSF_Coeff_3D_1[localComponent][3];
         }
         else if(Order == 2)
         {
             NS_ASSERT(localComponent < 10);
-            g[0] = PSF_Coeff_3D_2[localComponent][1] 
-                + PSF_Coeff_3D_2[localComponent][4]*local[1] 
-                + PSF_Coeff_3D_2[localComponent][5]*local[2] 
-                + 2*PSF_Coeff_3D_2[localComponent][7]*local[0];
+            g[0] = nodeValues[1]*PSF_Coeff_3D_2[localComponent][1] 
+                + nodeValues[4]*PSF_Coeff_3D_2[localComponent][4]*local[1] 
+                + nodeValues[5]*PSF_Coeff_3D_2[localComponent][5]*local[2] 
+                + nodeValues[7]*2*PSF_Coeff_3D_2[localComponent][7]*local[0];
 
-            g[1] = PSF_Coeff_3D_2[localComponent][2] 
-                + PSF_Coeff_3D_2[localComponent][4]*local[0] 
-                + PSF_Coeff_3D_2[localComponent][6]*local[2] 
-                + 2*PSF_Coeff_3D_2[localComponent][8]*local[1];
+            g[1] = nodeValues[2]*PSF_Coeff_3D_2[localComponent][2] 
+                + nodeValues[4]*PSF_Coeff_3D_2[localComponent][4]*local[0] 
+                + nodeValues[6]*PSF_Coeff_3D_2[localComponent][6]*local[2] 
+                + nodeValues[8]*2*PSF_Coeff_3D_2[localComponent][8]*local[1];
 
-            g[2] = PSF_Coeff_3D_2[localComponent][3] 
-                + PSF_Coeff_3D_2[localComponent][5]*local[0] 
-                + PSF_Coeff_3D_2[localComponent][6]*local[1] 
-                + 2*PSF_Coeff_3D_2[localComponent][9]*local[2];
+            g[2] = nodeValues[3]*PSF_Coeff_3D_2[localComponent][3] 
+                + nodeValues[5]*PSF_Coeff_3D_2[localComponent][5]*local[0] 
+                + nodeValues[6]*PSF_Coeff_3D_2[localComponent][6]*local[1] 
+                + nodeValues[9]*2*PSF_Coeff_3D_2[localComponent][9]*local[2];
+        }
+    }
+
+    static_assert((K==1 && Order == 1) ||
+    (K==1 && Order == 2) ||
+    (K==2 && Order == 1) ||
+    (K==2 && Order == 2) ||
+    (K==2 && Order == 3) ||
+    (K==3 && Order == 1) ||
+    (K==3 && Order == 2), "Currently only some combinations are implemented.");
+
+    return g;
+}
+
+template<typename T, Dimension K, Dimension Order>
+FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient2(Index localComponent, const FixedVector<T,K>& local) const
+{
+    FixedVector<T,DOF> nodeValues;
+    for(Index i = 0; i < DOF; ++i)
+        nodeValues[i] = 1;
+    return this->gradient2(localComponent, local, nodeValues);
+}
+
+template<typename T, Dimension K, Dimension Order>
+FixedVector<T,K> PolyShapePolicy<T,K,Order>::gradient2(Index localComponent, const FixedVector<T,K>& local, const FixedVector<T,DOF>& nodeValues) const
+{
+    FixedVector<T,K> g;
+    if(K == 1)
+    {
+        if(Order == 1)
+        {
+            NS_ASSERT(localComponent < 2);
+            g[0] = (T)0;
+        }
+        else if(Order == 2)
+        {
+            NS_ASSERT(localComponent < 3);
+            g[0] = nodeValues[2]*2*PSF_Coeff_1D_2[localComponent][2];
+        }
+    }
+    else if(K == 2)
+    {
+        if(Order == 1)
+        {
+            NS_ASSERT(localComponent < 3);
+            g[0] = (T)0;
+            g[1] = (T)0;
+        }
+        else if(Order == 2)
+        {
+            NS_ASSERT(localComponent < 6);
+            g[0] = nodeValues[4]*2*PSF_Coeff_2D_2[localComponent][4];
+            g[1] = nodeValues[5]*2*PSF_Coeff_2D_2[localComponent][5];
+        }
+        else if(Order == 3)
+        {
+            NS_ASSERT(localComponent < 10);
+            g[0] = nodeValues[4]*2*PSF_Coeff_2D_3[localComponent][4]
+                + nodeValues[6]*2*PSF_Coeff_2D_3[localComponent][6]*local[1]
+                + nodeValues[8]*6*PSF_Coeff_2D_3[localComponent][8]*local[0];
+            g[1] = nodeValues[5]*2*PSF_Coeff_2D_3[localComponent][5]
+                + nodeValues[7]*2*PSF_Coeff_2D_3[localComponent][7]*local[1]
+                + nodeValues[9]*6*PSF_Coeff_2D_3[localComponent][9]*local[1];
+        }
+    }
+    else if(K == 3)
+    {
+        if(Order == 1)
+        {
+            NS_ASSERT(localComponent < 4);
+            g[0] = (T)0;
+            g[1] = (T)0;
+            g[2] = (T)0;
+        }
+        else if(Order == 2)
+        {
+            NS_ASSERT(localComponent < 10);
+            g[0] = nodeValues[7]*2*PSF_Coeff_3D_2[localComponent][7];
+            g[1] = nodeValues[8]*2*PSF_Coeff_3D_2[localComponent][8];
+            g[2] = nodeValues[9]*2*PSF_Coeff_3D_2[localComponent][9];
         }
     }
 
