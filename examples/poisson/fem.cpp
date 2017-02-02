@@ -209,29 +209,12 @@ void handleMesh(Mesh<Number, 2>& mesh, int M, int Solver)
 
 	const auto p2_start = std::chrono::high_resolution_clock::now();
 
-	SparseMatrix<Number> C;
+	SparseMatrix<Number> C(A.rows(), A.columns());
 	if(Solver == 2)
 	{
 		std::cout << "  Calculating preconditioner..." << std::endl;
-		SparseMatrix<Number> L(A.rows(), A.columns());
-		SparseMatrix<Number> U(A.rows(), A.columns());
-		std::cout << "    [ILU0]..." << std::endl;
-		LU::serial::ilu0(A, L, U);
-
-		C = L.mul(U);
-		/*if(VertexSize < 1000)
-		{
-			std::cout << "    [INV]..." << std::endl;
-			C = Operations::inverse(L, U);
-		}
-		else
-		{
-			std::cout << "    [AINV_LU]..." << std::endl;
-			SparseMatrix<Number> invL(A.rows(), A.columns());
-			SparseMatrix<Number> invU(A.rows(), A.columns());
-			LU::serial::ainv_lu(L, U, invL, invU);
-			C = invL.mul(invU);
-		}*/
+		std::cout << "    [JACOBI]..." << std::endl;
+		CG::serial::jacobi(A,C);
 	}
 
 	std::cout << "  Solving..." << std::endl;

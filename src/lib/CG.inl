@@ -102,6 +102,29 @@ namespace CG {
 
 			return x;
 		}
+
+		template<class M>
+		void jacobi(const M& A, M& C)
+		{
+			typedef typename M::value_type T;
+
+			if (A.rows() != A.columns())
+				throw NotSquareException();
+
+			if (C.rows() != C.columns())
+				throw NotSquareException();
+
+			if (A.rows() != C.rows())
+				throw MatrixSizeMismatchException();
+
+			for(Index i = 0; i < A.rows(); ++i)
+			{
+				const auto mid = A.at(i,i);
+				if(std::abs(mid) <= std::numeric_limits<typename get_complex_internal<T>::type>::epsilon())
+					throw SingularException();
+				C.set(i,i, 1/mid);
+			}
+		}
 	}
 }
 NS_END_NAMESPACE

@@ -18,6 +18,12 @@ namespace CG
 		template<class M, class V1, class V2>
 		V1 pcg(const M& a, const V2& b, const M& c, const V1& x0,
 				size_t maxIter = 1024, double eps = 10e-6, size_t* it_stat = nullptr);
+
+		/**
+		 * @brief Jacobi preconditioner
+		 */
+		template<class M>
+		void jacobi(const M& A, M& C);
 	}
 }
 
